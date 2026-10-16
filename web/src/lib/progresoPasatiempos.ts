@@ -20,10 +20,31 @@ export const SELLOS: Record<Sello, { nombre: string; detalle: string }> = {
 export type ProgresoJuego = {
   sello?: Sello
   segundos?: number // tiempo de resolución (P5)
+  pistasUsadas?: number // pistas del editor (P2b)
+  verificaciones?: number // usos de "Verificar" (P2b)
+}
+
+export type ProgresoCifrado = ProgresoJuego & {
+  asignaciones?: Record<string, string> // símbolo → letra que puso el lector
+  resuelto?: boolean
 }
 
 // `v` es la versión del formato: si algún día cambia, los datos viejos se descartan en vez de romper la página
-export type Progreso = { v: 1; juegos: Partial<Record<Juego, ProgresoJuego>> }
+export type Progreso = {
+  v: 1
+  juegos: { cifrado?: ProgresoCifrado } & Partial<Record<Exclude<Juego, 'cifrado'>, ProgresoJuego>>
+}
+
+/**
+ * Sello según la tabla de docs/PASATIEMPOS.md. "Hasta 1 pista o 3 verificaciones" se lee como
+ * "no más de 1 pista y no más de 3 verificaciones"; si se pasa de cualquiera de los dos, es bronce.
+ */
+export function calcularSello({ pistasUsadas = 0, verificaciones = 0 }: ProgresoJuego, rendido = false): Sello {
+  if (rendido) return 'rendido'
+  if (pistasUsadas === 0 && verificaciones <= 1) return 'oro'
+  if (pistasUsadas <= 1 && verificaciones <= 3) return 'plata'
+  return 'bronce'
+}
 
 const vacio = (): Progreso => ({ v: 1, juegos: {} })
 export const claveProgreso = (numero: number) => `pv82-pasatiempos-${String(numero).padStart(2, '0')}`

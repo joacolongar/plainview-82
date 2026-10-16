@@ -1,15 +1,16 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ultimaEdicion } from '../data/pasatiempos'
-import type { Juego } from '../data/pasatiempos/types'
-import { SELLOS, useProgreso, type Sello } from '../lib/progresoPasatiempos'
+import Cifrado from '../components/pasatiempos/Cifrado'
+import type { Edicion, Juego } from '../data/pasatiempos/types'
+import { SELLOS, useProgreso, type Progreso, type Sello } from '../lib/progresoPasatiempos'
 
 const paperLink = 'inline-flex min-h-11 items-center font-display text-sm font-bold uppercase tracking-wider underline underline-offset-4 hover:decoration-red'
 
 /**
- * Página de Pasatiempos (P1: el marco). Sigue docs/pasatiempos-maqueta.png:
+ * Página de Pasatiempos. Sigue docs/pasatiempos-maqueta.png:
  * cabecera de página, título, las tres secciones de la edición y el Carnet de lector al pie.
- * Los juegos se programan en P2–P4; por ahora cada sección muestra sus datos y un recuadro "En imprenta".
+ * El Cifrado ya se juega (P2); Cinedoku y Crucigrama muestran "En imprenta" hasta P3–P4.
  */
 export default function Pasatiempos() {
   const edicion = ultimaEdicion()
@@ -33,49 +34,68 @@ export default function Pasatiempos() {
       {!edicion ? (
         <p className="py-10 text-center font-display italic">La sección no llegó a imprenta. Vuelva pronto.</p>
       ) : (
-        <>
-          <Seccion
-            id="cifrado"
-            numero="I"
-            titulo={edicion.cifrado.titulo}
-            entradilla={edicion.cifrado.entradilla}
-            dato={`${edicion.cifrado.simbolosUsados} símbolos`}
-            extra={<PistasDelEditor cantidad={edicion.cifrado.pistasGratis} />}
-          />
-          <Seccion
-            id="cinedoku"
-            numero="II"
-            titulo={edicion.cinedoku.titulo}
-            entradilla={edicion.cinedoku.entradilla}
-            dato={`${edicion.cinedoku.pistas} pistas iniciales · ${edicion.cinedoku.letras.join(' ')}`}
-          />
-          <Seccion
-            id="crucigrama"
-            numero="III"
-            titulo={edicion.crucigrama.titulo}
-            entradilla="Palabras cruzadas, todas sacadas de las páginas de este diario."
-            dato={`${edicion.crucigrama.ancho}×${edicion.crucigrama.alto} · ${edicion.crucigrama.horizontales.length + edicion.crucigrama.verticales.length} palabras`}
-          />
-
-          <p className="border-t-4 border-double border-print pt-3 font-display text-[15px] italic">
-            Mientras se terminan de imprimir, puede probar suerte con La Función del Día.
-          </p>
-          <Link to="/juego" className={paperLink}>Jugar La Función del Día (versión de prueba) →</Link>
-
-          <Carnet numero={edicion.numero} />
-        </>
+        <EdicionPasatiempos edicion={edicion} />
       )}
     </div>
   )
 }
 
-function Seccion({ id, numero, titulo, entradilla, dato, extra }: {
+/**
+ * El progreso vive acá, en un solo lugar, y baja a cada juego y al Carnet: si cada uno tuviera su propio
+ * useProgreso, el Carnet no se enteraría del sello que ganaste en el Cifrado hasta recargar la página.
+ */
+function EdicionPasatiempos({ edicion }: { edicion: Edicion }) {
+  const [progreso, setProgreso] = useProgreso(edicion.numero)
+
+  return (
+    <>
+      <Seccion
+        id="cifrado"
+        numero="I"
+        titulo={edicion.cifrado.titulo}
+        entradilla={edicion.cifrado.entradilla}
+        dato={`${edicion.cifrado.simbolosUsados} símbolos`}
+        extra={<PistasDelEditor cantidad={edicion.cifrado.pistasGratis} />}
+      >
+        <Cifrado
+          datos={edicion.cifrado}
+          progreso={progreso.juegos.cifrado ?? {}}
+          onCambio={(cifrado) => setProgreso((p) => ({ ...p, juegos: { ...p.juegos, cifrado } }))}
+        />
+      </Seccion>
+      <Seccion
+        id="cinedoku"
+        numero="II"
+        titulo={edicion.cinedoku.titulo}
+        entradilla={edicion.cinedoku.entradilla}
+        dato={`${edicion.cinedoku.pistas} pistas iniciales · ${edicion.cinedoku.letras.join(' ')}`}
+      />
+      <Seccion
+        id="crucigrama"
+        numero="III"
+        titulo={edicion.crucigrama.titulo}
+        entradilla="Palabras cruzadas, todas sacadas de las páginas de este diario."
+        dato={`${edicion.crucigrama.ancho}×${edicion.crucigrama.alto} · ${edicion.crucigrama.horizontales.length + edicion.crucigrama.verticales.length} palabras`}
+      />
+
+      <p className="border-t-4 border-double border-print pt-3 font-display text-[15px] italic">
+        Mientras se terminan de imprimir, puede probar suerte con La Función del Día.
+      </p>
+      <Link to="/juego" className={paperLink}>Jugar La Función del Día (versión de prueba) →</Link>
+
+      <Carnet numero={edicion.numero} progreso={progreso} />
+    </>
+  )
+}
+
+function Seccion({ id, numero, titulo, entradilla, dato, extra, children }: {
   id: Juego
   numero: string
   titulo: string
   entradilla: string
   dato: string
   extra?: ReactNode
+  children?: ReactNode // el juego; sin juego, se muestra "En imprenta"
 }) {
   return (
     <section id={id} aria-labelledby={`${id}-titulo`} className="border-b-4 border-double border-print py-5">
@@ -87,12 +107,13 @@ function Seccion({ id, numero, titulo, entradilla, dato, extra }: {
         <span>{dato}</span>
         {extra}
       </div>
-      {/* Lugar del juego: se programa en P2–P4 */}
-      <div className="mt-3 border-4 border-double border-print p-1">
-        <div className="engraving flex min-h-28 items-center justify-center">
-          <span className="bg-paper px-2 font-display text-xs uppercase tracking-widest text-print-muted">En imprenta</span>
+      {children ?? (
+        <div className="mt-3 border-4 border-double border-print p-1">
+          <div className="engraving flex min-h-28 items-center justify-center">
+            <span className="bg-paper px-2 font-display text-xs uppercase tracking-widest text-print-muted">En imprenta</span>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }
@@ -115,9 +136,7 @@ const JUEGOS: { id: Juego; nombre: string }[] = [
 const ESTRELLAS: Record<Sello, string> = { oro: '★★★', plata: '★★☆', bronce: '★☆☆', rendido: '☆☆☆' }
 
 /** Carnet de lector: un casillero por juego con el sello ganado en esta edición */
-function Carnet({ numero }: { numero: number }) {
-  const [progreso] = useProgreso(numero)
-
+function Carnet({ numero, progreso }: { numero: number; progreso: Progreso }) {
   return (
     <section aria-labelledby="carnet-titulo" className="mt-6 border-2 border-dashed border-print p-3">
       <h2 id="carnet-titulo" className="font-display text-sm font-bold uppercase tracking-[0.2em]">Carnet de lector</h2>
