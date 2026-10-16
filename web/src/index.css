@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/* Estética "titular de diario" oscuro con el rojo del 8:2 */
+@theme {
+  --color-ink: #0e0e0e;
+  --color-paper: #ece6da;
+  --color-muted: #9a958c;
+  --color-line: #2a2a2a;
+  --color-red: #c8102e;
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+html, body { background: var(--color-ink); color: var(--color-paper); }
+body { font-family: var(--font-body); }
