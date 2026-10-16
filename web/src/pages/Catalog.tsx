@@ -9,17 +9,18 @@ export default function Catalog() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between gap-4 border-b border-line pb-4">
+      <div className="flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
         <h1 className="font-display text-4xl">Catálogo</h1>
-        <label className="text-sm">
-          <span className="text-muted mr-2">Director</span>
-          <select value={director} onChange={(e) => setDirector(e.target.value)} className="bg-ink border border-line px-2 py-1">
+        <label className="flex items-center gap-2 text-sm">
+          <span className="text-muted">Director</span>
+          {/* text-base (16px): con menos, Safari en iPhone hace zoom al tocar el select */}
+          <select value={director} onChange={(e) => setDirector(e.target.value)} className="min-h-11 min-w-0 flex-1 bg-ink border border-line px-2 text-base sm:flex-none">
             <option value="todos">Todos</option>
             {directors.map((d) => <option key={d}>{d}</option>)}
           </select>
         </label>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         {list.map((p) => <ProductCard key={p.slug} p={p} />)}
       </div>
     </div>

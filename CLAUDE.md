@@ -31,6 +31,15 @@ npm run lint               # oxlint
 ```
 Backend (cuando llegue la Etapa 5): `cd api && python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && uvicorn main:app --reload`
 
+## Mobile-first
+La mayoría de las visitas llegan desde el celular (links de Instagram).
+- Diseñar primero a **375px** y después agrandar: las clases sin prefijo son para mobile; `md:`/`lg:` solo suman.
+- Botones y elementos tocables de **al menos 44px** de alto/ancho (`min-h-11`, `min-w-11`).
+- Acciones importantes (agregar al pedido, enviar por WhatsApp) **al alcance del pulgar**: abajo, fijas si hace falta.
+- **Nada que dependa solo de hover**: todo lo que se revela al pasar el mouse tiene que poder abrirse con un toque.
+- **Imágenes livianas**: tamaño justo, WebP/AVIF, `loading="lazy"` fuera de la primera pantalla.
+- Revisar cada cambio a 375px antes de darlo por terminado.
+
 ## Reglas del proyecto
 - Estética: diario oscuro, serif display, rojo `--color-red` solo para acentos (el 8:2, CTAs, estados activos).
   Los tokens están en `web/src/index.css` (`@theme`). No hardcodear colores.
