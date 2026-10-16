@@ -1,15 +1,24 @@
 @import "tailwindcss";
 
-/* Estética "titular de diario" oscuro con el rojo del 8:2 */
+/* Estética "titular de diario" oscuro. ink, paper y red son los colores exactos del logo (public/logo/) */
 @theme {
-  --color-ink: #0e0e0e;
-  --color-paper: #ece6da;
+  --color-ink: #0e0d0b;
+  --color-paper: #ece6d8;
   --color-muted: #9a958c;
   --color-line: #2a2a2a;
-  --color-red: #c8102e;
+  --color-red: #c84030;
   --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
   --font-body: "Inter", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Logo giratorio (RotatingLogo): 5 s el 8:2 · giro 0,6 s · 5 s PLAINVIEW · giro 0,6 s = 11,2 s.
+     44.64% = 5 / 11.2 y 50% = 5.6 / 11.2. El easing va en cada tramo de giro. */
+  --animate-logo-flip: logo-flip 11.2s infinite;
+  @keyframes logo-flip {
+    0%, 44.64% { transform: rotateY(0deg); animation-timing-function: cubic-bezier(.6, 0, .3, 1); }
+    50%, 94.64% { transform: rotateY(180deg); animation-timing-function: cubic-bezier(.6, 0, .3, 1); }
+    100% { transform: rotateY(360deg); }
+  }
 }
 
 html, body { background: var(--color-ink); color: var(--color-paper); }

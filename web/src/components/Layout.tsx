@@ -1,6 +1,7 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 import { BRAND, IS_PREVIEW } from '../config'
 import { useCart } from '../context/CartContext'
+import RotatingLogo from './RotatingLogo'
 
 // `short` es la etiqueta en mobile: a 375px "Adiviná la peli" no entra al lado de las otras
 const nav = [
@@ -21,10 +22,8 @@ export default function Layout() {
       <header className="border-b-4 border-double border-line">
         {/* Mobile: logo + pedido arriba y las secciones en una fila abajo. Desde md: todo en una línea */}
         <div className="mx-auto max-w-6xl px-4 md:py-4 md:flex md:items-center md:justify-between md:gap-4">
-          <div className="flex items-center justify-between gap-4">
-            <Link to="/" className="flex min-h-11 items-center whitespace-nowrap font-display text-2xl font-black tracking-tight">
-              PLAINVIEW&nbsp;<span className="text-red">8:2</span>
-            </Link>
+          <div className="flex items-center justify-between gap-4 py-1 md:py-0">
+            <RotatingLogo />
             <CartLink count={count} className="flex md:hidden" />
           </div>
           <nav className="grid grid-cols-3 border-t border-line text-xs uppercase tracking-widest md:flex md:items-center md:gap-6 md:border-0 md:text-sm">
