@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import type { Juego } from '../data/pasatiempos/types'
 
 /**
  * Progreso de los pasatiempos en localStorage, una clave por edición: `pv82-pasatiempos-01`.
@@ -30,10 +29,18 @@ export type ProgresoCifrado = ProgresoJuego & {
   resuelto?: boolean
 }
 
+/** Celdas del Cinedoku numeradas de 0 a 35 (fila * 6 + columna). Las letras impresas no se guardan: vienen en el JSON */
+export type ProgresoCinedoku = ProgresoJuego & {
+  celdas?: Record<number, string> // letra que puso el lector
+  notas?: Record<number, string> // candidatos anotados con el lápiz, por ejemplo "ZD"
+  reveladas?: number[] // celdas que dio el editor (quedan fijas)
+  resuelto?: boolean
+}
+
 // `v` es la versión del formato: si algún día cambia, los datos viejos se descartan en vez de romper la página
 export type Progreso = {
   v: 1
-  juegos: { cifrado?: ProgresoCifrado } & Partial<Record<Exclude<Juego, 'cifrado'>, ProgresoJuego>>
+  juegos: { cifrado?: ProgresoCifrado; cinedoku?: ProgresoCinedoku; crucigrama?: ProgresoJuego }
 }
 
 /**

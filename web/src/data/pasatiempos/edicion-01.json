@@ -12,6 +12,7 @@
   "cinedoku": {
     "titulo": "Cinedoku",
     "entradilla": "Complete la grilla con Z, O, D, I, A, C. Una fila guarda un nombre que la redacción prefiere no imprimir.",
+    "pistasGratis": 3,
     "letras": [
       "Z",
       "O",

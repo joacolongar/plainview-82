@@ -72,7 +72,11 @@ Sudoku de 6×6 (cajas de 2×3) que se completa con las letras **Z O D I A C**.
 - **Dificultad:** 10 pistas iniciales, el mínimo práctico para 6×6. Garantizado: solución
   única y resoluble solo con *singles* (sin prueba y error).
 - **Cómo se juega:** tocás la celda y después la letra en el teclado de 6 botones. Con
-  mantener apretado, anotás candidatos chiquitos (modo lápiz).
+  mantener apretado, anotás candidatos chiquitos (modo lápiz). Como un gesto solo no alcanza
+  (regla mobile-first), también hay un interruptor **Lápiz**, y en la compu Shift + letra.
+- **No marca conflictos solo** (sería verificar gratis): resalta la fila, la columna y la caja de la
+  celda elegida y las celdas con la misma letra. Errores, solo con "Verificar".
+- **Pistas del editor:** 3 (`pistasGratis` en el JSON); cada una revela la celda elegida.
 - **Próximas ediciones:** otras palabras de 6 letras distintas, o 4×4 para una edición
   "fácil" (por ejemplo RICK).
 

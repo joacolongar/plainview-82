@@ -319,7 +319,7 @@ EDICION_01 = {
         "cupon": "TORRE",
         "pistasGratis": 3,
     },
-    "cinedoku": {"titulo": "Cinedoku", "palabra": "ZODIAC", "filaOculta": 3,
+    "cinedoku": {"titulo": "Cinedoku", "palabra": "ZODIAC", "filaOculta": 3, "pistasGratis": 3,
                  "entradilla": "Complete la grilla con Z, O, D, I, A, C. Una fila guarda un nombre que la redacción prefiere no imprimir."},
     "crucigrama": {
         "titulo": "Crucigrama del Valle",
@@ -351,7 +351,7 @@ def generar(numero: int, semilla: int | None = None) -> tuple[dict, list[str]]:
         "numero": e["numero"], "titulo": e["titulo"],
         "cifrado": {"titulo": ci["titulo"], "entradilla": ci["entradilla"],
                     "pistasGratis": ci["pistasGratis"], **cifrar(ci["mensaje"], rng)},
-        "cinedoku": {"titulo": cz["titulo"], "entradilla": cz["entradilla"],
+        "cinedoku": {"titulo": cz["titulo"], "entradilla": cz["entradilla"], "pistasGratis": cz["pistasGratis"],
                      **generar_cinedoku(cz["palabra"], cz["filaOculta"], rng)},
     }
     cruci, descartadas = armar_crucigrama([{**x, "palabra": normalizar(x["palabra"])} for x in cr["entradas"]], rng)

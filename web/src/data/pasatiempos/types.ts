@@ -15,6 +15,7 @@ export type Cifrado = {
 export type Cinedoku = {
   titulo: string
   entradilla: string
+  pistasGratis: number
   letras: string[] // las 6 letras, en el orden que deletrea la fila oculta
   filaOculta: number
   cajas: [number, number] // [filas, columnas] de cada caja

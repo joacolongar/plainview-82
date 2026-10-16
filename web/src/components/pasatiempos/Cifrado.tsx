@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Cifrado as DatosCifrado } from '../../data/pasatiempos/types'
 import { decodificarClave, simbolosEnOrden } from '../../lib/descifrar'
 import { calcularSello, SELLOS, type ProgresoCifrado } from '../../lib/progresoPasatiempos'
+import Ayudas, { type Confirmacion } from './Ayudas'
 import Glifo from './glyphs/Glifo'
 
 const LETRAS = [...'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ']
@@ -31,7 +32,7 @@ export default function Cifrado({ datos, progreso, onCambio }: Props) {
   // Estado de la interfaz (no se guarda): símbolo elegido, errores marcados, confirmaciones y avisos
   const [elegido, setElegido] = useState<string | null>(null)
   const [errores, setErrores] = useState<Set<string>>(new Set())
-  const [confirmar, setConfirmar] = useState<'pista' | 'rendirse' | null>(null)
+  const [confirmar, setConfirmar] = useState<Confirmacion>(null)
   const [aviso, setAviso] = useState('')
 
   const numero = (s: string) => simbolos.indexOf(s) + 1
@@ -147,7 +148,6 @@ export default function Cifrado({ datos, progreso, onCambio }: Props) {
   })
 
   const textoEnClaro = [...datos.cifrado].map((ch) => clave[ch] ?? ch).join('')
-  const selloEnJuego = SELLOS[calcularSello(progreso)]
 
   return (
     <div className="mt-3">
@@ -209,35 +209,16 @@ export default function Cifrado({ datos, progreso, onCambio }: Props) {
         </div>
       ) : (
         <>
-          {/* Ayudas, como en la maqueta: Pedir pista (borde) y Verificar (rojo) */}
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={pedirPista}
-              disabled={pistasQuedan <= 0}
-              className="min-h-12 border-2 border-print px-2 font-display text-sm font-bold uppercase tracking-wider disabled:opacity-40"
-            >
-              {confirmar === 'pista' ? '¿Seguro? Baja el sello' : pistasQuedan > 0 ? `Pedir pista ${'◆'.repeat(pistasQuedan)}` : 'Sin pistas'}
-            </button>
-            {/* 19 px en negrita cuenta como "texto grande": así el crema sobre rojo (3,99:1) cumple el mínimo de 3:1 */}
-            <button
-              type="button"
-              onClick={verificar}
-              disabled={letrasUsadas.size === 0}
-              className="min-h-12 bg-red px-2 font-display text-[19px] font-bold uppercase tracking-wider text-paper disabled:opacity-40"
-            >
-              Verificar
-            </button>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4">
-            <p className="font-display text-sm">
-              Si lo resolvés ahora: <span aria-hidden>{selloEnJuego.estrellas}</span> <strong>{selloEnJuego.nombre}</strong>
-            </p>
-            <button type="button" onClick={rendirse} className="min-h-11 font-display text-sm underline underline-offset-4">
-              {confirmar === 'rendirse' ? '¿Seguro? Ver la solución sin sello' : 'Me rindo'}
-            </button>
-          </div>
-          <p role="status" aria-live="polite" className="min-h-5 font-display text-sm italic">{aviso}</p>
+          <Ayudas
+            pistasQuedan={pistasQuedan}
+            confirmar={confirmar}
+            puedeVerificar={letrasUsadas.size > 0}
+            selloEnJuego={calcularSello(progreso)}
+            aviso={aviso}
+            onPista={pedirPista}
+            onVerificar={verificar}
+            onRendirse={rendirse}
+          />
 
           {/* Lista de símbolos: botones de 44 px, la forma cómoda de elegir con el pulgar */}
           <p className="mt-3 font-display text-[11px] font-bold uppercase tracking-[0.15em] text-print-muted">Símbolos</p>

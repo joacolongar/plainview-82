@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ultimaEdicion } from '../data/pasatiempos'
 import Cifrado from '../components/pasatiempos/Cifrado'
+import Cinedoku from '../components/pasatiempos/Cinedoku'
 import type { Edicion, Juego } from '../data/pasatiempos/types'
 import { SELLOS, useProgreso, type Progreso, type Sello } from '../lib/progresoPasatiempos'
 
@@ -10,7 +11,7 @@ const paperLink = 'inline-flex min-h-11 items-center font-display text-sm font-b
 /**
  * Página de Pasatiempos. Sigue docs/pasatiempos-maqueta.png:
  * cabecera de página, título, las tres secciones de la edición y el Carnet de lector al pie.
- * El Cifrado ya se juega (P2); Cinedoku y Crucigrama muestran "En imprenta" hasta P3–P4.
+ * El Cifrado (P2) y el Cinedoku (P3) ya se juegan; el Crucigrama muestra "En imprenta" hasta P4.
  */
 export default function Pasatiempos() {
   const edicion = ultimaEdicion()
@@ -68,8 +69,15 @@ function EdicionPasatiempos({ edicion }: { edicion: Edicion }) {
         numero="II"
         titulo={edicion.cinedoku.titulo}
         entradilla={edicion.cinedoku.entradilla}
-        dato={`${edicion.cinedoku.pistas} pistas iniciales · ${edicion.cinedoku.letras.join(' ')}`}
-      />
+        dato={`${edicion.cinedoku.pistas} letras impresas · ${edicion.cinedoku.letras.join(' ')}`}
+        extra={<PistasDelEditor total={edicion.cinedoku.pistasGratis} usadas={progreso.juegos.cinedoku?.pistasUsadas ?? 0} />}
+      >
+        <Cinedoku
+          datos={edicion.cinedoku}
+          progreso={progreso.juegos.cinedoku ?? {}}
+          onCambio={(cinedoku) => setProgreso((p) => ({ ...p, juegos: { ...p.juegos, cinedoku } }))}
+        />
+      </Seccion>
       <Seccion
         id="crucigrama"
         numero="III"
