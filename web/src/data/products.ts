@@ -69,5 +69,15 @@ export const products: Product[] = [
 
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug)
 
+/** Ruta del aviso de una remera (antes /producto/:slug, que ahora redirige acá) */
+export const rutaAviso = (slug: string) => `/catalogo/${slug}`
+
+/** Estados con nombre de catálogo por correo, para el aviso y las cards */
+export const ESTADOS: Record<Product['status'], string> = {
+  disponible: 'En existencia',
+  preventa: 'Por encargo',
+  proximamente: 'Próximo número',
+}
+
 /** 1 → "001", como en los catálogos por correo */
 export const numeroArticulo = (p: Product) => String(p.articulo).padStart(3, '0')

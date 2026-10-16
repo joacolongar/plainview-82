@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { rounds } from '../data/game'
+import { rutaAviso } from '../data/products'
 
 export default function Game() {
   const [index, setIndex] = useState(0)
@@ -38,7 +39,7 @@ export default function Game() {
       </div>
       {picked && (
         <div className="flex items-center justify-between gap-4">
-          {r.productSlug ? <Link to={`/producto/${r.productSlug}`} className="flex min-h-11 items-center text-sm underline">Ver la remera</Link> : <span />}
+          {r.productSlug ? <Link to={rutaAviso(r.productSlug)} className="flex min-h-11 items-center text-sm underline">Ver la remera</Link> : <span />}
           <button onClick={() => { setIndex(index + 1); setPicked(null) }} className="min-h-11 bg-red px-6 font-display text-[19px] font-bold uppercase text-paper">Siguiente</button>
         </div>
       )}

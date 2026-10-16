@@ -1,4 +1,4 @@
-import { numeroArticulo, products } from './products'
+import { numeroArticulo, products, rutaAviso } from './products'
 
 /**
  * El orden de las páginas del diario. El número de página es la posición en esta lista,
@@ -13,7 +13,7 @@ export type Pagina = {
 // Los avisos van por N° de artículo, como en un catálogo por correo
 const avisos: Pagina[] = [...products]
   .sort((a, b) => a.articulo - b.articulo)
-  .map((p) => ({ ruta: `/producto/${p.slug}`, seccion: `Avisos · Art. N° ${numeroArticulo(p)}` }))
+  .map((p) => ({ ruta: rutaAviso(p.slug), seccion: `Avisos · Art. N° ${numeroArticulo(p)}` }))
 
 export const paginas: Pagina[] = [
   { ruta: '/', seccion: 'Primera plana' },

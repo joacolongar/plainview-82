@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import Masthead from '../components/Masthead'
 import { rounds } from '../data/game'
 import { clasificados, getNoticias, SECCIONES, type Noticia } from '../data/noticias'
-import { getProduct } from '../data/products'
+import { getProduct, rutaAviso } from '../data/products'
 
 // Links sobre el papel: tinta subrayada, 44px de alto para el pulgar
 const paperLink = 'inline-flex min-h-11 items-center font-display text-sm font-bold uppercase tracking-wider underline underline-offset-4 hover:decoration-red'
@@ -110,7 +110,7 @@ function Articulo({ n, chico = false }: { n: Noticia; chico?: boolean }) {
       <div className="mt-2">
         <Cuerpo parrafos={n.cuerpo} />
       </div>
-      {product && <Link to={`/producto/${product.slug}`} className={paperLink}>Ver la remera →</Link>}
+      {product && <Link to={rutaAviso(product.slug)} className={paperLink}>Ver la remera →</Link>}
     </article>
   )
 }

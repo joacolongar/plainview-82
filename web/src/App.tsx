@@ -2,7 +2,7 @@ import { createBrowserRouter, createRoutesFromElements, Route } from 'react-rout
 import NewspaperPage from './components/NewspaperPage'
 import Home from './pages/Home'
 import Catalog from './pages/Catalog'
-import ProductDetail from './pages/ProductDetail'
+import Aviso, { RedirigirAviso } from './pages/Aviso'
 import Cart from './pages/Cart'
 import Game from './pages/Game'
 import HowToBuy from './pages/HowToBuy'
@@ -19,7 +19,9 @@ export const router = createBrowserRouter(
     <Route element={<NewspaperPage />}>
       <Route index element={<Home />} />
       <Route path="catalogo" element={<Catalog />} />
-      <Route path="producto/:slug" element={<ProductDetail />} />
+      <Route path="catalogo/:slug" element={<Aviso />} />
+      {/* ruta vieja: redirige para no romper links ya compartidos */}
+      <Route path="producto/:slug" element={<RedirigirAviso />} />
       <Route path="carrito" element={<Cart />} />
       <Route path="pasatiempos" element={<Pasatiempos />} />
       <Route path="juego" element={<Game />} />
