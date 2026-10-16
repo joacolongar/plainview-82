@@ -9,12 +9,12 @@ export default function Catalog() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+      <div className="flex flex-col gap-3 border-b border-print/30 pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
         <h1 className="font-display text-4xl">Catálogo</h1>
         <label className="flex items-center gap-2 text-sm">
-          <span className="text-muted">Director</span>
+          <span className="text-print-muted">Director</span>
           {/* text-base (16px): con menos, Safari en iPhone hace zoom al tocar el select */}
-          <select value={director} onChange={(e) => setDirector(e.target.value)} className="min-h-11 min-w-0 flex-1 bg-ink border border-line px-2 text-base sm:flex-none">
+          <select value={director} onChange={(e) => setDirector(e.target.value)} className="min-h-11 min-w-0 flex-1 bg-paper border border-print/30 px-2 text-base sm:flex-none">
             <option value="todos">Todos</option>
             {directors.map((d) => <option key={d}>{d}</option>)}
           </select>

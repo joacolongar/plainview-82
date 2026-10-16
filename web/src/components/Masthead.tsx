@@ -1,12 +1,9 @@
 import { useState } from 'react'
 import { edicionActual } from '../data/editions'
+import { fechaCorta, fechaLarga } from '../lib/fecha'
 import RotatingLogo from './RotatingLogo'
 import SiteNav from './SiteNav'
 
-// "viernes, 16 de octubre de 2026" — el formato lo arma el navegador, en español de Argentina.
-// En mobile va sin el día de la semana para que la barra entre en una línea.
-const fechaLarga = new Intl.DateTimeFormat('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-const fechaCorta = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })
 
 /**
  * Cabecera del diario THE PLAINVIEW (solo en la portada; reemplaza al header compacto).

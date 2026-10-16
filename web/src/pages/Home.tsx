@@ -15,7 +15,7 @@ export default function Home() {
   const secundarias = [...getNoticias('espectaculos'), ...getNoticias('internacional'), ...getNoticias('deportes')]
 
   return (
-    <div className="paper px-3 pt-3 pb-6 shadow-2xl md:px-8 md:pt-6">
+    <div>
       <Masthead />
 
       {/* Noticia principal: en 375×667 entran titular, bajada e ilustración con epígrafe */}

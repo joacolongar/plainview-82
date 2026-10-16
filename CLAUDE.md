@@ -18,6 +18,8 @@ Sitio: catálogo con fichas, juego "Adiviná la peli" y pedidos por WhatsApp (si
   - `src/data/game.ts` rondas del juego
   - `src/lib/whatsapp.ts` arma el mensaje del pedido y el link wa.me
   - `src/context/CartContext.tsx` carrito (estado + localStorage con try/catch)
+  - `src/components/NewspaperPage.tsx` layout común: todo el sitio impreso en la hoja del diario (cabecera chica + pie)
+  - `src/data/paginas.ts` orden y números de página del diario; `src/data/editions.ts` edición del drop
   - `src/pages/*` una página por ruta
 - `api/` — backend opcional (Etapa 5): FastAPI + websockets. No hace falta para lanzar.
 - `docs/` — ROADMAP.md (plan por sesiones), IDEAS.md (backlog de ideas), PASATIEMPOS.md (diseño de los pasatiempos)

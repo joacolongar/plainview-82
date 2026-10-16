@@ -20,14 +20,7 @@ export default function Pasatiempos() {
   const edicion = ultimaEdicion()
 
   return (
-    <div className="paper px-3 pt-2 pb-6 shadow-2xl md:px-8 md:pt-4">
-      {/* Cabecera de página. El N° de página queda fijo hasta que exista paginas.ts (S3) */}
-      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 whitespace-nowrap border-b border-print/30 py-2 font-display text-[11px] font-bold uppercase tracking-[0.12em] md:tracking-[0.2em]">
-        <span>The Plainview</span>
-        <span className="text-center">Pág. 6</span>
-        <span className="text-right">Pasatiempos</span>
-      </div>
-
+    <div>
       <header className="border-b-4 border-double border-print pt-3 pb-3 text-center">
         <h1 className="font-headline text-[clamp(2.75rem,14vw,6rem)] uppercase leading-none">Pasatiempos</h1>
         <p className="mt-1 font-display italic">
