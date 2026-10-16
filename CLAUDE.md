@@ -20,8 +20,9 @@ Sitio: catálogo con fichas, juego "Adiviná la peli" y pedidos por WhatsApp (si
   - `src/context/CartContext.tsx` carrito (estado + localStorage con try/catch)
   - `src/pages/*` una página por ruta
 - `api/` — backend opcional (Etapa 5): FastAPI + websockets. No hace falta para lanzar.
-- `docs/` — ROADMAP.md (plan por sesiones), IDEAS.md (backlog de ideas) y PASATIEMPOS.md (diseño de los pasatiempos:
-  reglas comunes, cada juego y su validador).
+- `docs/` — ROADMAP.md (plan por sesiones), IDEAS.md (backlog de ideas), PASATIEMPOS.md (diseño de los pasatiempos)
+  y pasatiempos-maqueta.png (maqueta a 390px).
+- `scripts/pasatiempos.py` — genera y valida las ediciones de pasatiempos (`web/src/data/pasatiempos/edicion-NN.json`).
 
 ## Comandos
 ```bash
@@ -29,6 +30,7 @@ cd web && npm install      # una vez
 npm run dev                # http://localhost:5173
 npm run build              # chequea tipos y compila
 npm run lint               # oxlint
+python3 scripts/pasatiempos.py validar 1   # (desde la raíz) valida la edición 1 de pasatiempos
 ```
 Backend (cuando llegue la Etapa 5): `cd api && python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && uvicorn main:app --reload`
 

@@ -71,7 +71,7 @@ export default function Home() {
           <p className="mt-2 font-display text-[15px] italic leading-snug">
             {rounds.length} acertijos de cine esperan al lector atento. Pistas propias, ninguna trampa y un premio para quien mire de cerca.
           </p>
-          <Link to="/juego" className={paperLink}>Resolver el acertijo →</Link>
+          <Link to="/pasatiempos" className={paperLink}>Ir a Pasatiempos →</Link>
         </section>
       </div>
     </div>

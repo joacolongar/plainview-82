@@ -1,0 +1,191 @@
+{
+  "numero": 1,
+  "titulo": "Pasatiempos — Edición N° 1",
+  "cifrado": {
+    "titulo": "El Cifrado",
+    "entradilla": "Esta carta llegó a la redacción sin firma. El remitente exige que se publique en primera plana.",
+    "cupon": "BATIDO",
+    "pistasGratis": 3,
+    "texto": "SEÑOR EDITOR: EL PIANISTA SABE MAS DE LO QUE TOCA, EL PETROLERO CAVA MAS DE LO QUE DICE Y LA LLUVIA DEL VALLE NO ES LO QUE PARECE. QUIEN LEA ESTO MIRO DE CERCA. ESCRIBA LA PALABRA BATIDO EN SU BOLETA DE PEDIDO Y EL ENVIO CORRE POR NUESTRA CUENTA.",
+    "clave": {
+      "A": "Φ",
+      "B": "◁",
+      "C": "Ψ",
+      "D": "⊗",
+      "E": "○",
+      "I": "Λ",
+      "L": "Ξ",
+      "M": "■",
+      "N": "♆",
+      "O": "☋",
+      "P": "▽",
+      "Q": "Θ",
+      "R": "♁",
+      "S": "Ω",
+      "T": "♃",
+      "U": "Σ",
+      "V": "⊕",
+      "Y": "☊",
+      "Ñ": "♄"
+    },
+    "letrasUsadas": 19
+  },
+  "cinedoku": {
+    "titulo": "Cinedoku",
+    "entradilla": "Complete la grilla con Z, O, D, I, A, C. Una fila guarda un nombre que la redacción prefiere no imprimir.",
+    "letras": [
+      "Z",
+      "O",
+      "D",
+      "I",
+      "A",
+      "C"
+    ],
+    "filaOculta": 3,
+    "cajas": [
+      2,
+      3
+    ],
+    "inicio": [
+      "CZ.O..",
+      "O....A",
+      "AI....",
+      "......",
+      ".....D",
+      ".AO..."
+    ],
+    "solucion": [
+      "CZAODI",
+      "ODIZCA",
+      "AICDZO",
+      "ZODIAC",
+      "ICZAOD",
+      "DAOCIZ"
+    ],
+    "pistas": 10
+  },
+  "crucigrama": {
+    "titulo": "Crucigrama del Valle",
+    "ancho": 11,
+    "alto": 13,
+    "grilla": [
+      "########M##",
+      "#T###MIRAR#",
+      "RICK####G##",
+      "#G##P#C#N##",
+      "PREDICADOR#",
+      "#E##A#S#L##",
+      "####N#A#I##",
+      "####I#B#A##",
+      "RANAS#L##S#",
+      "O###T#A##I#",
+      "C#PLAINVIEW",
+      "K#####C##T#",
+      "Y#BOMBAY#E#"
+    ],
+    "horizontales": [
+      {
+        "n": 3,
+        "fila": 1,
+        "col": 5,
+        "respuesta": "MIRAR",
+        "pista": "Lo que hay que hacer de cerca, según el lema de este diario",
+        "largo": 5
+      },
+      {
+        "n": 4,
+        "fila": 2,
+        "col": 0,
+        "respuesta": "RICK",
+        "pista": "Dueño de ese café, que no se mete en política",
+        "largo": 4
+      },
+      {
+        "n": 7,
+        "fila": 4,
+        "col": 0,
+        "respuesta": "PREDICADOR",
+        "pista": "Oficio de Eli, el rival más joven de Little Boston",
+        "largo": 10
+      },
+      {
+        "n": 8,
+        "fila": 8,
+        "col": 0,
+        "respuesta": "RANAS",
+        "pista": "Precipitación poco habitual pronosticada para ese mismo valle",
+        "largo": 5
+      },
+      {
+        "n": 10,
+        "fila": 10,
+        "col": 2,
+        "respuesta": "PLAINVIEW",
+        "pista": "Apellido del petrolero que llegó a Little Boston con su hijo y una promesa",
+        "largo": 9
+      },
+      {
+        "n": 11,
+        "fila": 12,
+        "col": 2,
+        "respuesta": "BOMBAY",
+        "pista": "Ciudad del muchacho que conocía todas las respuestas",
+        "largo": 6
+      }
+    ],
+    "verticales": [
+      {
+        "n": 1,
+        "fila": 0,
+        "col": 8,
+        "respuesta": "MAGNOLIA",
+        "pista": "Flor, calle y película de tres horas en el Valle",
+        "largo": 8
+      },
+      {
+        "n": 2,
+        "fila": 1,
+        "col": 1,
+        "respuesta": "TIGRE",
+        "pista": "El ojo que Rocky tiene que recuperar",
+        "largo": 5
+      },
+      {
+        "n": 5,
+        "fila": 3,
+        "col": 4,
+        "respuesta": "PIANISTA",
+        "pista": "Le prohibieron una canción, pero la sabe de memoria",
+        "largo": 8
+      },
+      {
+        "n": 6,
+        "fila": 3,
+        "col": 6,
+        "respuesta": "CASABLANCA",
+        "pista": "Ciudad donde un café se niega a tomar partido",
+        "largo": 10
+      },
+      {
+        "n": 8,
+        "fila": 8,
+        "col": 0,
+        "respuesta": "ROCKY",
+        "pista": "Campeón de Filadelfia que pierde el ojo… del tigre",
+        "largo": 5
+      },
+      {
+        "n": 9,
+        "fila": 8,
+        "col": 9,
+        "respuesta": "SIETE",
+        "pista": "Pecados, días o cajas: el número de Somerset",
+        "largo": 5
+      }
+    ],
+    "descartadas": [
+      "BATIDO",
+      "FINCHER"
+    ]
+  }
+}

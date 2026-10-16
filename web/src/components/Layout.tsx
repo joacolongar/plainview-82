@@ -5,7 +5,10 @@ import SiteNav, { CartLink } from './SiteNav'
 
 export default function Layout() {
   // En la portada la cabecera del diario (Masthead, dentro de Home) reemplaza a este header
-  const isHome = useLocation().pathname === '/'
+  const { pathname } = useLocation()
+  const isHome = pathname === '/'
+  // Páginas impresas en la hoja crema: menos margen en el main para que la hoja aproveche el ancho
+  const enHoja = isHome || pathname === '/pasatiempos'
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -28,7 +31,7 @@ export default function Layout() {
           </div>
         </header>
       )}
-      <main className={`flex-1 mx-auto w-full max-w-6xl ${isHome ? 'px-2 py-2 md:px-4 md:py-6' : 'px-4 py-8 md:py-10'}`}>
+      <main className={`flex-1 mx-auto w-full max-w-6xl ${enHoja ? 'px-2 py-2 md:px-4 md:py-6' : 'px-4 py-8 md:py-10'}`}>
         <Outlet />
       </main>
       <footer className="border-t border-line text-muted text-sm">

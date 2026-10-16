@@ -71,8 +71,8 @@ Reglas del concepto:
 | `/catalogo/:slug` | Aviso comercial: titular grande, precio en recuadro, grabado, texto de aviso irónico, tabla de medidas, "Fe de erratas: mirá de nuevo", cupón "Recorte y agregue a su pedido" (talle, color, agregar); se pasa a la página anterior/siguiente |
 | `/producto/:slug` | Redirige a `/catalogo/:slug` |
 | `/carrito` | Boleta de pedido: cupón recortable editable, nota, "Enviar boleta por WhatsApp" |
-| `/pasatiempos` | Pasatiempos: carnet de lector y sumario de la edición semanal (`/juego` redirige) |
-| `/pasatiempos/:id` | Un pasatiempo por página: cifrado, cinedoku, crucigrama, mira-de-cerca, funcion-del-dia |
+| `/pasatiempos` | Pasatiempos: una página con El Cifrado, Cinedoku y Crucigrama del Valle de la edición numerada vigente, y el Carnet de lector al pie (maqueta en `docs/pasatiempos-maqueta.png`) |
+| `/juego` | La Función del Día (versión de prueba, hasta P6) |
 | `/como-comprar` | Avisos clasificados: pasos, guía de talles, pagos, envíos y cambios |
 | `*` | Fe de erratas (404) |
 
@@ -97,14 +97,15 @@ Reglas del concepto:
 - [ ] S6. Boleta de pedido (página del diario): cupón recortable (borde punteado, tijera), quitar ítem, validaciones, "Enviar boleta por WhatsApp" pegado abajo, campo de cupón (de los pasatiempos) en el mensaje, número real en `.env`, probar en celular
 - [ ] S7. Datos del pedido (nombre, zona, envío/retiro) completados en la boleta y sumados al mensaje; página "Clasificados" (cómo comprar) completa dentro de `NewspaperPage`
 
-## Etapa 3 — Pasatiempos (6 sesiones, diseño en `docs/PASATIEMPOS.md`)
-Numeradas P1–P6 (reemplazan a las viejas S8–S10) para no renumerar S11 y S12, que ya se mencionan en la Bitácora.
-- [ ] P1. Base común: `/pasatiempos` como página del diario (`/juego` redirige), edición semanal elegida por fecha, JSON por semana + tipos, `scripts/validar_pasatiempos.py` (estructura base), progreso en localStorage, carnet de lector con sellos; La Función del Día mudada tal cual
-- [ ] P2. El Cifrado: sustitución estilo Zodiac con símbolos propios, revela un mensaje y el cupón de la semana; validador del cifrado
-- [ ] P3. Cinedoku: sudoku 6×6 con Z O D I A C y la fila oculta que deletrea ZODIAC; validador con solver de solución única
-- [ ] P4. Crucigrama Mini 5×5 con pistas desde el mundo del diario; validador de numeración y pistas
-- [ ] P5. Mirá de Cerca: siete diferencias sobre una estampa (necesita el arte de las dos versiones); validador de áreas tocables
-- [ ] P6. La Función del Día mejorada: una pista diaria igual para todos, intentos limitados, pistas progresivas, racha y resultado para compartir
+## Etapa 3 — Pasatiempos (6-8 sesiones, diseño en `docs/PASATIEMPOS.md`)
+Numeradas P1–P6 para no renumerar S11 y S12. Contenido por **edición numerada** (`web/src/data/pasatiempos/edicion-NN.json`),
+generado y validado con `python3 scripts/pasatiempos.py generar|validar N`.
+- [x] P1. Marco de la página Pasatiempos (`/pasatiempos`, hoja del diario según la maqueta) + Carnet de lector (sellos en localStorage) + carga del JSON con tipos
+- [ ] P2. El Cifrado (1-2 sesiones): símbolos SVG propios, tocar símbolo → letra en todas las apariciones, pistas del editor, verificar, cupón
+- [ ] P3. Cinedoku (1-2 sesiones): grilla 6×6, teclado de 6 letras, modo lápiz, verificación, fila oculta ZODIAC
+- [ ] P4. Crucigrama del Valle (2 sesiones): selección de palabra, input oculto, barra de pista fija arriba del teclado
+- [ ] P5. Sellos (oro/plata/bronce), tiempos y resultado para compartir; completar los tres desbloquea el mensaje del Cifrado
+- [ ] P6. Mirá de Cerca y La Función del Día, cuando haya ilustraciones
 
 ## Etapa 4 — Lanzamiento (2 sesiones)
 - [ ] S11. SEO: títulos por página, Open Graph con imagen de cada remera, sitemap, accesibilidad (teclado, contraste)
@@ -125,3 +126,4 @@ Numeradas P1–P6 (reemplazan a las viejas S8–S10) para no renumerar S11 y S12
 - 2026-10-16 — S2a: logo giratorio en el header (`RotatingLogo`: 5 s el 8:2, giro de 0,6 s, 5 s PLAINVIEW; con reduced motion queda PLAINVIEW fijo). Los PNG de `public/brand/` se recortaron y exportaron a WebP a 3x (`public/logo/`, ~13 KB c/u) para que las dos caras tengan peso parecido. Tokens con los colores exactos del logo. Verificado a 375px: nítido, sin desbordes y el layout no se mueve durante el giro. Se reescribió el concepto: diario viejo + catálogo de venta por correo del lejano oeste, catálogo de a una página por artículo con URL propia, "Avisos clasificados" y "Boleta de pedido". Pendiente: el crema sobre rojo da 3,99:1 de contraste (AA pide 4,5:1 en texto chico), revisar en S11 o usar texto más grande/negrita en botones rojos; decidir qué hacer con `public/brand/` (se publica con el sitio). Próxima sesión: S2, primera plana.
 - 2026-10-16 — S2: la portada es la primera plana de "THE PLAINVIEW". En `/` la cabecera del diario reemplaza al header compacto (nav extraído a `SiteNav`, con variante sobre papel). Noticia principal: Petróleo sangriento (sin remera todavía, lleva al catálogo); secundarias Casablanca, Millonario y Rocky III; Magnolia como columna del clima. Reglas de las noticias en CLAUDE.md. El logo va en un recuadro oscuro porque su cara PLAINVIEW es crema. El adelanto de Pasatiempos no muestra pistas (las tres películas del juego salen en las noticias). Verificado a 375×667: titular, bajada e ilustración con epígrafe entran en la primera pantalla (epígrafe en 641px), sin desbordes ni titulares cortados en ninguna ruta; desktop y reduced motion revisados. Pendiente: favicon y pie de imprenta (pasan a S2b); ilustración real del grabado; revisar los borradores de `noticias.ts`; probar en celular real. Próxima sesión: S2b.
 - 2026-10-16 — Diseño (sin código): todo el sitio pasa a ser el diario THE PLAINVIEW con un layout común `NewspaperPage` (cabecera chica con N° de página y sección, pie con paginación), páginas que se pasan deslizando o con flechas y transición de hoja con View Transitions (reemplaza al `scroll-snap` planeado). La ficha pasa a ser un aviso comercial estilo catálogo por correo; catálogo = índice de avisos, carrito = boleta, cómo comprar = clasificados, 404 = fe de erratas. Etapa 1 reorganizada (S3–S5b) y Etapa 3 reemplazada por P1–P6 según `docs/PASATIEMPOS.md` (Cifrado → Cinedoku → Crucigrama → Mirá de Cerca, con base común antes y La Función del Día al final). Pendiente: definir el premio del carnet de lector, conseguir medidas reales por talle (S4b) y el arte para Mirá de Cerca (P5). Próxima sesión: S2b.
+- 2026-10-16 — P1: llegó `pasatiempos.zip` con un diseño nuevo de los pasatiempos (ediciones numeradas, `scripts/pasatiempos.py` que genera y valida, sellos oro/plata/bronce, maqueta a 390px); su `PASATIEMPOS.md` reemplazó al anterior y la Etapa 3 sigue su orden. `validar 1` da OK. Página `/pasatiempos` sobre la hoja crema según la maqueta: cabecera de página (Pág. 6 fija hasta S3), título, las tres secciones con datos leídos del JSON (`import.meta.glob` + tipos en `src/data/pasatiempos/`) y recuadro "En imprenta", link a La Función del Día (`/juego`, versión de prueba) y Carnet de lector con sellos desde localStorage (`pv82-pasatiempos-01`, con versión y try/catch; datos corruptos se descartan). El nav y la portada llevan a `/pasatiempos`. Verificado a 375px: sin desbordes ni elementos tocables chicos. Pendiente (decidir antes de P2–P4): RANAS spoilea el final de Magnolia; las pistas de TIGRE y BATIDO aluden a frases célebres (regla de citas); el crucigrama 11×13 deja celdas de ~30px (< 44px); el cupón BATIDO se lee en el JSON público. Próxima sesión: P2, El Cifrado.

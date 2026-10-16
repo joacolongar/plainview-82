@@ -1,10 +1,10 @@
 import { NavLink } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 
-// `short` es la etiqueta en mobile: a 375px "Adiviná la peli" no entra al lado de las otras
+// `short` es la etiqueta en mobile, por si alguna no entra a 375px al lado de las otras
 const nav = [
   { to: '/catalogo', label: 'Catálogo', short: 'Catálogo' },
-  { to: '/juego', label: 'Adiviná la peli', short: 'Juego' },
+  { to: '/pasatiempos', label: 'Pasatiempos', short: 'Pasatiempos' },
   { to: '/como-comprar', label: 'Cómo comprar', short: 'Cómo comprar' },
 ]
 
