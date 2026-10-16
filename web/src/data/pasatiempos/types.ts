@@ -46,6 +46,7 @@ export type Crucigrama = {
 export type Edicion = {
   numero: number
   titulo: string
+  premio: string // JSON { cupon, detalle } en base64: se muestra al completar los tres sin rendirse
   cifrado: Cifrado
   cinedoku: Cinedoku
   crucigrama: Crucigrama

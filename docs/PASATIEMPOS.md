@@ -30,8 +30,10 @@ Maqueta de referencia: `docs/pasatiempos-maqueta.png` (390 px, celular).
 | **Clasificados** (bronce) | Resuelto de cualquier forma |
 | — | "Me rindo" |
 
-Los sellos se ven en el **Carnet de lector**, al pie de la página. Completar los tres juegos de
-la edición desbloquea el mensaje del Cifrado (el cupón) y un resultado para compartir:
+Los sellos se ven en el **Carnet de lector**, al pie de la página, con el tiempo de cada juego.
+El cronómetro arranca con la primera jugada, se frena al resolver y solo cuenta con la pestaña visible. Completar los tres juegos de
+la edición desbloquea el cupón (si ninguno fue "Me rindo") y un resultado para compartir
+(en el celular abre el menú de compartir; si no hay, copia el texto):
 
 ```
 THE PLAINVIEW · Pasatiempos N° 1
@@ -54,8 +56,10 @@ simple**: cada letra tiene un símbolo fijo.
   los espacios y la puntuación: es lo que lo hace jugable en celular. Lo que lo destraba son las
   palabras repetidas ("DE", "LO QUE", "MAS DE LO QUE") y la estructura de carta ("SEÑOR EDITOR").
 - **Pista del editor:** revela una letra a elección.
-- **Premio:** al resolverlo, el mensaje dice qué palabra escribir en la boleta (Edición 1:
-  **TORRE** = envío gratis). Ver "Cupones" más abajo.
+- **Premio:** la carta ya no trae el cupón (se leería en las letras al descifrarla): dice que quien
+  complete los tres pasatiempos sabrá qué palabra escribir en la boleta. El cupón va aparte, en
+  `premio` del JSON (base64), y aparece en el Carnet al completar los tres **sin rendirse**
+  (Edición 1: **TORRE** = envío gratis). Ver "Cupones" más abajo.
 - **En el JSON** no va el mensaje en claro ni el cupón: solo `cifrado` (el texto ya cifrado, con
   espacios y puntuación) y `clave` (JSON símbolo → letra, en base64). El front decodifica la clave
   para verificar lo que pone el lector.
@@ -146,9 +150,10 @@ de tipeo.
   mire el código las puede ver. Para una marca chica alcanza.
 
 ### Cupones
-- El cupón sale **solo** del mensaje del Cifrado. En el JSON está cifrado y con la clave en base64:
-  eso evita leerlo de un vistazo, **no es seguridad**. Además, el mensaje en claro está en
+- El cupón se muestra **al completar los tres juegos sin "Me rindo"**. En el JSON va en `premio`, en
+  base64: eso evita leerlo de un vistazo, **no es seguridad**. Además, está en claro en
   `scripts/pasatiempos.py`, que es público en GitHub.
+- El cupón **no puede estar en el mensaje cifrado** (se leería al descifrarlo): `validar` lo controla.
 - Por eso el cupón es siempre **de bajo valor**, vale **uno por pedido** y **cambia en cada edición**.
 - Se valida **a mano** cuando llega el pedido por WhatsApp (la boleta suma un campo de cupón en S6).
 - El cupón **no puede ser palabra de ningún juego** de la edición: `validar` falla si aparece en

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Cinedoku as DatosCinedoku } from '../../data/pasatiempos/types'
-import { calcularSello, SELLOS, type ProgresoCinedoku } from '../../lib/progresoPasatiempos'
-import Ayudas, { type Confirmacion } from './Ayudas'
+import { calcularSello, type ProgresoCinedoku } from '../../lib/progresoPasatiempos'
+import Ayudas, { SelloResuelto, type Confirmacion } from './Ayudas'
 
 type Props = {
   datos: DatosCinedoku
@@ -235,11 +235,7 @@ export default function Cinedoku({ datos, progreso, onCambio }: Props) {
           <p className="mt-1 font-display text-[15px] leading-snug">
             La fila {datos.filaOculta + 1} dice <strong>{datos.solucion[datos.filaOculta]}</strong>: el nombre que la redacción prefería no imprimir.
           </p>
-          <p className="mt-2 font-display text-sm italic">
-            {progreso.sello === 'rendido'
-              ? 'Se rindió: el sello queda en blanco.'
-              : progreso.sello && <>Sello en su carnet: <strong className="not-italic">{SELLOS[progreso.sello].estrellas} {SELLOS[progreso.sello].nombre}</strong>.</>}
-          </p>
+          <SelloResuelto progreso={progreso} />
         </div>
       ) : (
         <>
@@ -248,6 +244,7 @@ export default function Cinedoku({ datos, progreso, onCambio }: Props) {
             confirmar={confirmar}
             puedeVerificar={Object.keys(celdas).length > 0}
             selloEnJuego={calcularSello(progreso)}
+            segundos={progreso.segundos}
             aviso={aviso}
             onPista={pedirPista}
             onVerificar={verificar}

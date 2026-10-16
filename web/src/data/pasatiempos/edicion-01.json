@@ -1,11 +1,12 @@
 {
   "numero": 1,
   "titulo": "Pasatiempos — Edición N° 1",
+  "premio": "eyJjdXBvbiI6ICJUT1JSRSIsICJkZXRhbGxlIjogIkVsIGVudsOtbyBjb3JyZSBwb3IgbnVlc3RyYSBjdWVudGEuIn0=",
   "cifrado": {
     "titulo": "El Cifrado",
     "entradilla": "Esta carta llegó a la redacción sin firma. El remitente exige que se publique en primera plana.",
     "pistasGratis": 3,
-    "cifrado": "Ω○♄☋♁ ○⊗Λ♃☋♁: ○Ξ ▽ΛΦ♆ΛΩ♃Φ ΩΦ◁○ ■ΦΩ ⊗○ Ξ☋ ΘΣ○ ♃☋ΨΦ, ○Ξ ▽○♃♁☋Ξ○♁☋ ΨΦ⊕Φ ■ΦΩ ⊗○ Ξ☋ ΘΣ○ ⊗ΛΨ○ ☊ ΞΦ ΞΞΣ⊕ΛΦ ⊗○Ξ ⊕ΦΞΞ○ ♆☋ ○Ω Ξ☋ ΘΣ○ ▽Φ♁○Ψ○. ΘΣΛ○♆ Ξ○Φ ○Ω♃☋ ■Λ♁☋ ⊗○ Ψ○♁ΨΦ. ○ΩΨ♁Λ◁Φ ΞΦ ▽ΦΞΦ◁♁Φ ♃☋♁♁○ ○♆ ΩΣ ◁☋Ξ○♃Φ ⊗○ ▽○⊗Λ⊗☋ ☊ ○Ξ ○♆⊕Λ☋ Ψ☋♁♁○ ▽☋♁ ♆Σ○Ω♃♁Φ ΨΣ○♆♃Φ.",
+    "cifrado": "Ω○♄☋♁ ○⊗Λ♃☋♁: ○Ξ ▽ΛΦ♆ΛΩ♃Φ ΩΦ◁○ ■ΦΩ ⊗○ Ξ☋ ΘΣ○ ♃☋ΨΦ, ○Ξ ▽○♃♁☋Ξ○♁☋ ΨΦ⊕Φ ■ΦΩ ⊗○ Ξ☋ ΘΣ○ ⊗ΛΨ○ ☊ ΞΦ ΞΞΣ⊕ΛΦ ⊗○Ξ ⊕ΦΞΞ○ ♆☋ ○Ω Ξ☋ ΘΣ○ ▽Φ♁○Ψ○. ΘΣΛ○♆ Ξ○Φ ○Ω♃☋ ■Λ♁☋ ⊗○ Ψ○♁ΨΦ. Ψ☋■▽Ξ○♃○ Ξ☋Ω ♃♁○Ω ▽ΦΩΦ♃Λ○■▽☋Ω ☊ ○Ξ ⊗ΛΦ♁Λ☋ Ξ○ ⊗Λ♁Φ ΘΣ○ ▽ΦΞΦ◁♁Φ ○ΩΨ♁Λ◁Λ♁ ○♆ ΩΣ ◁☋Ξ○♃Φ.",
     "clave": "eyLOpiI6ICJBIiwgIuKXgSI6ICJCIiwgIs6oIjogIkMiLCAi4oqXIjogIkQiLCAi4peLIjogIkUiLCAizpsiOiAiSSIsICLOniI6ICJMIiwgIuKWoCI6ICJNIiwgIuKZhiI6ICJOIiwgIuKYiyI6ICJPIiwgIuKWvSI6ICJQIiwgIs6YIjogIlEiLCAi4pmBIjogIlIiLCAizqkiOiAiUyIsICLimYMiOiAiVCIsICLOoyI6ICJVIiwgIuKKlSI6ICJWIiwgIuKYiiI6ICJZIiwgIuKZhCI6ICLDkSJ9",
     "simbolosUsados": 19
   },

@@ -10,8 +10,10 @@ Garantías:
   * Crucigrama: todas las palabras se cruzan, ninguna se toca de costado,
     no aparecen "palabras fantasma" y ninguna pista nombra una respuesta de la grilla.
   * Cifrado: sustitución biyectiva, ninguna letra se cifra en sí misma.
-    El JSON NO lleva el mensaje en claro ni el cupón: solo el texto cifrado y la clave
-    ofuscada en base64 (símbolo → letra). Ojo: el mensaje sí está en este script, que es público.
+    El JSON NO lleva el mensaje en claro: solo el texto cifrado y la clave ofuscada en base64
+    (símbolo → letra). Ojo: el mensaje sí está en este script, que es público.
+  * Premio: el cupón NO va en el mensaje cifrado (se leería al descifrarlo). Va aparte, en "premio"
+    (base64), y el sitio lo muestra recién al completar los tres pasatiempos sin rendirse.
 """
 from __future__ import annotations
 import base64, json, random, re, sys, unicodedata
@@ -76,8 +78,8 @@ def validar_cifrado(c: dict, fuente: dict | None = None) -> list[str]:
         descifrado = "".join(clave.get(ch, ch) for ch in c["cifrado"])
         if descifrado != normalizar(fuente["mensaje"]):
             err.append("cifrado: descifrado no coincide con el mensaje de la edición")
-        if normalizar(fuente["cupon"]) not in descifrado:
-            err.append("cifrado: el cupón no está en el mensaje")
+        if fuente.get("cupon") and normalizar(fuente["cupon"]) in descifrado:
+            err.append("cifrado: el cupón aparece en el mensaje (se leería al descifrarlo)")
     return err
 
 # ================================================================== CINEDOKU
@@ -314,11 +316,12 @@ EDICION_01 = {
         "entradilla": "Esta carta llegó a la redacción sin firma. El remitente exige que se publique en primera plana.",
         "mensaje": ("Señor editor: el pianista sabe más de lo que toca, el petrolero cava más de lo que dice "
                     "y la lluvia del valle no es lo que parece. Quien lea esto miró de cerca. "
-                    "Escriba la palabra TORRE en su boleta de pedido y el envío corre por nuestra cuenta."),
-        # El cupón no puede ser palabra de ningún juego (el validador lo controla): BATIDO es del crucigrama
-        "cupon": "TORRE",
+                    "Complete los tres pasatiempos y el diario le dirá qué palabra escribir en su boleta."),
         "pistasGratis": 3,
     },
+    # Se muestra al completar los tres juegos sin rendirse. El cupón no puede ser palabra de ningún juego
+    # ni estar en el mensaje cifrado (el validador lo controla): por eso no es BATIDO, que es del crucigrama.
+    "premio": {"cupon": "TORRE", "detalle": "El envío corre por nuestra cuenta."},
     "cinedoku": {"titulo": "Cinedoku", "palabra": "ZODIAC", "filaOculta": 3, "pistasGratis": 3,
                  "entradilla": "Complete la grilla con Z, O, D, I, A, C. Una fila guarda un nombre que la redacción prefiere no imprimir."},
     "crucigrama": {
@@ -349,7 +352,7 @@ def generar(numero: int, semilla: int | None = None) -> tuple[dict, list[str]]:
     e = EDICIONES[numero]; rng = random.Random(semilla if semilla is not None else numero * 82)
     ci = e["cifrado"]; cz = e["cinedoku"]; cr = e["crucigrama"]
     data = {
-        "numero": e["numero"], "titulo": e["titulo"],
+        "numero": e["numero"], "titulo": e["titulo"], "premio": ofuscar(e["premio"]),
         "cifrado": {"titulo": ci["titulo"], "entradilla": ci["entradilla"],
                     "pistasGratis": ci["pistasGratis"], **cifrar(ci["mensaje"], rng)},
         "cinedoku": {"titulo": cz["titulo"], "entradilla": cz["entradilla"], "pistasGratis": cz["pistasGratis"],
@@ -361,10 +364,17 @@ def generar(numero: int, semilla: int | None = None) -> tuple[dict, list[str]]:
 
 def validar(data, numero: int | None = None) -> list[str]:
     fuente = EDICIONES.get(numero) if numero is not None else None
-    err = validar_cifrado(data["cifrado"], fuente["cifrado"] if fuente else None) \
+    cifrado_fuente = {**fuente["cifrado"], "cupon": fuente["premio"]["cupon"]} if fuente else None
+    err = validar_cifrado(data["cifrado"], cifrado_fuente) \
         + validar_cinedoku(data["cinedoku"]) + validar_crucigrama(data["crucigrama"])
+    try:
+        premio = desofuscar(data["premio"])
+        if not premio.get("cupon"): err.append("premio: falta el cupón")
+        elif fuente and premio["cupon"] != fuente["premio"]["cupon"]: err.append("premio: el cupón no coincide con la edición")
+    except (ValueError, KeyError):
+        err.append("premio: no es base64 de un JSON válido")
     # El cupón no puede aparecer en claro en ningún lado del JSON (ni como palabra del crucigrama)
-    if fuente and normalizar(fuente["cifrado"]["cupon"]) in json.dumps(data, ensure_ascii=False).upper():
+    if fuente and normalizar(fuente["premio"]["cupon"]) in json.dumps(data, ensure_ascii=False).upper():
         err.append("cupón: aparece en claro en el JSON (¿es también palabra del crucigrama?)")
     return err
 

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { Crucigrama as DatosCrucigrama } from '../../data/pasatiempos/types'
 import { armarCrucigrama, normalizarLetra, type Direccion } from '../../lib/crucigrama'
-import { calcularSello, SELLOS, type ProgresoCrucigrama } from '../../lib/progresoPasatiempos'
-import Ayudas, { type Confirmacion } from './Ayudas'
+import { calcularSello, type ProgresoCrucigrama } from '../../lib/progresoPasatiempos'
+import Ayudas, { SelloResuelto, type Confirmacion } from './Ayudas'
 
 type Props = {
   datos: DatosCrucigrama
@@ -266,6 +266,7 @@ export default function Crucigrama({ datos, progreso, onCambio }: Props) {
           confirmar={confirmar}
           puedeVerificar={Object.keys(letras).length > 0}
           selloEnJuego={calcularSello(progreso)}
+          segundos={progreso.segundos}
           aviso={aviso}
           onPista={pedirPista}
           onVerificar={verificar}
@@ -276,11 +277,7 @@ export default function Crucigrama({ datos, progreso, onCambio }: Props) {
       {resuelto && (
         <div role="status" className="mt-4 border-4 border-double border-print p-3">
           <p className="font-display text-[11px] font-bold uppercase tracking-[0.15em] text-print-muted">Crucigrama resuelto</p>
-          <p className="mt-1 font-display text-sm italic">
-            {progreso.sello === 'rendido'
-              ? 'Se rindió: el sello queda en blanco.'
-              : progreso.sello && <>Sello en su carnet: <strong className="not-italic">{SELLOS[progreso.sello].estrellas} {SELLOS[progreso.sello].nombre}</strong>.</>}
-          </p>
+          <SelloResuelto progreso={progreso} />
         </div>
       )}
 

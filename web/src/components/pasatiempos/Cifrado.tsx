@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Cifrado as DatosCifrado } from '../../data/pasatiempos/types'
 import { decodificarClave, simbolosEnOrden } from '../../lib/descifrar'
-import { calcularSello, SELLOS, type ProgresoCifrado } from '../../lib/progresoPasatiempos'
-import Ayudas, { type Confirmacion } from './Ayudas'
+import { calcularSello, type ProgresoCifrado } from '../../lib/progresoPasatiempos'
+import Ayudas, { SelloResuelto, type Confirmacion } from './Ayudas'
 import Glifo from './glyphs/Glifo'
 
 const LETRAS = [...'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ']
@@ -194,18 +194,8 @@ export default function Cifrado({ datos, progreso, onCambio }: Props) {
         <div role="status" className="mt-4 border-4 border-double border-print p-3">
           <p className="font-display text-[11px] font-bold uppercase tracking-[0.15em] text-print-muted">Carta descifrada</p>
           <p className="mt-1 font-display text-[15px] leading-snug">{textoEnClaro}</p>
-          {progreso.sello === 'rendido' ? (
-            <p className="mt-2 font-display text-sm italic">
-              Se rindió: el sello queda en blanco. El cupón vale igual, uno por pedido y solo en esta edición.
-            </p>
-          ) : (
-            progreso.sello && (
-              <p className="mt-2 font-display text-sm italic">
-                Sello en su carnet: <strong className="not-italic">{SELLOS[progreso.sello].estrellas} {SELLOS[progreso.sello].nombre}</strong>. El cupón vale
-                uno por pedido y solo en esta edición.
-              </p>
-            )
-          )}
+          <SelloResuelto progreso={progreso} />
+          {/* El cupón no está en la carta: aparece en el Carnet al completar los tres pasatiempos sin rendirse */}
         </div>
       ) : (
         <>
@@ -214,6 +204,7 @@ export default function Cifrado({ datos, progreso, onCambio }: Props) {
             confirmar={confirmar}
             puedeVerificar={letrasUsadas.size > 0}
             selloEnJuego={calcularSello(progreso)}
+            segundos={progreso.segundos}
             aviso={aviso}
             onPista={pedirPista}
             onVerificar={verificar}

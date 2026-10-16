@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 
 /**
  * Progreso de los pasatiempos en localStorage, una clave por edición: `pv82-pasatiempos-01`.
@@ -86,4 +86,48 @@ export function useProgreso(numero: number) {
   }, [numero, progreso])
 
   return [progreso, setProgreso] as const
+}
+
+const JUEGOS = ['cifrado', 'cinedoku', 'crucigrama'] as const
+type JuegoId = (typeof JUEGOS)[number]
+
+/** 252 → "4:12"; 3725 → "1:02:05". Sin tiempo (o rendido) → "—" */
+export function formatearTiempo(segundos?: number): string {
+  if (!segundos) return '—'
+  const h = Math.floor(segundos / 3600)
+  const m = Math.floor((segundos % 3600) / 60)
+  const s = String(segundos % 60).padStart(2, '0')
+  return h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`
+}
+
+/** El reloj de un juego arranca con la primera jugada: alguna letra, nota o celda puesta */
+function empezado(p: Progreso, j: JuegoId): boolean {
+  const lleno = (x?: object) => !!x && Object.keys(x).length > 0
+  if (j === 'cifrado') return lleno(p.juegos.cifrado?.asignaciones)
+  if (j === 'cinedoku') return lleno(p.juegos.cinedoku?.celdas) || lleno(p.juegos.cinedoku?.notas)
+  return lleno(p.juegos.crucigrama?.letras)
+}
+
+/**
+ * Cronómetro de los tres juegos: suma un segundo por juego empezado y sin resolver,
+ * solo mientras la pestaña está visible (si dejás el juego abierto toda la noche, no cuenta).
+ * Usa la forma funcional de setProgreso para no pisar lo que el juego guardó en el mismo segundo.
+ */
+export function useCronometros(progreso: Progreso, setProgreso: Dispatch<SetStateAction<Progreso>>) {
+  const corriendo = JUEGOS.filter((j) => empezado(progreso, j) && !progreso.juegos[j]?.resuelto).join(',')
+
+  useEffect(() => {
+    if (!corriendo) return
+    const id = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      setProgreso((p) => {
+        const juegos: Record<string, ProgresoJuego & { resuelto?: boolean }> = { ...p.juegos }
+        for (const j of corriendo.split(',')) {
+          if (juegos[j] && !juegos[j].resuelto) juegos[j] = { ...juegos[j], segundos: (juegos[j].segundos ?? 0) + 1 }
+        }
+        return { ...p, juegos: juegos as Progreso['juegos'] }
+      })
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [corriendo, setProgreso])
 }

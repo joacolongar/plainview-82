@@ -1,11 +1,13 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ultimaEdicion } from '../data/pasatiempos'
 import Cifrado from '../components/pasatiempos/Cifrado'
 import Cinedoku from '../components/pasatiempos/Cinedoku'
 import Crucigrama from '../components/pasatiempos/Crucigrama'
 import type { Edicion, Juego } from '../data/pasatiempos/types'
-import { SELLOS, useProgreso, type Progreso, type Sello } from '../lib/progresoPasatiempos'
+import { decodificarClave } from '../lib/descifrar'
+import { formatearTiempo, SELLOS, useCronometros, useProgreso, type Progreso, type ProgresoJuego, type Sello } from '../lib/progresoPasatiempos'
+import { edicionCompleta, sinRendirse, textoResultado } from '../lib/resultado'
 
 const paperLink = 'inline-flex min-h-11 items-center font-display text-sm font-bold uppercase tracking-wider underline underline-offset-4 hover:decoration-red'
 
@@ -48,6 +50,13 @@ export default function Pasatiempos() {
  */
 function EdicionPasatiempos({ edicion }: { edicion: Edicion }) {
   const [progreso, setProgreso] = useProgreso(edicion.numero)
+  useCronometros(progreso, setProgreso)
+
+  // Cada juego guarda su copia del progreso, que puede ir un segundo atrás del cronómetro: nunca se resta tiempo
+  const conTiempo = <T extends ProgresoJuego>(nuevo: T, anterior?: ProgresoJuego): T => ({
+    ...nuevo,
+    segundos: Math.max(nuevo.segundos ?? 0, anterior?.segundos ?? 0),
+  })
 
   return (
     <>
@@ -62,7 +71,7 @@ function EdicionPasatiempos({ edicion }: { edicion: Edicion }) {
         <Cifrado
           datos={edicion.cifrado}
           progreso={progreso.juegos.cifrado ?? {}}
-          onCambio={(cifrado) => setProgreso((p) => ({ ...p, juegos: { ...p.juegos, cifrado } }))}
+          onCambio={(cifrado) => setProgreso((p) => ({ ...p, juegos: { ...p.juegos, cifrado: conTiempo(cifrado, p.juegos.cifrado) } }))}
         />
       </Seccion>
       <Seccion
@@ -76,7 +85,7 @@ function EdicionPasatiempos({ edicion }: { edicion: Edicion }) {
         <Cinedoku
           datos={edicion.cinedoku}
           progreso={progreso.juegos.cinedoku ?? {}}
-          onCambio={(cinedoku) => setProgreso((p) => ({ ...p, juegos: { ...p.juegos, cinedoku } }))}
+          onCambio={(cinedoku) => setProgreso((p) => ({ ...p, juegos: { ...p.juegos, cinedoku: conTiempo(cinedoku, p.juegos.cinedoku) } }))}
         />
       </Seccion>
       <Seccion
@@ -90,7 +99,7 @@ function EdicionPasatiempos({ edicion }: { edicion: Edicion }) {
         <Crucigrama
           datos={edicion.crucigrama}
           progreso={progreso.juegos.crucigrama ?? {}}
-          onCambio={(crucigrama) => setProgreso((p) => ({ ...p, juegos: { ...p.juegos, crucigrama } }))}
+          onCambio={(crucigrama) => setProgreso((p) => ({ ...p, juegos: { ...p.juegos, crucigrama: conTiempo(crucigrama, p.juegos.crucigrama) } }))}
         />
       </Seccion>
 
@@ -99,7 +108,7 @@ function EdicionPasatiempos({ edicion }: { edicion: Edicion }) {
       </p>
       <Link to="/juego" className={paperLink}>Jugar La Función del Día (versión de prueba) →</Link>
 
-      <Carnet numero={edicion.numero} progreso={progreso} />
+      <Carnet edicion={edicion} progreso={progreso} />
     </>
   )
 }
@@ -152,7 +161,8 @@ const JUEGOS: { id: Juego; nombre: string }[] = [
 ]
 
 /** Carnet de lector: un casillero por juego con el sello ganado en esta edición */
-function Carnet({ numero, progreso }: { numero: number; progreso: Progreso }) {
+function Carnet({ edicion, progreso }: { edicion: Edicion; progreso: Progreso }) {
+  const numero = edicion.numero
   return (
     <section aria-labelledby="carnet-titulo" className="mt-6 border-2 border-dashed border-print p-3">
       <h2 id="carnet-titulo" className="font-display text-sm font-bold uppercase tracking-[0.2em]">Carnet de lector</h2>
@@ -164,11 +174,68 @@ function Carnet({ numero, progreso }: { numero: number; progreso: Progreso }) {
             <li key={id} className="flex flex-col items-center gap-1 text-center">
               <span className="font-display text-[11px] font-bold uppercase tracking-wider">{nombre}</span>
               {sello ? <SelloImpreso sello={sello} /> : <SinSello />}
+              {sello && sello !== 'rendido' && progreso.juegos[id]?.segundos ? (
+                <span className="font-display text-xs" aria-label={`tiempo ${formatearTiempo(progreso.juegos[id]?.segundos)}`}>
+                  <span aria-hidden>⏱</span> {formatearTiempo(progreso.juegos[id]?.segundos)}
+                </span>
+              ) : null}
             </li>
           )
         })}
       </ul>
+      {edicionCompleta(progreso) && <ResultadoEdicion edicion={edicion} progreso={progreso} />}
     </section>
+  )
+}
+
+/**
+ * Al completar los tres: el cupón (solo si ninguno fue "Me rindo") y el resultado para compartir.
+ * En el celular, Compartir abre el menú nativo (WhatsApp, Instagram…); si no hay, copia el texto.
+ */
+function ResultadoEdicion({ edicion, progreso }: { edicion: Edicion; progreso: Progreso }) {
+  const [estado, setEstado] = useState('')
+  const texto = textoResultado(edicion, progreso, window.location.host)
+  const premio = sinRendirse(progreso) ? decodificarClave(edicion.premio) : null
+
+  async function compartir() {
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: texto })
+        return
+      } catch (e) {
+        if ((e as Error).name === 'AbortError') return // el lector cerró el menú: no hay que hacer nada
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(texto)
+      setEstado('Copiado. Pegalo donde quieras.')
+    } catch {
+      setEstado('No se pudo copiar: mantené apretado el texto para copiarlo a mano.')
+    }
+  }
+
+  return (
+    <div className="mt-4 border-t-2 border-dashed border-print pt-3">
+      <p className="font-display text-sm font-bold uppercase tracking-[0.2em]">Edición completa</p>
+      {premio ? (
+        <div className="mt-2 border-4 border-double border-red p-3 text-center">
+          <p className="font-display text-xs uppercase tracking-[0.15em]">Palabra para su boleta</p>
+          <p className="font-headline text-4xl uppercase tracking-wider">{premio.cupon}</p>
+          <p className="mt-1 font-display text-sm italic">
+            {premio.detalle} Escríbala en su boleta de pedido: vale uno por pedido y solo en esta edición.
+          </p>
+        </div>
+      ) : (
+        <p className="mt-2 font-display text-sm italic">
+          El premio era para quien completara los tres sin rendirse. Habrá revancha en la próxima edición.
+        </p>
+      )}
+      <pre className="mt-3 overflow-x-auto bg-print/5 p-2 font-mono text-xs leading-relaxed whitespace-pre">{texto}</pre>
+      <button type="button" onClick={compartir} className="mt-2 min-h-12 w-full border-2 border-print font-display text-sm font-bold uppercase tracking-wider">
+        Compartir resultado
+      </button>
+      <p role="status" aria-live="polite" className="min-h-5 font-display text-sm italic">{estado}</p>
+    </div>
   )
 }
 
@@ -179,7 +246,7 @@ function SelloImpreso({ sello }: { sello: Sello }) {
   return (
     <span title={detalle} className={`flex size-20 -rotate-6 flex-col items-center justify-center rounded-full ${estilo}`}>
       <span className="text-xs leading-none" aria-hidden>{estrellas}</span>
-      <span className="mt-1 px-1 font-display text-[10px] font-bold uppercase leading-tight">{nombre}</span>
+      <span className="mt-1 max-w-full px-1.5 font-display text-[9px] font-bold uppercase leading-tight tracking-tight">{nombre}</span>
     </span>
   )
 }
