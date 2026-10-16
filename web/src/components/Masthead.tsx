@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { edicionActual } from '../data/editions'
 import RotatingLogo from './RotatingLogo'
 import SiteNav from './SiteNav'
 
@@ -16,6 +17,7 @@ const fechaCorta = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'lo
 export default function Masthead() {
   // La fecha se calcula una sola vez al montar (inicializador de useState): el render queda puro
   const [hoy] = useState(() => new Date())
+  const edicion = edicionActual()
   return (
     <header>
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-x-3 md:grid-cols-[1fr_auto_1fr] md:gap-x-6">
@@ -23,6 +25,10 @@ export default function Masthead() {
           Watch
           <br />
           closer
+        </p>
+        {/* En mobile el N° de edición va en el hueco entre los recuadros (así la cabecera no crece); desde md, en la barra */}
+        <p className="col-start-2 row-start-1 text-center font-display text-[11px] font-bold uppercase tracking-wider md:hidden">
+          Edición N° {edicion.numero}
         </p>
         {/* Recuadro oscuro: la cara PLAINVIEW del logo es crema y sobre la hoja no se vería */}
         <div className="col-start-3 row-start-1 justify-self-end bg-ink px-2 md:px-3 md:py-1">
@@ -34,7 +40,10 @@ export default function Masthead() {
         </h1>
       </div>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 border-y-4 border-double border-print py-1 font-display text-[11px] uppercase tracking-wider md:text-xs">
-        <span>Vol. 8 · Córdoba · No. 2</span>
+        {/* "Vol. 8 · No. 2" es fijo, como marca; lo que avanza con cada drop es la edición (src/data/editions.ts) */}
+        <span>
+          Vol. 8 · Córdoba · No. 2<span className="hidden md:inline"> · Edición N° {edicion.numero}</span>
+        </span>
         <time dateTime={hoy.toISOString().slice(0, 10)}>
           <span className="md:hidden">{fechaCorta.format(hoy)}</span>
           <span className="hidden md:inline">{fechaLarga.format(hoy)}</span>

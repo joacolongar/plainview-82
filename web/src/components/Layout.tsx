@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { BRAND, IS_PREVIEW } from '../config'
+import { edicionActual } from '../data/editions'
 import RotatingLogo from './RotatingLogo'
 import SiteNav, { CartLink } from './SiteNav'
 
@@ -14,7 +15,7 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col">
       {IS_PREVIEW && (
         <p className="border-b border-line px-4 py-1.5 text-center font-mono text-[11px] uppercase tracking-wider md:tracking-[0.2em] text-muted">
-          Edición N° 0 · <span className="text-red">Número de prueba</span> · Precios y fotos todavía no son reales
+          Edición N° {edicionActual().numero} · <span className="text-red">Número de prueba</span> · Precios y fotos todavía no son reales
         </p>
       )}
       {!isHome && (

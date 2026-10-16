@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { CURRENCY } from '../config'
-import type { Product } from '../data/products'
+import { numeroArticulo, type Product } from '../data/products'
 
 export default function ProductCard({ p }: { p: Product }) {
   // El hover es solo decoración: en el celular la card entera es el link, se toca y listo
@@ -14,6 +14,7 @@ export default function ProductCard({ p }: { p: Product }) {
         )}
       </div>
       <div className="p-3">
+        <p className="font-mono text-[11px] text-muted">Art. N° {numeroArticulo(p)}</p>
         <p className="truncate text-xs uppercase tracking-widest text-muted">{p.movie} · {p.year}</p>
         <h3 className="font-display text-lg leading-tight group-hover:text-red">{p.name}</h3>
         <p className="font-mono text-sm">{p.status === 'disponible' ? CURRENCY.format(p.price) : p.status}</p>
