@@ -1,8 +1,8 @@
 /**
  * Noticias de la portada: el diario "THE PLAINVIEW", que existe dentro del mundo de las películas.
- * Cada noticia cuenta la PREMISA de una película como si pasara hoy (ver reglas en CLAUDE.md):
- * - sin citas textuales de la película (ni diálogos ni frases famosas)
- * - spoilers mínimos: nada del final ni de los giros
+ * Cada noticia cuenta la PREMISA de una película como si pasara hoy (ver la regla de contenido en CLAUDE.md):
+ * - alusiones a escenas y frases célebres sí, diálogo textual nunca
+ * - spoilers solo como guiño velado, nunca escritos como dato
  * - si hay remera, `productSlug` lleva a la ficha (solo se muestra el link si el producto existe)
  */
 export type Seccion = 'portada' | 'internacional' | 'espectaculos' | 'deportes' | 'clima'

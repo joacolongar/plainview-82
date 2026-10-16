@@ -55,7 +55,10 @@ simple**: cada letra tiene un símbolo fijo.
   palabras repetidas ("DE", "LO QUE", "MAS DE LO QUE") y la estructura de carta ("SEÑOR EDITOR").
 - **Pista del editor:** revela una letra a elección.
 - **Premio:** al resolverlo, el mensaje dice qué palabra escribir en la boleta (Edición 1:
-  **BATIDO** = envío gratis).
+  **TORRE** = envío gratis). Ver "Cupones" más abajo.
+- **En el JSON** no va el mensaje en claro ni el cupón: solo `cifrado` (el texto ya cifrado, con
+  espacios y puntuación) y `clave` (JSON símbolo → letra, en base64). El front decodifica la clave
+  para verificar lo que pone el lector.
 - **Símbolos:** dibujarlos como **SVG propios** en `web/src/components/pasatiempos/glyphs/`.
   Los caracteres Unicode del JSON son solo identificadores, porque varios no tienen fuente en
   todos los celulares.
@@ -75,21 +78,28 @@ Sudoku de 6×6 (cajas de 2×3) que se completa con las letras **Z O D I A C**.
 
 ## III. Crucigrama del Valle
 
-Crucigrama cruzado (no denso) de 11×13, con 12 palabras. Es el tamaño máximo cómodo a 375 px:
-celdas de unos 30 px.
+Crucigrama cruzado (no denso) de **8 columnas** como máximo (15 filas en la Edición 1). Con 8
+columnas, a 375 px cada celda mide unos **42 px**, casi el mínimo de 44 px de la regla mobile-first.
+Las palabras de más de 8 letras, incluida el ancla PLAINVIEW, **solo van en vertical**
+(el script lo garantiza al armar y al validar).
 
 - **Pistas:** escritas desde dentro del mundo del diario, con doble lectura. El largo de la
   palabra va entre paréntesis.
 - **Cómo se juega:** tocar una celda resalta la palabra y muestra su pista en una **barra fija
-  arriba del teclado** (como el mini del NYT). Tocar de nuevo cambia entre horizontal y
+  arriba del teclado** (como el mini del NYT), con botones **"‹ anterior"** y **"siguiente ›"** para
+  pasar de pista sin apuntarle a celdas chicas. Tocar de nuevo cambia entre horizontal y
   vertical. Se escribe con el teclado nativo, usando un `<input>` oculto.
 - **Ancla:** PLAINVIEW siempre entra (`"ancla": true`). Las palabras que no encajan quedan en
   `descartadas` y se pueden usar en la próxima edición.
 
 ### Edición 1 — palabras
 
-Horizontales: MIRAR, RICK, PREDICADOR, RANAS, PLAINVIEW, BOMBAY.
-Verticales: MAGNOLIA, TIGRE, PIANISTA, CASABLANCA, ROCKY, SIETE.
+Grilla de 8×15 con 11 palabras.
+Horizontales: RICK, BATIDO, ROCKY, PIANISTA, TIGRE.
+Verticales: SIETE, BOMBAY, CONCURSO, PLAINVIEW, MAGNOLIA, MIRAR.
+No entraron (quedan para otra edición): CASABLANCA, PREDICADOR, FINCHER.
+RANAS se sacó: era el final de Magnolia escrito como respuesta (ver la regla de spoilers en CLAUDE.md).
+Ninguna pista puede nombrar una respuesta de la grilla (ni la suya ni otra): `validar` lo controla.
 
 ---
 
@@ -126,9 +136,17 @@ de tipeo.
   ```
 - Para una edición nueva, se agrega `EDICION_02` en el script (mensaje, palabra del Cinedoku y
   entradas del crucigrama con pistas) y se genera.
-- **Ojo:** las soluciones están en el JSON, así que cualquiera que mire el código las puede ver.
-  Para una marca chica alcanza, y el cupón se controla a mano por WhatsApp. Si el repo es
-  público, conviene no anunciar los cupones con premios grandes.
+- **Ojo:** las soluciones del Cinedoku y del Crucigrama están en el JSON, así que cualquiera que
+  mire el código las puede ver. Para una marca chica alcanza.
+
+### Cupones
+- El cupón sale **solo** del mensaje del Cifrado. En el JSON está cifrado y con la clave en base64:
+  eso evita leerlo de un vistazo, **no es seguridad**. Además, el mensaje en claro está en
+  `scripts/pasatiempos.py`, que es público en GitHub.
+- Por eso el cupón es siempre **de bajo valor**, vale **uno por pedido** y **cambia en cada edición**.
+- Se valida **a mano** cuando llega el pedido por WhatsApp (la boleta suma un campo de cupón en S6).
+- El cupón **no puede ser palabra de ningún juego** de la edición: `validar` falla si aparece en
+  claro en cualquier parte del JSON.
 - El progreso (letras puestas, sellos, tiempos) se guarda en `localStorage` con try/catch,
   con clave `pv82-pasatiempos-NN`.
 

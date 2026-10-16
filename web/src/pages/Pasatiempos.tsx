@@ -39,7 +39,7 @@ export default function Pasatiempos() {
             numero="I"
             titulo={edicion.cifrado.titulo}
             entradilla={edicion.cifrado.entradilla}
-            dato={`${edicion.cifrado.letrasUsadas} símbolos`}
+            dato={`${edicion.cifrado.simbolosUsados} símbolos`}
             extra={<PistasDelEditor cantidad={edicion.cifrado.pistasGratis} />}
           />
           <Seccion

@@ -7,12 +7,14 @@ Uso:
 
 Garantías:
   * Cinedoku: solución única y resoluble solo con lógica (singles), sin adivinar.
-  * Crucigrama: todas las palabras se cruzan, ninguna se toca de costado
-    y no aparecen "palabras fantasma".
+  * Crucigrama: todas las palabras se cruzan, ninguna se toca de costado,
+    no aparecen "palabras fantasma" y ninguna pista nombra una respuesta de la grilla.
   * Cifrado: sustitución biyectiva, ninguna letra se cifra en sí misma.
+    El JSON NO lleva el mensaje en claro ni el cupón: solo el texto cifrado y la clave
+    ofuscada en base64 (símbolo → letra). Ojo: el mensaje sí está en este script, que es público.
 """
 from __future__ import annotations
-import json, random, sys, unicodedata
+import base64, json, random, re, sys, unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,20 +43,41 @@ def cifrar(mensaje: str, rng: random.Random) -> dict:
         if all(clave[k] != v for k, v in parecidos.items()):
             break
     usadas = sorted({c for c in texto if c in ALFABETO})
+    # Se conservan espacios y puntuación (es lo que lo hace jugable); cada letra pasa a su símbolo
+    cifrado = "".join(clave.get(ch, ch) for ch in texto)
     return {
-        "texto": texto,
-        "clave": {k: clave[k] for k in usadas},
-        "letrasUsadas": len(usadas),
+        "cifrado": cifrado,
+        "clave": ofuscar({clave[k]: k for k in usadas}),
+        "simbolosUsados": len(usadas),
     }
 
-def validar_cifrado(c: dict) -> list[str]:
+def ofuscar(d: dict) -> str:
+    """Clave símbolo → letra como JSON en base64. No es seguridad: solo evita leerla de un vistazo."""
+    return base64.b64encode(json.dumps(d, ensure_ascii=False).encode("utf-8")).decode("ascii")
+
+def desofuscar(s: str) -> dict:
+    return json.loads(base64.b64decode(s).decode("utf-8"))
+
+def validar_cifrado(c: dict, fuente: dict | None = None) -> list[str]:
     err = []
-    vals = list(c["clave"].values())
-    if len(set(vals)) != len(vals):
-        err.append("cifrado: dos letras comparten símbolo")
-    faltan = {ch for ch in c["texto"] if ch in ALFABETO} - set(c["clave"])
-    if faltan:
-        err.append(f"cifrado: letras sin símbolo {faltan}")
+    try:
+        clave = desofuscar(c["clave"])
+    except (ValueError, KeyError):
+        return ["cifrado: la clave no es base64 de un JSON válido"]
+    letras = list(clave.values())
+    if len(set(letras)) != len(letras):
+        err.append("cifrado: dos símbolos dan la misma letra")
+    if any(ch in ALFABETO for ch in c["cifrado"]):
+        err.append("cifrado: el texto cifrado tiene letras en claro")
+    sin_clave = {ch for ch in c["cifrado"] if ch in SIMBOLOS} - set(clave)
+    if sin_clave:
+        err.append(f"cifrado: símbolos sin letra {sin_clave}")
+    if fuente:
+        descifrado = "".join(clave.get(ch, ch) for ch in c["cifrado"])
+        if descifrado != normalizar(fuente["mensaje"]):
+            err.append("cifrado: descifrado no coincide con el mensaje de la edición")
+        if normalizar(fuente["cupon"]) not in descifrado:
+            err.append("cifrado: el cupón no está en el mensaje")
     return err
 
 # ================================================================== CINEDOKU
@@ -158,6 +181,12 @@ def validar_cinedoku(d: dict) -> list[str]:
     return err
 
 # ================================================================ CRUCIGRAMA
+# Mobile-first: con 8 columnas, a 375 px cada celda mide unos 42 px. Las palabras de más de 8 letras
+# (incluida el ancla PLAINVIEW) solo pueden ir en vertical. Con 15 filas entran 11 de las 14 palabras
+# de la Edición 1 (con 13 entraban 9); la grilla mide unos 630 px de alto a 375 px.
+ANCHO_MAX = 8
+ALTO_MAX = 15
+
 def ubicar(grid, palabra, r, c, d):
     """d = (dr, dc). Devuelve cruces o -1 si no entra."""
     dr, dc = d; L = len(palabra); cruces = 0
@@ -175,7 +204,7 @@ def ubicar(grid, palabra, r, c, d):
                 if (rr + dc * s, cc + dr * s) in grid: return -1
     return cruces
 
-def armar_crucigrama(entradas, rng, ancho_max=11, alto_max=13, intentos=4000):
+def armar_crucigrama(entradas, rng, ancho_max=ANCHO_MAX, alto_max=ALTO_MAX, intentos=4000):
     mejor = None
     for _ in range(intentos):
         orden = entradas[:]; rng.shuffle(orden)
@@ -184,14 +213,16 @@ def armar_crucigrama(entradas, rng, ancho_max=11, alto_max=13, intentos=4000):
         orden.sort(key=lambda e: not e.get("ancla", False))
         grid = {}; puestas = []
         p0 = orden[0]
-        for i, ch in enumerate(p0["palabra"]): grid[(0, i)] = ch
-        puestas.append((p0, 0, 0, (0, 1)))
+        d0 = (0, 1) if len(p0["palabra"]) <= ancho_max else (1, 0)   # larga → vertical
+        for i, ch in enumerate(p0["palabra"]): grid[(d0[0] * i, d0[1] * i)] = ch
+        puestas.append((p0, 0, 0, d0))
         for e in orden[1:]:
             w = e["palabra"]; opciones = []
             for (gr, gc), gch in list(grid.items()):
                 for i, ch in enumerate(w):
                     if ch != gch: continue
                     for d in ((0, 1), (1, 0)):
+                        if d == (0, 1) and len(w) > ancho_max: continue   # larga → solo vertical
                         r, c = gr - d[0] * i, gc - d[1] * i
                         x = ubicar(grid, w, r, c, d)
                         if x > 0:
@@ -236,17 +267,25 @@ def armar_crucigrama(entradas, rng, ancho_max=11, alto_max=13, intentos=4000):
         "grilla": ["".join(f) for f in filas],
         "horizontales": sorted(horizontales, key=lambda x: x["n"]),
         "verticales": sorted(verticales, key=lambda x: x["n"]),
-        "descartadas": [e["palabra"] for e in entradas if e["palabra"] not in usadas],
-    }
+    }, [e["palabra"] for e in entradas if e["palabra"] not in usadas]
 
 def validar_crucigrama(x: dict) -> list[str]:
     err = []; g = x["grilla"]; H, W = x["alto"], x["ancho"]
+    if W > ANCHO_MAX: err.append(f"crucigrama: {W} columnas (máximo {ANCHO_MAX} para mobile)")
+    for i in x["horizontales"]:
+        if i["largo"] > ANCHO_MAX: err.append(f"crucigrama: {i['respuesta']} es horizontal y tiene más de {ANCHO_MAX} letras")
     declaradas = {(i["fila"], i["col"], "h") for i in x["horizontales"]} | \
                  {(i["fila"], i["col"], "v") for i in x["verticales"]}
     for item, d in [(i, "h") for i in x["horizontales"]] + [(i, "v") for i in x["verticales"]]:
         r, c = item["fila"], item["col"]
         leida = "".join(g[r + (k if d == "v" else 0)][c + (k if d == "h" else 0)] for k in range(item["largo"]))
         if leida != item["respuesta"]: err.append(f"crucigrama: {item['n']}{d} dice {leida}")
+    # ninguna pista puede nombrar una respuesta de la grilla (ni la suya ni otra): la regalaría
+    respuestas = {i["respuesta"] for i in x["horizontales"] + x["verticales"]}
+    for item in x["horizontales"] + x["verticales"]:
+        palabras = set(re.findall(r"[A-ZÑ]+", normalizar(item["pista"])))
+        for r in sorted(respuestas & palabras):
+            err.append(f"crucigrama: la pista de {item['respuesta']} nombra la respuesta {r}")
     # palabras fantasma: toda secuencia de 2+ letras debe estar declarada
     for r in range(H):
         c = 0
@@ -275,8 +314,9 @@ EDICION_01 = {
         "entradilla": "Esta carta llegó a la redacción sin firma. El remitente exige que se publique en primera plana.",
         "mensaje": ("Señor editor: el pianista sabe más de lo que toca, el petrolero cava más de lo que dice "
                     "y la lluvia del valle no es lo que parece. Quien lea esto miró de cerca. "
-                    "Escriba la palabra BATIDO en su boleta de pedido y el envío corre por nuestra cuenta."),
-        "cupon": "BATIDO",
+                    "Escriba la palabra TORRE en su boleta de pedido y el envío corre por nuestra cuenta."),
+        # El cupón no puede ser palabra de ningún juego (el validador lo controla): BATIDO es del crucigrama
+        "cupon": "TORRE",
         "pistasGratis": 3,
     },
     "cinedoku": {"titulo": "Cinedoku", "palabra": "ZODIAC", "filaOculta": 3,
@@ -286,10 +326,10 @@ EDICION_01 = {
         "entradas": [
             {"palabra": "PLAINVIEW", "ancla": True, "pista": "Apellido del petrolero que llegó a Little Boston con su hijo y una promesa"},
             {"palabra": "CASABLANCA", "pista": "Ciudad donde un café se niega a tomar partido"},
-            {"palabra": "RICK", "pista": "Dueño de ese café, que no se mete en política"},
-            {"palabra": "ROCKY", "pista": "Campeón de Filadelfia que pierde el ojo… del tigre"},
+            {"palabra": "RICK", "pista": "Dueño de un café de Casablanca que no se mete en política"},
+            {"palabra": "ROCKY", "pista": "Campeón de Filadelfia que perdió la mirada de fiera"},
             {"palabra": "MAGNOLIA", "pista": "Flor, calle y película de tres horas en el Valle"},
-            {"palabra": "RANAS", "pista": "Precipitación poco habitual pronosticada para ese mismo valle"},
+            {"palabra": "CONCURSO", "pista": "Programa de preguntas donde se juegan todo un chico del Valle y otro de la India"},
             {"palabra": "BATIDO", "pista": "Según un desafío en una bolera, se lo toma el que tiene la pajita más larga"},
             {"palabra": "SIETE", "pista": "Pecados, días o cajas: el número de Somerset"},
             {"palabra": "BOMBAY", "pista": "Ciudad del muchacho que conocía todas las respuestas"},
@@ -297,42 +337,49 @@ EDICION_01 = {
             {"palabra": "PREDICADOR", "pista": "Oficio de Eli, el rival más joven de Little Boston"},
             {"palabra": "MIRAR", "pista": "Lo que hay que hacer de cerca, según el lema de este diario"},
             {"palabra": "PIANISTA", "pista": "Le prohibieron una canción, pero la sabe de memoria"},
-            {"palabra": "TIGRE", "pista": "El ojo que Rocky tiene que recuperar"},
+            {"palabra": "TIGRE", "pista": "Fiera cuyo ojo el campeón de Filadelfia tiene que recuperar"},
         ],
     },
 }
 EDICIONES = {1: EDICION_01}
 
-def generar(numero: int, semilla: int | None = None):
+def generar(numero: int, semilla: int | None = None) -> tuple[dict, list[str]]:
+    """Devuelve (datos para el JSON, palabras del crucigrama que no entraron)."""
     e = EDICIONES[numero]; rng = random.Random(semilla if semilla is not None else numero * 82)
     ci = e["cifrado"]; cz = e["cinedoku"]; cr = e["crucigrama"]
     data = {
         "numero": e["numero"], "titulo": e["titulo"],
-        "cifrado": {"titulo": ci["titulo"], "entradilla": ci["entradilla"], "cupon": ci["cupon"],
+        "cifrado": {"titulo": ci["titulo"], "entradilla": ci["entradilla"],
                     "pistasGratis": ci["pistasGratis"], **cifrar(ci["mensaje"], rng)},
         "cinedoku": {"titulo": cz["titulo"], "entradilla": cz["entradilla"],
                      **generar_cinedoku(cz["palabra"], cz["filaOculta"], rng)},
-        "crucigrama": {"titulo": cr["titulo"],
-                       **armar_crucigrama([{**x, "palabra": normalizar(x["palabra"])} for x in cr["entradas"]], rng)},
     }
-    return data
+    cruci, descartadas = armar_crucigrama([{**x, "palabra": normalizar(x["palabra"])} for x in cr["entradas"]], rng)
+    data["crucigrama"] = {"titulo": cr["titulo"], **cruci}
+    return data, descartadas
 
-def validar(data) -> list[str]:
-    return validar_cifrado(data["cifrado"]) + validar_cinedoku(data["cinedoku"]) + validar_crucigrama(data["crucigrama"])
+def validar(data, numero: int | None = None) -> list[str]:
+    fuente = EDICIONES.get(numero) if numero is not None else None
+    err = validar_cifrado(data["cifrado"], fuente["cifrado"] if fuente else None) \
+        + validar_cinedoku(data["cinedoku"]) + validar_crucigrama(data["crucigrama"])
+    # El cupón no puede aparecer en claro en ningún lado del JSON (ni como palabra del crucigrama)
+    if fuente and normalizar(fuente["cifrado"]["cupon"]) in json.dumps(data, ensure_ascii=False).upper():
+        err.append("cupón: aparece en claro en el JSON (¿es también palabra del crucigrama?)")
+    return err
 
 if __name__ == "__main__":
     accion, numero = sys.argv[1], int(sys.argv[2])
     ruta = OUT / f"edicion-{numero:02d}.json"
     if accion == "generar":
-        data = generar(numero)
-        errores = validar(data)
+        data, descartadas = generar(numero)
+        errores = validar(data, numero)
         if errores: sys.exit("\n".join(errores))
         OUT.mkdir(parents=True, exist_ok=True)
         ruta.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"OK → {ruta.relative_to(ROOT)}  (cinedoku: {data['cinedoku']['pistas']} pistas, "
               f"crucigrama {data['crucigrama']['ancho']}x{data['crucigrama']['alto']}, "
-              f"descartadas: {data['crucigrama']['descartadas']})")
+              f"descartadas: {descartadas})")
     elif accion == "validar":
-        errores = validar(json.loads(ruta.read_text(encoding="utf-8")))
+        errores = validar(json.loads(ruta.read_text(encoding="utf-8")), numero)
         print("\n".join(errores) or "OK: todo valida")
         sys.exit(1 if errores else 0)

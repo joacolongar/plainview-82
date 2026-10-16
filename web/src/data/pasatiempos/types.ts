@@ -6,11 +6,10 @@
 export type Cifrado = {
   titulo: string
   entradilla: string
-  cupon: string
   pistasGratis: number
-  texto: string // mensaje en claro, en mayúsculas y sin tildes
-  clave: Record<string, string> // letra → símbolo (el símbolo es solo un identificador; se dibuja como SVG)
-  letrasUsadas: number
+  cifrado: string // el mensaje ya cifrado: símbolos + espacios y puntuación (el texto en claro no viaja)
+  clave: string // JSON símbolo → letra en base64. Ofuscado, no secreto (ver "Cupones" en docs/PASATIEMPOS.md)
+  simbolosUsados: number
 }
 
 export type Cinedoku = {
@@ -40,7 +39,6 @@ export type Crucigrama = {
   grilla: string[] // "#" = casilla negra
   horizontales: EntradaCrucigrama[]
   verticales: EntradaCrucigrama[]
-  descartadas: string[]
 }
 
 export type Edicion = {
