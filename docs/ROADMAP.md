@@ -26,14 +26,15 @@ cada página de cerca.
 |---|---|---|
 | Portada | Primera plana | Cabecera, fecha de hoy, "Edición N° 1" |
 | Drop / colección | Edición | "Edición N° 1 · Córdoba · 16 oct 2026" |
-| Catálogo | Páginas que se pasan deslizando, un artículo por página, con índice | "Art. N° 001 — Magnolia" |
-| Remera | Artículo | N° de artículo, precio, descripción, detalles (talles, color, la referencia) |
+| Catálogo | Índice de avisos + un aviso por página que se pasa deslizando | "Art. N° 001 — Magnolia" |
+| Remera | Aviso comercial estilo catálogo por correo | Titular grande, precio en recuadro, grabado, texto de aviso, tabla de medidas, cupón "Recorte y agregue a su pedido" |
 | Referencia | Recuadro "Fe de erratas: mirá de nuevo" | Se despliega al tocarlo |
 | Estado | En existencia / Por encargo / Próximo número | disponible / preventa / próximamente |
-| Juego | Pasatiempos | "La función del día" |
+| Juego | Pasatiempos | El Cifrado, Cinedoku, Crucigrama Mini, Mirá de Cerca y La Función del Día (ver `docs/PASATIEMPOS.md`) |
 | Cómo comprar | Avisos clasificados | Pagos, envíos, talles y cambios como avisos |
 | Carrito | Boleta de pedido | Cupón recortable que se envía por WhatsApp |
-| Footer | Pie de imprenta | Staff, Córdoba, @plainview.82 |
+| Footer | Pie de página + pie de imprenta | "← pág. anterior · Índice · pág. siguiente →", fecha, staff, @plainview.82 |
+| 404 | Fe de erratas | "Esta escena se cortó en el montaje" |
 
 Estética: papel crema sobre fondo oscuro, tipografías de época, rojo (`--color-red`) solo para el 8:2 y acentos.
 
@@ -43,20 +44,37 @@ Reglas del concepto:
 - Cada página del catálogo tiene **URL propia** (se puede compartir un artículo por WhatsApp o Instagram).
   Las rutas viejas (`/producto/:slug`) redirigen a la nueva, para no romper links ya compartidos.
 - Comprar nunca queda escondido detrás de la metáfora: precio, talle y botón siempre a la vista.
-- Todo con CSS y los tokens de `index.css` (`scroll-snap` para deslizar, filetes, capitulares); sin librerías nuevas.
+- Todo con CSS y los tokens de `index.css` (filetes, capitulares, View Transitions); sin librerías nuevas.
+
+### Todo el sitio es el diario: `NewspaperPage`
+- **Layout común** para todas las rutas (reemplaza a `Layout.tsx`). La portada conserva la cabecera grande
+  (`Masthead`) y es la pág. 1; el resto lleva una **cabecera chica**: logo giratorio en su recuadro oscuro,
+  "THE PLAINVIEW", número de página y nombre de la sección.
+- **Pie de página:** "← pág. anterior · Índice · pág. siguiente →", la fecha y el pie de imprenta.
+- **Orden de páginas** en `src/data/paginas.ts`, armado a partir de productos y secciones: Primera plana →
+  Índice de avisos → un aviso por producto (por `articleNo`) → Pasatiempos → Clasificados → Boleta.
+  El número de página es la posición en esa lista; el 404 (Fe de erratas) queda afuera.
+- **Pasar de página:** deslizando en el celular (pointer events nativos, umbral ~60px y solo si el gesto es más
+  horizontal que vertical), con ← → en la compu (salvo con el foco en un campo o un tablero) y siempre con los
+  botones del pie.
+- **Transición de hoja:** View Transitions API (la prop `viewTransition` de React Router 7 + CSS
+  `::view-transition-*`), un deslizamiento sutil con sombra según la dirección. Con reduced motion o sin soporte
+  del navegador, cambia sin animación. Con una URL por página, navegar entre rutas es más simple que un
+  carrusel con `scroll-snap`.
 
 ## Páginas
 
 | Ruta | Qué tiene |
 |---|---|
 | `/` | Primera plana: cabecera con logo, fecha de hoy y "Edición N° 1", titular del drop, artículos destacados, recuadro de pasatiempos |
-| `/catalogo` | Índice del catálogo: lista de artículos con número, nombre y precio |
-| `/catalogo/:slug` | Una página por artículo: N°, precio, descripción, detalles, fotos con epígrafe, "Fe de erratas", talles, "Agregar a la boleta"; se desliza a la anterior/siguiente |
+| `/catalogo` | Índice de avisos: sumario con N° de página, nombre y precio; filtros en la URL |
+| `/catalogo/:slug` | Aviso comercial: titular grande, precio en recuadro, grabado, texto de aviso irónico, tabla de medidas, "Fe de erratas: mirá de nuevo", cupón "Recorte y agregue a su pedido" (talle, color, agregar); se pasa a la página anterior/siguiente |
 | `/producto/:slug` | Redirige a `/catalogo/:slug` |
 | `/carrito` | Boleta de pedido: cupón recortable editable, nota, "Enviar boleta por WhatsApp" |
-| `/juego` | Pasatiempos: ¿de qué película es? — pistas propias, opciones, puntaje, link al artículo |
+| `/pasatiempos` | Pasatiempos: carnet de lector y sumario de la edición semanal (`/juego` redirige) |
+| `/pasatiempos/:id` | Un pasatiempo por página: cifrado, cinedoku, crucigrama, mira-de-cerca, funcion-del-dia |
 | `/como-comprar` | Avisos clasificados: pasos, guía de talles, pagos, envíos y cambios |
-| `*` | 404 "Esta escena se cortó en el montaje" |
+| `*` | Fe de erratas (404) |
 
 ---
 
@@ -64,22 +82,29 @@ Reglas del concepto:
 - [x] S1. Proyecto Vite + React + TS + Tailwind + Router, páginas vacías, carrito y WhatsApp funcionando con datos de ejemplo, CLAUDE.md
 - [x] S1b. Crear repo en GitHub, primer push y deploy en Cloudflare Pages/Netlify (sitio "en construcción" online)
 
-## Etapa 1 — La Edición: identidad y catálogo (6 sesiones)
+## Etapa 1 — La Edición: identidad, diario y catálogo (9 sesiones)
 - [x] S2a. Logo giratorio (`RotatingLogo`, 3D con `rotateY`, fijo con prefers-reduced-motion) y colores exactos de la marca en `@theme` (rojo `#c84030`, crema `#ece6d8`, fondo `#0e0d0b`)
 - [x] S2. Primera plana del diario "THE PLAINVIEW": tipografías de época (UnifrakturMaguntia, Anton, Old Standard TT), hoja crema con textura sobre el fondo oscuro, cabecera (Watch closer, logo, "Vol. 8 · Córdoba · No. 2" y fecha de hoy), noticias en `src/data/noticias.ts` (principal + secundarias + clima, clasificados y pasatiempos)
-- [ ] S2b. Datos editoriales: `src/data/editions.ts` (número, fecha, titular) para que la cabecera y la franja salgan de ahí, campos `articleNo`, `kicker`, `headline`, `dek`, `caption` en `Product`; footer "pie de imprenta" y favicon con el 8:2 (quedaron de S2)
-- [ ] S3. Fotos: carpeta `public/products/` en WebP, galería en la página del artículo con epígrafes (zoom con un toque en mobile)
-- [ ] S4. Catálogo por páginas (1/2): ruta `/catalogo/:slug` con un artículo por página (N°, precio, descripción, detalles, "Fe de erratas", estados), `/producto/:slug` redirige, guía de talles en modal
-- [ ] S5. Catálogo por páginas (2/2): pasar páginas deslizando (`scroll-snap`), botones anterior/siguiente y flechas del teclado, la URL cambia con cada página, índice en `/catalogo` con filtros (película, director, década) en la URL
+- [ ] S2b. Datos editoriales: `src/data/editions.ts` (número, fecha, titular) para que la cabecera y la franja salgan de ahí, campos `articleNo`, `kicker`, `headline`, `dek`, `caption` en `Product`; favicon con el 8:2 (quedó de S2)
+- [ ] S3. `NewspaperPage`: layout común para todas las rutas (cabecera chica con logo, N° de página y sección; pie "← pág. anterior · Índice · pág. siguiente →" con fecha y pie de imprenta), orden de páginas en `src/data/paginas.ts`
+- [ ] S3b. Pasar de página: deslizar en el celular (pointer events), flechas ← → en la compu, transición de hoja con View Transitions (`viewTransition` de React Router), sin animación con reduced motion
+- [ ] S4. Aviso comercial (1/2): ruta `/catalogo/:slug` (`/producto/:slug` redirige), titular grande, precio en recuadro, grabado (placeholder `engraving`), texto de aviso irónico (campo `aviso` en `Product`), estados; productos encadenados como páginas del catálogo
+- [ ] S4b. Aviso comercial (2/2): tabla de medidas (datos reales por talle), cupón "Recorte y agregue a su pedido" (talle, color, agregar; pegado abajo en mobile), recuadro "Fe de erratas: mirá de nuevo"
+- [ ] S5. Índice de avisos en `/catalogo` (sumario con N° de página, filtros por película, director y década en la URL) y 404 como "Fe de erratas"
+- [ ] S5b. Fotos: carpeta `public/products/` en WebP, galería en el aviso con epígrafes (zoom con un toque en mobile)
 
 ## Etapa 2 — Pedidos por WhatsApp (2 sesiones)
-- [ ] S6. Boleta de pedido: cupón recortable (borde punteado, tijera), quitar ítem, validaciones, "Enviar boleta por WhatsApp" pegado abajo, número real en `.env`, probar en celular
-- [ ] S7. Datos del pedido (nombre, zona, envío/retiro) completados en la boleta y sumados al mensaje; página "Avisos clasificados" completa
+- [ ] S6. Boleta de pedido (página del diario): cupón recortable (borde punteado, tijera), quitar ítem, validaciones, "Enviar boleta por WhatsApp" pegado abajo, campo de cupón (de los pasatiempos) en el mensaje, número real en `.env`, probar en celular
+- [ ] S7. Datos del pedido (nombre, zona, envío/retiro) completados en la boleta y sumados al mensaje; página "Clasificados" (cómo comprar) completa dentro de `NewspaperPage`
 
-## Etapa 3 — Pasatiempos (3 sesiones)
-- [ ] S8. "La función del día": una pista diaria igual para todos (elegida por fecha), intentos limitados, maquetada como la página de pasatiempos
-- [ ] S9. Pistas progresivas (texto → detalle de la estampa → paleta de colores), racha guardada en localStorage
-- [ ] S10. Compartir resultado (texto con emojis para Instagram/WhatsApp) y cupón al acertar ("WATCHCLOSER")
+## Etapa 3 — Pasatiempos (6 sesiones, diseño en `docs/PASATIEMPOS.md`)
+Numeradas P1–P6 (reemplazan a las viejas S8–S10) para no renumerar S11 y S12, que ya se mencionan en la Bitácora.
+- [ ] P1. Base común: `/pasatiempos` como página del diario (`/juego` redirige), edición semanal elegida por fecha, JSON por semana + tipos, `scripts/validar_pasatiempos.py` (estructura base), progreso en localStorage, carnet de lector con sellos; La Función del Día mudada tal cual
+- [ ] P2. El Cifrado: sustitución estilo Zodiac con símbolos propios, revela un mensaje y el cupón de la semana; validador del cifrado
+- [ ] P3. Cinedoku: sudoku 6×6 con Z O D I A C y la fila oculta que deletrea ZODIAC; validador con solver de solución única
+- [ ] P4. Crucigrama Mini 5×5 con pistas desde el mundo del diario; validador de numeración y pistas
+- [ ] P5. Mirá de Cerca: siete diferencias sobre una estampa (necesita el arte de las dos versiones); validador de áreas tocables
+- [ ] P6. La Función del Día mejorada: una pista diaria igual para todos, intentos limitados, pistas progresivas, racha y resultado para compartir
 
 ## Etapa 4 — Lanzamiento (2 sesiones)
 - [ ] S11. SEO: títulos por página, Open Graph con imagen de cada remera, sitemap, accesibilidad (teclado, contraste)
@@ -99,3 +124,4 @@ Reglas del concepto:
 - 2026-10-16 — Mobile-first (fuera de plan): reglas nuevas en CLAUDE.md y repaso de todas las páginas a 375px. El header desbordaba y ensanchaba todo el sitio: ahora en mobile va logo + pedido arriba y secciones en una fila. Botones de 44px o más, barra de compra y de WhatsApp pegadas abajo con `sticky` (ficha y carrito), selects/textarea a 16px para que iPhone no haga zoom, `viewport-fit=cover` para el área segura. Verificado midiendo cada ruta en un iframe de 375px (sin desbordes ni elementos tocables chicos). Pendiente: probar en un celular real, incluido el carrito → WhatsApp de punta a punta (viene de S1b). Próxima sesión: S2, cabezal del diario (ya respetando las reglas mobile-first).
 - 2026-10-16 — S2a: logo giratorio en el header (`RotatingLogo`: 5 s el 8:2, giro de 0,6 s, 5 s PLAINVIEW; con reduced motion queda PLAINVIEW fijo). Los PNG de `public/brand/` se recortaron y exportaron a WebP a 3x (`public/logo/`, ~13 KB c/u) para que las dos caras tengan peso parecido. Tokens con los colores exactos del logo. Verificado a 375px: nítido, sin desbordes y el layout no se mueve durante el giro. Se reescribió el concepto: diario viejo + catálogo de venta por correo del lejano oeste, catálogo de a una página por artículo con URL propia, "Avisos clasificados" y "Boleta de pedido". Pendiente: el crema sobre rojo da 3,99:1 de contraste (AA pide 4,5:1 en texto chico), revisar en S11 o usar texto más grande/negrita en botones rojos; decidir qué hacer con `public/brand/` (se publica con el sitio). Próxima sesión: S2, primera plana.
 - 2026-10-16 — S2: la portada es la primera plana de "THE PLAINVIEW". En `/` la cabecera del diario reemplaza al header compacto (nav extraído a `SiteNav`, con variante sobre papel). Noticia principal: Petróleo sangriento (sin remera todavía, lleva al catálogo); secundarias Casablanca, Millonario y Rocky III; Magnolia como columna del clima. Reglas de las noticias en CLAUDE.md. El logo va en un recuadro oscuro porque su cara PLAINVIEW es crema. El adelanto de Pasatiempos no muestra pistas (las tres películas del juego salen en las noticias). Verificado a 375×667: titular, bajada e ilustración con epígrafe entran en la primera pantalla (epígrafe en 641px), sin desbordes ni titulares cortados en ninguna ruta; desktop y reduced motion revisados. Pendiente: favicon y pie de imprenta (pasan a S2b); ilustración real del grabado; revisar los borradores de `noticias.ts`; probar en celular real. Próxima sesión: S2b.
+- 2026-10-16 — Diseño (sin código): todo el sitio pasa a ser el diario THE PLAINVIEW con un layout común `NewspaperPage` (cabecera chica con N° de página y sección, pie con paginación), páginas que se pasan deslizando o con flechas y transición de hoja con View Transitions (reemplaza al `scroll-snap` planeado). La ficha pasa a ser un aviso comercial estilo catálogo por correo; catálogo = índice de avisos, carrito = boleta, cómo comprar = clasificados, 404 = fe de erratas. Etapa 1 reorganizada (S3–S5b) y Etapa 3 reemplazada por P1–P6 según `docs/PASATIEMPOS.md` (Cifrado → Cinedoku → Crucigrama → Mirá de Cerca, con base común antes y La Función del Día al final). Pendiente: definir el premio del carnet de lector, conseguir medidas reales por talle (S4b) y el arte para Mirá de Cerca (P5). Próxima sesión: S2b.

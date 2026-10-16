@@ -20,7 +20,8 @@ Sitio: catálogo con fichas, juego "Adiviná la peli" y pedidos por WhatsApp (si
   - `src/context/CartContext.tsx` carrito (estado + localStorage con try/catch)
   - `src/pages/*` una página por ruta
 - `api/` — backend opcional (Etapa 5): FastAPI + websockets. No hace falta para lanzar.
-- `docs/` — ROADMAP.md (plan por sesiones) e IDEAS.md (backlog de ideas).
+- `docs/` — ROADMAP.md (plan por sesiones), IDEAS.md (backlog de ideas) y PASATIEMPOS.md (diseño de los pasatiempos:
+  reglas comunes, cada juego y su validador).
 
 ## Comandos
 ```bash
