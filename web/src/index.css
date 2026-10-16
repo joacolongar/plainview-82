@@ -42,3 +42,21 @@ body { font-family: var(--font-body); }
 @utility engraving {
   background-image: repeating-linear-gradient(135deg, color-mix(in oklab, var(--color-print) 22%, transparent) 0 1px, transparent 1px 6px);
 }
+
+/* Transición de hoja al pasar de página (View Transitions API; React Router la dispara con `viewTransition`).
+   Solo se anima la hoja: la franja de arriba queda quieta. La dirección la marca pasarPagina.ts en <html>. */
+.hoja { view-transition-name: hoja; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+::view-transition-group(hoja) { animation-duration: 300ms; }
+::view-transition-old(hoja) { animation: 300ms ease-in both hoja-sale-izquierda; }
+::view-transition-new(hoja) { animation: 300ms ease-out both hoja-entra-derecha; }
+html[data-direccion="atras"]::view-transition-old(hoja) { animation-name: hoja-sale-derecha; }
+html[data-direccion="atras"]::view-transition-new(hoja) { animation-name: hoja-entra-izquierda; }
+@keyframes hoja-sale-izquierda { to { transform: translateX(-25%); opacity: 0; filter: brightness(0.8); } }
+@keyframes hoja-sale-derecha { to { transform: translateX(25%); opacity: 0; filter: brightness(0.8); } }
+@keyframes hoja-entra-derecha { from { transform: translateX(25%); opacity: 0; } }
+@keyframes hoja-entra-izquierda { from { transform: translateX(-25%); opacity: 0; } }
+/* Con movimiento reducido no hay animación: la página cambia y listo */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

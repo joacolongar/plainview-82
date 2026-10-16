@@ -169,7 +169,8 @@ export default function Cinedoku({ datos, progreso, onCambio }: Props) {
   const letraElegida = elegida !== null ? valor(elegida) : ''
 
   return (
-    <div className="mt-3">
+    // data-no-swipe: deslizar o usar las flechas sobre el juego no pasa de página
+    <div className="mt-3" data-no-swipe>
       <div
         aria-label="Grilla del Cinedoku"
         className="mx-auto grid max-w-sm select-none grid-cols-6 border-[3px] border-print"

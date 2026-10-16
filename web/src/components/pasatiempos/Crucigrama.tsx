@@ -219,7 +219,8 @@ export default function Crucigrama({ datos, progreso, onCambio }: Props) {
   }, [cursor, altoTeclado])
 
   return (
-    <div className="mt-3">
+    // data-no-swipe: deslizar o usar las flechas sobre el juego no pasa de página
+    <div className="mt-3" data-no-swipe>
       <div
         ref={grilla}
         aria-label="Grilla del crucigrama"

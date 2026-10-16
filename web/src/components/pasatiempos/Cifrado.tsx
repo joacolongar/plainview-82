@@ -150,7 +150,8 @@ export default function Cifrado({ datos, progreso, onCambio }: Props) {
   const textoEnClaro = [...datos.cifrado].map((ch) => clave[ch] ?? ch).join('')
 
   return (
-    <div className="mt-3">
+    // data-no-swipe: deslizar o usar las flechas sobre el juego no pasa de página
+    <div className="mt-3" data-no-swipe>
       {/* El mensaje: palabra por palabra, sin cortar palabras al final del renglón */}
       <div className="flex flex-wrap gap-x-3 gap-y-3" aria-label="Mensaje cifrado">
         {datos.cifrado.split(' ').map((palabra, i) => (
