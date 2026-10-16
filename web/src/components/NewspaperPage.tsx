@@ -49,10 +49,7 @@ function CabeceraChica({ pagina, suelta }: { pagina: Pagina; suelta: string | nu
     <header className="mb-5">
       {/* Mobile: el logo a la izquierda y nombre + página apilados a la derecha (en una línea no entran a 375 px) */}
       <div className="flex items-center justify-between gap-3 py-1">
-        {/* Recuadro oscuro: la cara PLAINVIEW del logo es crema y sobre la hoja no se vería */}
-        <div className="shrink-0 bg-ink px-2">
-          <RotatingLogo center />
-        </div>
+        <RotatingLogo lado="izquierda" tamano="h-12 w-[46px] md:h-14 md:w-[54px]" />
         <div className="min-w-0 text-right md:flex md:items-baseline md:gap-6">
           <p className="font-masthead text-xl leading-tight md:text-3xl">The Plainview</p>
           <p className="font-display text-[11px] font-bold uppercase tracking-[0.15em]">{pagina ? `Pág. ${pagina.numero}` : suelta ? 'Suplemento' : 'Fe de erratas'}</p>

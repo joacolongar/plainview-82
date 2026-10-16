@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
-/* Estética "titular de diario" oscuro. ink, paper y red son los colores exactos del logo (public/logo/) */
+/* Estética "titular de diario" oscuro. ink y red son los colores exactos del logo (public/logo/); paper es un hueso cálido */
 @theme {
   --color-ink: #0e0d0b;
-  --color-paper: #ece6d8;
+  --color-paper: #ebe3d1; /* hueso cálido (el crema del logo era #ece6d8) */
   --color-muted: #9a958c;
   --color-line: #2a2a2a;
   --color-red: #c84030;
