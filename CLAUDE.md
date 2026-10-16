@@ -45,5 +45,8 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   Los tokens están en `web/src/index.css` (`@theme`). No hardcodear colores.
 - El juego usa **pistas propias** (textos o ilustraciones de la marca), nunca fotogramas, afiches ni
   frases textuales de películas: evita problemas de copyright y promociona las remeras.
+- Las **noticias** de la portada (diario "THE PLAINVIEW") viven en `web/src/data/noticias.ts`. Cuentan la premisa de
+  la película como si pasara hoy: **sin citas textuales** de la película (ni diálogos ni frases famosas) y con
+  **spoilers mínimos** (nada del final ni de giros). Tono irónico de diario de época.
 - El número de WhatsApp va en `web/.env` como `VITE_WHATSAPP_NUMBER` (ver `.env.example`). Nunca commitear `.env`.
 - Antes de dar algo por terminado: `npm run build` y `npm run lint` sin errores.

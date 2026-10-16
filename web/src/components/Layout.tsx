@@ -1,17 +1,12 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { BRAND, IS_PREVIEW } from '../config'
-import { useCart } from '../context/CartContext'
 import RotatingLogo from './RotatingLogo'
-
-// `short` es la etiqueta en mobile: a 375px "Adiviná la peli" no entra al lado de las otras
-const nav = [
-  { to: '/catalogo', label: 'Catálogo', short: 'Catálogo' },
-  { to: '/juego', label: 'Adiviná la peli', short: 'Juego' },
-  { to: '/como-comprar', label: 'Cómo comprar', short: 'Cómo comprar' },
-]
+import SiteNav, { CartLink } from './SiteNav'
 
 export default function Layout() {
-  const { count } = useCart()
+  // En la portada la cabecera del diario (Masthead, dentro de Home) reemplaza a este header
+  const isHome = useLocation().pathname === '/'
+
   return (
     <div className="min-h-screen flex flex-col">
       {IS_PREVIEW && (
@@ -19,29 +14,21 @@ export default function Layout() {
           Edición N° 0 · <span className="text-red">Número de prueba</span> · Precios y fotos todavía no son reales
         </p>
       )}
-      <header className="border-b-4 border-double border-line">
-        {/* Mobile: logo + pedido arriba y las secciones en una fila abajo. Desde md: todo en una línea */}
-        <div className="mx-auto max-w-6xl px-4 md:py-4 md:flex md:items-center md:justify-between md:gap-4">
-          <div className="flex items-center justify-between gap-4 py-1 md:py-0">
-            <RotatingLogo />
-            <CartLink count={count} className="flex md:hidden" />
+      {!isHome && (
+        <header className="border-b-4 border-double border-line">
+          {/* Mobile: logo + pedido arriba y las secciones en una fila abajo. Desde md: todo en una línea */}
+          <div className="mx-auto max-w-6xl px-4 md:py-4 md:flex md:items-center md:justify-between md:gap-4">
+            <div className="flex items-center justify-between gap-4 py-1 md:py-0">
+              <RotatingLogo />
+              <CartLink className="flex md:hidden" />
+            </div>
+            <div className="border-t border-line md:border-0">
+              <SiteNav cart="desktop" />
+            </div>
           </div>
-          <nav className="grid grid-cols-3 border-t border-line text-xs uppercase tracking-widest md:flex md:items-center md:gap-6 md:border-0 md:text-sm">
-            {nav.map((n) => (
-              <NavLink
-                key={n.to}
-                to={n.to}
-                className={({ isActive }) => `flex min-h-11 items-center justify-center text-center ${isActive ? 'text-red' : 'hover:text-red'}`}
-              >
-                <span className="md:hidden">{n.short}</span>
-                <span className="hidden md:inline">{n.label}</span>
-              </NavLink>
-            ))}
-            <CartLink count={count} className="hidden md:flex" />
-          </nav>
-        </div>
-      </header>
-      <main className="flex-1 mx-auto w-full max-w-6xl px-4 py-8 md:py-10">
+        </header>
+      )}
+      <main className={`flex-1 mx-auto w-full max-w-6xl ${isHome ? 'px-2 py-2 md:px-4 md:py-6' : 'px-4 py-8 md:py-10'}`}>
         <Outlet />
       </main>
       <footer className="border-t border-line text-muted text-sm">
@@ -51,18 +38,5 @@ export default function Layout() {
         </div>
       </footer>
     </div>
-  )
-}
-
-/** El link al pedido aparece dos veces (arriba a la derecha en mobile, al final del nav en desktop); `className` decide cuál se ve. */
-function CartLink({ count, className }: { count: number; className: string }) {
-  return (
-    <NavLink
-      to="/carrito"
-      aria-label={`Pedido, ${count} productos`}
-      className={({ isActive }) => `${className} min-h-11 min-w-11 items-center justify-center font-mono text-sm ${isActive ? 'text-red' : 'hover:text-red'}`}
-    >
-      [{count}]
-    </NavLink>
   )
 }

@@ -7,7 +7,12 @@
   --color-muted: #9a958c;
   --color-line: #2a2a2a;
   --color-red: #c84030;
-  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  /* Tinta para imprimir sobre la hoja crema (portada) */
+  --color-print: #1b1915;
+  --color-print-muted: #5b554b;
+  --font-masthead: "UnifrakturMaguntia", "Old English Text MT", serif;
+  --font-headline: "Anton", "Impact", "Arial Narrow", sans-serif;
+  --font-display: "Old Standard TT", Georgia, "Times New Roman", serif;
   --font-body: "Inter", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
@@ -23,3 +28,17 @@
 
 html, body { background: var(--color-ink); color: var(--color-paper); }
 body { font-family: var(--font-body); }
+
+/* Hoja de diario: crema con grano de papel (ruido SVG generado, sin imágenes) y bordes apenas más oscuros */
+@utility paper {
+  background-color: var(--color-paper);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at center, transparent 55%, color-mix(in oklab, var(--color-print) 10%, transparent));
+  color: var(--color-print);
+}
+
+/* Trama de grabado para los placeholders de ilustración */
+@utility engraving {
+  background-image: repeating-linear-gradient(135deg, color-mix(in oklab, var(--color-print) 22%, transparent) 0 1px, transparent 1px 6px);
+}
