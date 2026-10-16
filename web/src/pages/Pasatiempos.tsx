@@ -12,7 +12,7 @@ const paperLink = 'inline-flex min-h-11 items-center font-display text-sm font-b
 /**
  * Página de Pasatiempos. Sigue docs/pasatiempos-maqueta.png:
  * cabecera de página, título, las tres secciones de la edición y el Carnet de lector al pie.
- * Los tres juegos se juegan: Cifrado (P2), Cinedoku (P3) y Crucigrama (P4; sus ayudas llegan en P4b).
+ * Los tres juegos se juegan con sus ayudas: Cifrado (P2), Cinedoku (P3) y Crucigrama (P4).
  */
 export default function Pasatiempos() {
   const edicion = ultimaEdicion()
@@ -85,6 +85,7 @@ function EdicionPasatiempos({ edicion }: { edicion: Edicion }) {
         titulo={edicion.crucigrama.titulo}
         entradilla="Palabras cruzadas, todas sacadas de las páginas de este diario."
         dato={`${edicion.crucigrama.ancho}×${edicion.crucigrama.alto} · ${edicion.crucigrama.horizontales.length + edicion.crucigrama.verticales.length} palabras`}
+        extra={<PistasDelEditor total={edicion.crucigrama.pistasGratis} usadas={progreso.juegos.crucigrama?.pistasUsadas ?? 0} />}
       >
         <Crucigrama
           datos={edicion.crucigrama}

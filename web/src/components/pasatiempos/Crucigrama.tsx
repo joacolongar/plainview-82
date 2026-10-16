@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import type { Crucigrama as DatosCrucigrama } from '../../data/pasatiempos/types'
 import { armarCrucigrama, normalizarLetra, type Direccion } from '../../lib/crucigrama'
 import { calcularSello, SELLOS, type ProgresoCrucigrama } from '../../lib/progresoPasatiempos'
+import Ayudas, { type Confirmacion } from './Ayudas'
 
 type Props = {
   datos: DatosCrucigrama
@@ -44,19 +45,28 @@ function Chevron({ dir }: { dir: 'izq' | 'der' }) {
 const sinRobarFoco = (e: ReactPointerEvent) => e.preventDefault()
 
 /**
- * Crucigrama del Valle (P4a: escribir y resolver; las ayudas llegan en P4b).
+ * Crucigrama del Valle.
  * Tocar una celda resalta su palabra; tocarla de nuevo cambia entre horizontal y vertical.
  * Se escribe con el teclado nativo a través de un <input> oculto, y la pista activa va en una barra
  * fija arriba del teclado, con ‹ anterior / siguiente › para recorrer las pistas.
+ * Ayudas (como en los otros juegos): la pista revela la celda elegida y la deja fija (al escribir se saltea),
+ * Verificar marca las equivocadas y Me rindo completa todo con sello en blanco.
  */
 export default function Crucigrama({ datos, progreso, onCambio }: Props) {
   const { palabras, porCelda, numeros, solucion, blancas } = useMemo(() => armarCrucigrama(datos), [datos])
   const W = datos.ancho
   const letras = progreso.letras ?? {}
+  const reveladas = new Set(progreso.reveladas ?? [])
   const resuelto = !!progreso.resuelto
+  const pistasQuedan = datos.pistasGratis - (progreso.pistasUsadas ?? 0)
 
   const [activa, setActiva] = useState<number | null>(null) // índice en `palabras`
   const [cursor, setCursor] = useState<number | null>(null) // celda donde se escribe
+  // Perder el foco (por ejemplo, al tocar "Pedir pista") solo esconde la barra: la celda elegida se mantiene
+  const [conFoco, setConFoco] = useState(false)
+  const [errores, setErrores] = useState<Set<number>>(new Set())
+  const [confirmar, setConfirmar] = useState<Confirmacion>(null)
+  const [aviso, setAviso] = useState('')
   const input = useRef<HTMLInputElement>(null)
   const grilla = useRef<HTMLDivElement>(null)
   const altoTeclado = useAltoTeclado()
@@ -84,6 +94,7 @@ export default function Crucigrama({ datos, progreso, onCambio }: Props) {
     if (de[dir] === undefined) dir = dir === 'h' ? 'v' : 'h' // la celda tiene una sola dirección
     setActiva(de[dir] ?? null)
     setCursor(i)
+    setConfirmar(null)
     enfocar()
   }
 
@@ -97,35 +108,89 @@ export default function Crucigrama({ datos, progreso, onCambio }: Props) {
 
   const saltar = (paso: number) => elegirPalabra(activa === null ? 0 : (activa + paso + palabras.length) % palabras.length)
 
-  function guardar(nuevas: Record<number, string>) {
-    if (blancas.every((i) => nuevas[i] === solucion(i))) {
-      onCambio({ ...progreso, letras: nuevas, resuelto: true, sello: calcularSello(progreso) })
+  function guardar(cambio: ProgresoCrucigrama) {
+    const nuevo = { ...progreso, ...cambio }
+    const l = nuevo.letras ?? {}
+    if (blancas.every((i) => l[i] === solucion(i))) {
+      onCambio({ ...nuevo, resuelto: true, sello: calcularSello(nuevo) })
       cerrar()
     } else {
-      onCambio({ ...progreso, letras: nuevas })
+      onCambio(nuevo)
     }
   }
 
+  const sinError = (i: number) => setErrores((prev) => new Set([...prev].filter((x) => x !== i)))
+
   function escribir(letra: string) {
     if (cursor === null || !palabra) return
-    guardar({ ...letras, [cursor]: letra })
+    setConfirmar(null)
+    // las celdas que dio el editor no se pisan: se escribe en la próxima libre de la palabra
     const k = palabra.celdas.indexOf(cursor)
-    if (k < palabra.celdas.length - 1) setCursor(palabra.celdas[k + 1])
+    const destino = palabra.celdas.slice(k).find((c) => !reveladas.has(c))
+    if (destino === undefined) return
+    sinError(destino)
+    guardar({ letras: { ...letras, [destino]: letra } })
+    const siguiente = palabra.celdas.slice(palabra.celdas.indexOf(destino) + 1).find((c) => !reveladas.has(c))
+    setCursor(siguiente ?? destino)
   }
 
   function borrar() {
     if (cursor === null || !palabra) return
+    setConfirmar(null)
     const nuevas = { ...letras }
-    if (nuevas[cursor]) {
+    if (nuevas[cursor] && !reveladas.has(cursor)) {
       delete nuevas[cursor]
+      sinError(cursor)
     } else {
-      // celda vacía: borra la anterior de la palabra y retrocede, como en cualquier crucigrama digital
+      // celda vacía (o del editor): borra la anterior libre de la palabra y retrocede, como en cualquier crucigrama digital
       const k = palabra.celdas.indexOf(cursor)
-      if (k === 0) return
-      delete nuevas[palabra.celdas[k - 1]]
-      setCursor(palabra.celdas[k - 1])
+      const anterior = palabra.celdas.slice(0, k).reverse().find((c) => !reveladas.has(c))
+      if (anterior === undefined) return
+      delete nuevas[anterior]
+      sinError(anterior)
+      setCursor(anterior)
     }
-    guardar(nuevas)
+    guardar({ letras: nuevas })
+  }
+
+  function pedirPista() {
+    if (resuelto || pistasQuedan <= 0) return
+    if (cursor === null) return setAviso('Elegí primero la celda que querés que revele el editor.')
+    if (reveladas.has(cursor)) return setAviso('Esa letra ya la dio el editor. Elegí otra celda.')
+    if ((progreso.pistasUsadas ?? 0) === 0 && confirmar !== 'pista') return setConfirmar('pista')
+    setConfirmar(null)
+    sinError(cursor)
+    setAviso(`El editor revela: fila ${Math.floor(cursor / W) + 1}, columna ${(cursor % W) + 1} es una ${solucion(cursor)}.`)
+    guardar({
+      letras: { ...letras, [cursor]: solucion(cursor) },
+      reveladas: [...reveladas, cursor],
+      pistasUsadas: (progreso.pistasUsadas ?? 0) + 1,
+    })
+  }
+
+  function verificar() {
+    if (resuelto || Object.keys(letras).length === 0) return
+    setConfirmar(null)
+    const mal = blancas.filter((i) => letras[i] && letras[i] !== solucion(i))
+    setErrores(new Set(mal))
+    setAviso(
+      mal.length === 0
+        ? 'Todo lo que pusiste está bien. Seguí.'
+        : mal.length === 1
+          ? 'Hay 1 letra equivocada: está marcada con ✗.'
+          : `Hay ${mal.length} letras equivocadas: están marcadas con ✗.`,
+    )
+    guardar({ verificaciones: (progreso.verificaciones ?? 0) + 1 })
+  }
+
+  function rendirse() {
+    if (resuelto) return
+    if (confirmar !== 'rendirse') return setConfirmar('rendirse')
+    setConfirmar(null)
+    setErrores(new Set())
+    setAviso('')
+    onCambio({ ...progreso, letras: Object.fromEntries(blancas.map((i) => [i, solucion(i)])), resuelto: true, sello: calcularSello(progreso, true) })
+    cerrar()
   }
 
   /** Flechas (en la compu): se mueve a la próxima celda blanca en esa dirección */
@@ -172,7 +237,11 @@ export default function Crucigrama({ datos, progreso, onCambio }: Props) {
               disabled={resuelto}
               onPointerDown={sinRobarFoco}
               onClick={() => tocar(i)}
-              aria-label={`Fila ${Math.floor(i / W) + 1}, columna ${(i % W) + 1}, ${letras[i] ?? 'vacía'}`}
+              aria-label={
+                `Fila ${Math.floor(i / W) + 1}, columna ${(i % W) + 1}, ${letras[i] ?? 'vacía'}` +
+                (reveladas.has(i) ? ', dada por el editor' : '') +
+                (errores.has(i) ? ', marcada como error' : '')
+              }
               // margen al hacer scroll: deja lugar para la barra de pista y el teclado del celular
               style={cursor === i ? { scrollMarginBottom: altoTeclado + 96 } : undefined}
               className={`relative flex aspect-square items-center justify-center border-r border-b border-print/40 ${
@@ -180,11 +249,29 @@ export default function Crucigrama({ datos, progreso, onCambio }: Props) {
               }`}
             >
               {numeros.has(i) && <span className="absolute top-0 left-0.5 font-display text-[9px] font-bold leading-none" aria-hidden>{numeros.get(i)}</span>}
-              <span className="font-display text-xl font-bold leading-none">{letras[i] ?? ''}</span>
+              <span
+                className={`font-display text-xl leading-none ${reveladas.has(i) ? 'italic text-print-muted' : 'font-bold'} ${errores.has(i) ? 'line-through decoration-2' : ''}`}
+              >
+                {letras[i] ?? ''}
+              </span>
+              {errores.has(i) && <span className="absolute top-0 right-0.5 font-display text-[10px] font-bold" aria-hidden>✗</span>}
             </button>
           )
         })}
       </div>
+
+      {!resuelto && (
+        <Ayudas
+          pistasQuedan={pistasQuedan}
+          confirmar={confirmar}
+          puedeVerificar={Object.keys(letras).length > 0}
+          selloEnJuego={calcularSello(progreso)}
+          aviso={aviso}
+          onPista={pedirPista}
+          onVerificar={verificar}
+          onRendirse={rendirse}
+        />
+      )}
 
       {resuelto && (
         <div role="status" className="mt-4 border-4 border-double border-print p-3">
@@ -233,10 +320,8 @@ export default function Crucigrama({ datos, progreso, onCambio }: Props) {
         autoCorrect="off"
         spellCheck={false}
         className="fixed bottom-0 left-0 size-px text-base opacity-0"
-        onBlur={() => {
-          setActiva(null)
-          setCursor(null)
-        }}
+        onFocus={() => setConFoco(true)}
+        onBlur={() => setConFoco(false)}
         onInput={(e) => {
           const el = e.currentTarget
           const tipo = (e.nativeEvent as InputEvent).inputType ?? ''
@@ -260,7 +345,7 @@ export default function Crucigrama({ datos, progreso, onCambio }: Props) {
       />
 
       {/* Barra de pista fija arriba del teclado (como el mini del NYT), con ‹ anterior / siguiente › */}
-      {palabra && (
+      {palabra && conFoco && (
         <div className="paper fixed inset-x-0 bottom-0 z-20 border-t-2 border-print shadow-[0_-4px_12px_rgb(0_0_0/0.15)]" style={{ transform: `translateY(-${altoTeclado}px)` }}>
           <div className="mx-auto flex max-w-6xl items-center gap-1 px-2 py-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
             <button type="button" onPointerDown={sinRobarFoco} onClick={() => saltar(-1)} aria-label="Pista anterior" className="size-11 shrink-0">

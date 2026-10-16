@@ -323,6 +323,7 @@ EDICION_01 = {
                  "entradilla": "Complete la grilla con Z, O, D, I, A, C. Una fila guarda un nombre que la redacción prefiere no imprimir."},
     "crucigrama": {
         "titulo": "Crucigrama del Valle",
+        "pistasGratis": 3,
         "entradas": [
             {"palabra": "PLAINVIEW", "ancla": True, "pista": "Apellido del petrolero que llegó a Little Boston con su hijo y una promesa"},
             {"palabra": "CASABLANCA", "pista": "Ciudad donde un café se niega a tomar partido"},
@@ -355,7 +356,7 @@ def generar(numero: int, semilla: int | None = None) -> tuple[dict, list[str]]:
                      **generar_cinedoku(cz["palabra"], cz["filaOculta"], rng)},
     }
     cruci, descartadas = armar_crucigrama([{**x, "palabra": normalizar(x["palabra"])} for x in cr["entradas"]], rng)
-    data["crucigrama"] = {"titulo": cr["titulo"], **cruci}
+    data["crucigrama"] = {"titulo": cr["titulo"], "pistasGratis": cr["pistasGratis"], **cruci}
     return data, descartadas
 
 def validar(data, numero: int | None = None) -> list[str]:

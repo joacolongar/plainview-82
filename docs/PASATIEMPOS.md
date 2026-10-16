@@ -93,6 +93,8 @@ Las palabras de más de 8 letras, incluida el ancla PLAINVIEW, **solo van en ver
   arriba del teclado** (como el mini del NYT), con botones **"‹ anterior"** y **"siguiente ›"** para
   pasar de pista sin apuntarle a celdas chicas. Tocar de nuevo cambia entre horizontal y
   vertical. Se escribe con el teclado nativo, usando un `<input>` oculto.
+- **Pistas del editor:** 3 (`pistasGratis` en el JSON); cada una revela la celda elegida, que queda fija
+  y se saltea al escribir. "Verificar" marca las letras equivocadas; "Me rindo" completa todo sin sello.
 - **Ancla:** PLAINVIEW siempre entra (`"ancla": true`). Las palabras que no encajan quedan en
   `descartadas` y se pueden usar en la próxima edición.
 

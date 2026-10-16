@@ -35,6 +35,7 @@ export type EntradaCrucigrama = {
 
 export type Crucigrama = {
   titulo: string
+  pistasGratis: number
   ancho: number
   alto: number
   grilla: string[] // "#" = casilla negra

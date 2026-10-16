@@ -46,6 +46,7 @@
   },
   "crucigrama": {
     "titulo": "Crucigrama del Valle",
+    "pistasGratis": 3,
     "ancho": 8,
     "alto": 15,
     "grilla": [
