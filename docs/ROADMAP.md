@@ -53,7 +53,7 @@ Reglas del concepto:
 
 ## Etapa 0 — Base (1 sesión)
 - [x] S1. Proyecto Vite + React + TS + Tailwind + Router, páginas vacías, carrito y WhatsApp funcionando con datos de ejemplo, CLAUDE.md
-- [ ] S1b. Crear repo en GitHub, primer push y deploy en Cloudflare Pages/Netlify (sitio "en construcción" online)
+- [x] S1b. Crear repo en GitHub, primer push y deploy en Cloudflare Pages/Netlify (sitio "en construcción" online)
 
 ## Etapa 1 — La Edición: identidad y catálogo (5 sesiones)
 - [ ] S2. Cabezal del diario: tipografías (Google Fonts), logo SVG con el 8:2 rojo, cabezal con N° de edición y fecha, nav como secciones, footer "pie de imprenta", favicon
@@ -85,3 +85,4 @@ Reglas del concepto:
 ## Bitácora
 - 2026-10-16 — S1: proyecto inicializado con catálogo de ejemplo (Magnolia, Casablanca), carrito con WhatsApp, juego de 3 rondas y CLAUDE.md. Pendiente: repo en GitHub y deploy (S1b).
 - 2026-10-16 — Concepto: se eligió "La Edición" (el sitio como diario de cine) entre tres propuestas (Edición, Expediente, Moviola). Se reescribieron las Etapas 1 a 3 y se sumó S2b (datos editoriales + tapa). Ideas guardadas para más adelante: la lupa/revelado del Expediente y el zoom progresivo de la Moviola como mecánica de juego. Pendiente: fotos reales, precios y textos editoriales de cada remera.
+- 2026-10-16 — S1b: repo público en https://github.com/joacolongar/plainview-82 y deploy automático en Cloudflare Pages (root `web`, build `npm run build`, salida `dist`, Node 22 por `.nvmrc`, `VITE_WHATSAPP_NUMBER` como variable de entorno). Online en https://plainview-82.pages.dev con la franja "Número de prueba" (`IS_PREVIEW` en `config.ts`, pasar a false en S12). `gh` instalado en `~/.local/bin` (sin apt). Verificado: rutas directas responden 200 y el número llega al build. Pendiente: probar en el celular el carrito → WhatsApp de punta a punta.
