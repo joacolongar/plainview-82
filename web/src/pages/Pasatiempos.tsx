@@ -55,7 +55,7 @@ function EdicionPasatiempos({ edicion }: { edicion: Edicion }) {
         titulo={edicion.cifrado.titulo}
         entradilla={edicion.cifrado.entradilla}
         dato={`${edicion.cifrado.simbolosUsados} símbolos`}
-        extra={<PistasDelEditor cantidad={edicion.cifrado.pistasGratis} />}
+        extra={<PistasDelEditor total={edicion.cifrado.pistasGratis} usadas={progreso.juegos.cifrado?.pistasUsadas ?? 0} />}
       >
         <Cifrado
           datos={edicion.cifrado}
@@ -118,11 +118,13 @@ function Seccion({ id, numero, titulo, entradilla, dato, extra, children }: {
   )
 }
 
-// El texto va en tinta y los rombos en rojo: texto rojo chico sobre crema no llega al contraste mínimo
-function PistasDelEditor({ cantidad }: { cantidad: number }) {
+// El texto va en tinta y los rombos en rojo: texto rojo chico sobre crema no llega al contraste mínimo.
+// ◆ = pista disponible, ◇ = pista usada
+function PistasDelEditor({ total, usadas }: { total: number; usadas: number }) {
+  const quedan = Math.max(total - usadas, 0)
   return (
-    <span aria-label={`${cantidad} pistas del editor`}>
-      Pistas del editor: <span aria-hidden className="text-red">{'◆'.repeat(cantidad)}</span>
+    <span aria-label={`Pistas del editor: quedan ${quedan} de ${total}`}>
+      Pistas del editor: <span aria-hidden className="text-red">{'◆'.repeat(quedan)}{'◇'.repeat(total - quedan)}</span>
     </span>
   )
 }
@@ -132,8 +134,6 @@ const JUEGOS: { id: Juego; nombre: string }[] = [
   { id: 'cinedoku', nombre: 'Cinedoku' },
   { id: 'crucigrama', nombre: 'Crucigrama' },
 ]
-
-const ESTRELLAS: Record<Sello, string> = { oro: '★★★', plata: '★★☆', bronce: '★☆☆', rendido: '☆☆☆' }
 
 /** Carnet de lector: un casillero por juego con el sello ganado en esta edición */
 function Carnet({ numero, progreso }: { numero: number; progreso: Progreso }) {
@@ -157,12 +157,12 @@ function Carnet({ numero, progreso }: { numero: number; progreso: Progreso }) {
 }
 
 function SelloImpreso({ sello }: { sello: Sello }) {
-  const { nombre, detalle } = SELLOS[sello]
+  const { nombre, detalle, estrellas } = SELLOS[sello]
   const estilo =
     sello === 'oro' ? 'border-red border-double border-4' : sello === 'rendido' ? 'border-dashed border-2 border-print/50 text-print-muted' : 'border-2 border-print'
   return (
     <span title={detalle} className={`flex size-20 -rotate-6 flex-col items-center justify-center rounded-full ${estilo}`}>
-      <span className="text-xs leading-none" aria-hidden>{ESTRELLAS[sello]}</span>
+      <span className="text-xs leading-none" aria-hidden>{estrellas}</span>
       <span className="mt-1 px-1 font-display text-[10px] font-bold uppercase leading-tight">{nombre}</span>
     </span>
   )

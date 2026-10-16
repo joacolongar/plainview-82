@@ -10,22 +10,23 @@ import type { Juego } from '../data/pasatiempos/types'
 /** Sellos del Carnet de lector (ver docs/PASATIEMPOS.md). `rendido` = "Me rindo": sello en blanco */
 export type Sello = 'oro' | 'plata' | 'bronce' | 'rendido'
 
-export const SELLOS: Record<Sello, { nombre: string; detalle: string }> = {
-  oro: { nombre: 'Primera plana', detalle: 'Sin pistas y con 1 verificación como máximo' },
-  plata: { nombre: 'Página central', detalle: 'Hasta 1 pista o 3 verificaciones' },
-  bronce: { nombre: 'Clasificados', detalle: 'Resuelto de cualquier forma' },
-  rendido: { nombre: 'Me rindo', detalle: 'Se vio la solución: sello en blanco' },
+export const SELLOS: Record<Sello, { nombre: string; detalle: string; estrellas: string }> = {
+  oro: { nombre: 'Primera plana', detalle: 'Sin pistas y con 1 verificación como máximo', estrellas: '★★★' },
+  plata: { nombre: 'Página central', detalle: 'Hasta 1 pista o 3 verificaciones', estrellas: '★★☆' },
+  bronce: { nombre: 'Clasificados', detalle: 'Resuelto de cualquier forma', estrellas: '★☆☆' },
+  rendido: { nombre: 'Me rindo', detalle: 'Se vio la solución: sello en blanco', estrellas: '☆☆☆' },
 }
 
 export type ProgresoJuego = {
   sello?: Sello
   segundos?: number // tiempo de resolución (P5)
-  pistasUsadas?: number // pistas del editor (P2b)
-  verificaciones?: number // usos de "Verificar" (P2b)
+  pistasUsadas?: number // pistas del editor
+  verificaciones?: number // usos de "Verificar"
 }
 
 export type ProgresoCifrado = ProgresoJuego & {
   asignaciones?: Record<string, string> // símbolo → letra que puso el lector
+  reveladas?: string[] // símbolos cuya letra dio el editor (quedan fijos)
   resuelto?: boolean
 }
 
