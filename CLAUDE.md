@@ -58,5 +58,9 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
     palabra del crucigrama ni dato explícito.
 - Las **noticias** de la portada (diario "THE PLAINVIEW") viven en `web/src/data/noticias.ts` y cuentan la premisa de
   la película como si pasara hoy, con la regla de arriba. Tono irónico de diario de época.
+  - **Largo:** la principal lleva titular, bajada de **una línea** y epígrafe (sin cuerpo); las secundarias,
+    sección, titular y **2 o 3 oraciones**. Las noticias mandan: tienen que pesar más que los avisos.
+- Los **avisos** chicos (`web/src/data/anuncios.ts`, tipos "mini" y "linea") van sueltos entre las noticias y en otras
+  páginas, nunca en una página propia. Misma regla de contenido; los teléfonos terminan en el año de la película.
 - El número de WhatsApp va en `web/.env` como `VITE_WHATSAPP_NUMBER` (ver `.env.example`). Nunca commitear `.env`.
 - Antes de dar algo por terminado: `npm run build` y `npm run lint` sin errores.

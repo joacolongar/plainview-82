@@ -1,116 +1,127 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import Aviso from '../components/Aviso'
 import Masthead from '../components/Masthead'
-import { rounds } from '../data/game'
-import { clasificados, getNoticias, SECCIONES, type Noticia } from '../data/noticias'
+import { getAviso, PORTADA, type Aviso as DatosAviso } from '../data/anuncios'
+import { principal, secundarias, SECCIONES, type Noticia } from '../data/noticias'
 import { getProduct, rutaAviso } from '../data/products'
 
-// Links sobre el papel: tinta subrayada, 44px de alto para el pulgar
-const paperLink = 'inline-flex min-h-11 items-center font-display text-sm font-bold uppercase tracking-wider underline underline-offset-4 hover:decoration-red'
+type Item = { tipo: 'noticia'; noticia: Noticia } | { tipo: 'aviso'; aviso: DatosAviso }
 
-/** Primera plana del diario THE PLAINVIEW. Mobile: una columna. Desde md: grillas con filetes entre columnas. */
+/**
+ * Reparte las noticias secundarias en dos columnas e intercala los avisos de la portada (PORTADA en anuncios.ts):
+ * - las noticias van alternadas: izquierda, derecha, izquierda…
+ * - los minis van desfasados: la derecha arranca con uno y la izquierda lo pone después de su primera noticia
+ *   (así nunca quedan dos a la misma altura y hay como mucho 2 a la vista en el celular)
+ * - los avisos de línea rellenan el final: el primero a la columna más corta, el siguiente a la otra
+ */
+function armarColumnas(noticias: Noticia[]): [Item[], Item[]] {
+  const minis = PORTADA.minis.map(getAviso).filter((a): a is DatosAviso => !!a)
+  const lineas = PORTADA.lineas.map(getAviso).filter((a): a is DatosAviso => !!a)
+  const izq: Item[] = []
+  const der: Item[] = []
+  const mini = (col: Item[]) => {
+    const a = minis.shift()
+    if (a) col.push({ tipo: 'aviso', aviso: a })
+  }
+
+  mini(der)
+  noticias.forEach((noticia, i) => {
+    const col = i % 2 === 0 ? izq : der
+    col.push({ tipo: 'noticia', noticia })
+    const enSuColumna = Math.floor(i / 2) + 1
+    if (col === izq ? enSuColumna % 2 === 1 : enSuColumna % 2 === 0) mini(col)
+  })
+
+  const [corta, larga] = izq.length <= der.length ? [izq, der] : [der, izq]
+  lineas.forEach((aviso, i) => (i % 2 === 0 ? corta : larga).push({ tipo: 'aviso', aviso }))
+  return [izq, der]
+}
+
+/**
+ * Primera plana del diario THE PLAINVIEW (maqueta: docs/portada-con-avisos.png).
+ * Principal corta (titular, bajada, grabado, epígrafe) y abajo dos columnas, también en el celular,
+ * con noticias breves y avisos sueltos. Cierra el aviso rojo de la marca.
+ */
 export default function Home() {
-  const [principal] = getNoticias('portada')
-  const [clima] = getNoticias('clima')
-  const secundarias = [...getNoticias('espectaculos'), ...getNoticias('internacional'), ...getNoticias('deportes')]
+  const p = principal()
+  const columnas = armarColumnas(secundarias())
+  const cierre = getAviso(PORTADA.cierre)
 
   return (
     <div>
       <Masthead />
 
-      {/* Noticia principal: en 375×667 entran titular, bajada e ilustración con epígrafe */}
+      {/* Noticia principal: en 375×667 entran titular, bajada y grabado con epígrafe */}
       <article className="pt-2 md:pt-5">
-        <h2 className="text-center font-headline text-[clamp(3rem,15vw,9rem)] uppercase leading-[0.92] text-balance hyphens-auto">
-          {principal.titular}
-        </h2>
-        <p className="mx-auto mt-2 max-w-3xl text-center font-display text-[17px] italic leading-snug md:text-2xl">{principal.bajada}</p>
-        <div className="mt-2 grid gap-4 md:mt-5 md:grid-cols-3 md:gap-6">
-          <figure className="md:col-span-2">
-            {/* Placeholder con borde de grabado hasta que esté la ilustración propia */}
-            <div className="border-4 border-double border-print p-1">
-              <div className="engraving flex aspect-[2/1] items-center justify-center md:aspect-[4/3]">
-                <span className="bg-paper px-2 font-display text-xs uppercase tracking-widest text-print-muted">Grabado en preparación</span>
-              </div>
+        <h2 className="text-center font-headline text-[clamp(3rem,15vw,9rem)] uppercase leading-[0.92] text-balance hyphens-auto">{p.titular}</h2>
+        <p className="mx-auto mt-2 max-w-3xl text-center font-display text-[17px] italic leading-snug md:text-2xl">{p.bajada}</p>
+        <figure className="mt-3 md:mt-5">
+          {/* Placeholder con borde de grabado hasta que esté la ilustración propia */}
+          <div className="border-4 border-double border-print p-1">
+            <div className="engraving flex aspect-[2/1] items-center justify-center md:aspect-[5/2]">
+              <span className="bg-paper px-2 font-display text-xs uppercase tracking-widest text-print-muted">Grabado en preparación</span>
             </div>
-            {principal.epigrafe && <figcaption className="mt-1 font-display text-sm italic leading-snug text-print-muted">{principal.epigrafe}</figcaption>}
-          </figure>
-          <div className="border-t border-print/30 pt-3 md:border-t-0 md:border-l md:pt-0 md:pl-6">
-            <Cuerpo parrafos={principal.cuerpo} />
-            <Link to="/catalogo" className={paperLink}>Ver el catálogo →</Link>
           </div>
-        </div>
+          {p.epigrafe && <figcaption className="mt-1 font-display text-sm italic leading-snug text-print-muted">{p.epigrafe}</figcaption>}
+        </figure>
       </article>
 
-      {/* Noticias secundarias */}
-      <div className="mt-6 grid border-t-4 border-double border-print md:grid-cols-3 md:divide-x md:divide-print/30">
-        {secundarias.map((n) => (
-          <div key={n.id} className="border-b border-print/30 py-5 last:border-b-0 md:border-b-0 md:px-5 md:first:pl-0 md:last:pr-0">
-            <Articulo n={n} />
+      {/* Dos columnas con noticias breves y avisos intercalados */}
+      <div className="mt-5 grid grid-cols-2 gap-x-4 border-t-2 border-print pt-4 md:gap-x-10">
+        {columnas.map((col, c) => (
+          <div key={c} className="flex min-w-0 flex-col gap-4">
+            {col.map((item) =>
+              item.tipo === 'noticia' ? (
+                <Breve key={item.noticia.id} n={item.noticia} />
+              ) : (
+                <Aviso key={item.aviso.id} aviso={item.aviso} />
+              ),
+            )}
           </div>
         ))}
       </div>
 
-      {/* Columnas chicas: el tiempo, clasificados y pasatiempos */}
-      <div className="grid border-t-4 border-double border-print md:grid-cols-3 md:divide-x md:divide-print/30">
-        <section className="border-b border-print/30 py-5 md:border-b-0 md:pr-5">
-          {clima && <Articulo n={clima} chico />}
-        </section>
-        <section className="border-b border-print/30 py-5 md:border-b-0 md:px-5">
-          <Volanta>Avisos clasificados</Volanta>
-          <ul className="mt-2 space-y-2 font-display text-[15px] leading-snug">
-            {clasificados.map((c) => (
-              <li key={c} className="border-b border-dotted border-print/40 pb-2">{c}</li>
-            ))}
-          </ul>
-          <Link to="/como-comprar" className={paperLink}>Ver Cómo comprar →</Link>
-        </section>
-        <section className="py-5 md:pl-5">
-          <Volanta>Pasatiempos</Volanta>
-          <h3 className="mt-1 font-headline text-2xl uppercase leading-none">¿De qué película es?</h3>
-          {/* Sin mostrar pistas: las películas del juego también salen en las noticias y la respuesta quedaría a la vista */}
-          <p className="mt-2 font-display text-[15px] italic leading-snug">
-            {rounds.length} acertijos de cine esperan al lector atento. Pistas propias, ninguna trampa y un premio para quien mire de cerca.
-          </p>
-          <Link to="/pasatiempos" className={paperLink}>Ir a Pasatiempos →</Link>
-        </section>
-      </div>
+      {cierre && (
+        <div className="mt-6">
+          <Aviso aviso={cierre} />
+        </div>
+      )}
     </div>
   )
 }
 
 function Volanta({ children }: { children: ReactNode }) {
   return (
-    <p className="flex items-center gap-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-print-muted">
-      <span aria-hidden className="size-2 bg-red" />
+    <p className="flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.18em] text-print-muted">
+      <span aria-hidden className="size-1.5 shrink-0 bg-red" />
       {children}
     </p>
   )
 }
 
-/** Cuerpo de nota con capitular (primera letra grande) en el primer párrafo */
-function Cuerpo({ parrafos }: { parrafos: string[] }) {
-  return (
-    <div className="space-y-2 font-display text-[15px] leading-snug text-pretty">
-      {parrafos.map((p, i) => (
-        <p key={i} className={i === 0 ? 'first-letter:float-left first-letter:mr-1.5 first-letter:font-headline first-letter:text-5xl first-letter:leading-[0.8]' : ''}>
-          {p}
-        </p>
-      ))}
-    </div>
-  )
-}
-
-function Articulo({ n, chico = false }: { n: Noticia; chico?: boolean }) {
+/** Noticia breve: sección, titular y 2 o 3 oraciones. Si hay remera, la noticia entera es el link a su aviso
+ * (área grande para el dedo, sin dejar huecos cuando el titular entra en una línea) */
+function Breve({ n }: { n: Noticia }) {
   const product = n.productSlug ? getProduct(n.productSlug) : undefined
-  return (
-    <article>
+  const contenido = (
+    <>
       <Volanta>{SECCIONES[n.seccion]}</Volanta>
-      <h3 className={`mt-1 font-headline uppercase leading-none text-balance hyphens-auto ${chico ? 'text-2xl' : 'text-3xl'}`}>{n.titular}</h3>
-      <p className="mt-2 font-display italic leading-snug">{n.bajada}</p>
-      <div className="mt-2">
-        <Cuerpo parrafos={n.cuerpo} />
-      </div>
-      {product && <Link to={rutaAviso(product.slug)} className={paperLink}>Ver la remera →</Link>}
+      <h3 className="mt-1 font-display text-xl font-bold leading-tight text-balance hyphens-auto underline-offset-4 group-hover:underline md:text-3xl">
+        {n.titular}
+      </h3>
+      <p className="mt-1 font-display text-[15px] leading-snug text-pretty md:text-base">{n.texto}</p>
+    </>
+  )
+  return (
+    <article className="border-b border-print/30 pb-4">
+      {product ? (
+        <Link to={rutaAviso(product.slug)} className="group block">
+          {contenido}
+        </Link>
+      ) : (
+        contenido
+      )}
     </article>
   )
 }

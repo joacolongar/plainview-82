@@ -31,7 +31,8 @@ cada página de cerca.
 | Referencia | Recuadro "Fe de erratas: mirá de nuevo" | Se despliega al tocarlo |
 | Estado | En existencia / Por encargo / Próximo número | disponible / preventa / próximamente |
 | Juego | Pasatiempos | El Cifrado, Cinedoku, Crucigrama Mini, Mirá de Cerca y La Función del Día (ver `docs/PASATIEMPOS.md`) |
-| Cómo comprar | Avisos clasificados | Pagos, envíos, talles y cambios como avisos |
+| Cómo comprar | Página propia (sin clasificados) | Pasos, guía de talles, pagos, envíos y cambios |
+| Avisos | Avisos chicos sueltos (`anuncios.ts`): "mini" con ilustración y "línea" | Entre las noticias de la portada, al pie de cada aviso comercial y en Pasatiempos; nunca en una página propia |
 | Carrito | Boleta de pedido | Cupón recortable que se envía por WhatsApp |
 | Footer | Pie de página + pie de imprenta | "← pág. anterior · Índice · pág. siguiente →", fecha, staff, @plainview.82 |
 | 404 | Fe de erratas | "Esta escena se cortó en el montaje" |
@@ -52,7 +53,7 @@ Reglas del concepto:
   "THE PLAINVIEW", número de página y nombre de la sección.
 - **Pie de página:** "← pág. anterior · Índice · pág. siguiente →", la fecha y el pie de imprenta.
 - **Orden de páginas** en `src/data/paginas.ts`, armado a partir de productos y secciones: Primera plana →
-  Índice de avisos → un aviso por producto (por `articleNo`) → Pasatiempos → Clasificados → Boleta.
+  Índice de avisos → un aviso por producto (por `articulo`) → Pasatiempos → Cómo comprar → Boleta.
   El número de página es la posición en esa lista; el 404 (Fe de erratas) queda afuera.
 - **Pasar de página:** deslizando en el celular (pointer events nativos, umbral ~60px y solo si el gesto es más
   horizontal que vertical), con ← → en la compu (salvo con el foco en un campo o un tablero) y siempre con los
@@ -73,7 +74,7 @@ Reglas del concepto:
 | `/carrito` | Boleta de pedido: cupón recortable editable, nota, "Enviar boleta por WhatsApp" |
 | `/pasatiempos` | Pasatiempos: una página con El Cifrado, Cinedoku y Crucigrama del Valle de la edición numerada vigente, y el Carnet de lector al pie (maqueta en `docs/pasatiempos-maqueta.png`) |
 | `/juego` | La Función del Día (versión de prueba, hasta P6) |
-| `/como-comprar` | Avisos clasificados: pasos, guía de talles, pagos, envíos y cambios |
+| `/como-comprar` | Cómo comprar: pasos, guía de talles, pagos, envíos y cambios |
 | `*` | Fe de erratas (404) |
 
 ---
@@ -96,7 +97,7 @@ Reglas del concepto:
 
 ## Etapa 2 — Pedidos por WhatsApp (2 sesiones)
 - [ ] S6. Boleta de pedido (página del diario): cupón recortable (borde punteado, tijera), quitar ítem, validaciones, "Enviar boleta por WhatsApp" pegado abajo, campo de cupón (de los pasatiempos) en el mensaje, número real en `.env`, probar en celular
-- [ ] S7. Datos del pedido (nombre, zona, envío/retiro) completados en la boleta y sumados al mensaje; página "Clasificados" (cómo comprar) completa dentro de `NewspaperPage`
+- [ ] S7. Datos del pedido (nombre, zona, envío/retiro) completados en la boleta y sumados al mensaje; página "Cómo comprar" completa dentro de `NewspaperPage`
 
 ## Etapa 3 — Pasatiempos (6-8 sesiones, diseño en `docs/PASATIEMPOS.md`)
 Numeradas P1–P6 para no renumerar S11 y S12. Contenido por **edición numerada** (`web/src/data/pasatiempos/edicion-NN.json`),
@@ -144,3 +145,4 @@ generado y validado con `python3 scripts/pasatiempos.py generar|validar N`.
 - 2026-10-16 — S4.0 (paso 0 de S4): cabecera nueva según `cabecera.zip`. Bloque izquierdo = `logo-watch-closer` (imagen, mismo rojo de la marca); logo giratorio sin franja negra, con cara A `logo-8-2-bloque` y cara B `logo-plainview-tinta`, en un contenedor del mismo tamaño que el bloque (50×52 en mobile, 96×100 desde md). La cara B se sale hacia el título sin moverlo (anclada al revés porque el giro de 180° la espeja). `RotatingLogo` ahora recibe `lado` y `tamano`; la cabecera chica también lo usa sin recuadro negro. Título "The / Plainview" en dos líneas en mobile; barra mobile "Vol. 8 · No. 2 · Ed. N° 1 · 16 oct 2026". Papel `#ebe3d1`. Logos en WebP (bloques con pérdida, 4–7 KB); se borraron los WebP viejos. Verificado a 375 y 1280: bloques iguales, título fijo en las dos caras, la cara B no pisa "Plainview" (19 px de aire), portada con epígrafe en 615 px. Próxima sesión: S4, aviso comercial.
 - 2026-10-16 — Pruebas en celular real: el dueño confirmó que andan bien los juegos, Compartir, el deslizar, el giro del logo y carrito → WhatsApp (se cierran esos pendientes).
 - 2026-10-16 — S4: aviso comercial en `/catalogo/:slug` (`pages/Aviso.tsx`, renombrado de ProductDetail con `git mv`); `/producto/:slug` redirige (`RedirigirAviso`). La ruta sale de `rutaAviso()` y los estados de `ESTADOS` (En existencia / Por encargo / Próximo número), ambos en `products.ts`; se actualizaron cards, portada, juego y `paginas.ts`. Aviso: "Art. N° · película · director · año", titular en Anton, bajada + precio en recuadro con "$" chico (sin precio: "Próximo número"), grabado con doble filete y epígrafe, texto del aviso con capitular, referencia, talle/color y "Agregar al pedido" pegado abajo. El campo `description` ya no se muestra (lo reemplaza `aviso`). Verificado a 375 px: avisos en pág. 3 y 4, redirección, slug inexistente → Fe de erratas, sin desbordes, grabado visible en la primera pantalla; con un precio de prueba (no commiteado): recuadro "$ 25.000 · En existencia" y agregar a la boleta funciona. Pendiente: precios reales. Próxima sesión: S4b (tabla de medidas, cupón recortable, Fe de erratas).
+- 2026-10-16 — Avisos y noticias cortas (`avisos.zip`: 8 ilustraciones SVG en `public/ilustraciones/`, `data/anuncios.ts`, maqueta `docs/portada-con-avisos.png`; los SVG solo tienen referencias internas). Componente `components/Aviso.tsx` para "mini" (recuadro con ilustración de 44 px; estilos invertido —SVG con `invert`— y rojo —texto de 19 px en negrita por contraste—) y "línea" (separador punteado); con `productSlug`/`href` el aviso entero es link. La página del aviso comercial pasó a `pages/AvisoComercial.tsx` (`git mv`) para no chocar con el nombre `Aviso`. Noticias reescritas cortas (principal: titular, bajada de una línea y epígrafe; secundarias: sección, titular y 2-3 oraciones; regla de largo en CLAUDE.md); sale `clasificados` y la columna de Pasatiempos de la portada. Portada como la maqueta: principal corta y dos columnas también a 375 px (`armarColumnas` en Home: noticias alternadas, minis desfasados, líneas al final), con el aviso rojo de la marca al cierre. Con 5 noticias las columnas miden menos de una pantalla, así que va 1 mini + el rojo (2 a la vista, el máximo pedido); la lista está en `PORTADA` de `anuncios.ts`. Al pie del aviso comercial va el aviso de esa remera (sin link) y en Pasatiempos "Recompensa" (texto corregido: decía "pág. 6"). No hay página de clasificados: `/como-comprar` se llama "Cómo comprar". Verificado a 375 px: sin desbordes ni elementos chicos, como mucho 2 avisos grandes por pantalla, titular de noticia 20 px vs aviso 16 px, epígrafe de la principal en 596 px. Próxima sesión: S4b.

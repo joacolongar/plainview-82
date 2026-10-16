@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="none" color="#141210"><defs><pattern id="h" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="currentColor" stroke-width="1.6"/></pattern></defs>
+<g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+<path d="M100 6v22M92 14h16" stroke-width="4"/>
+<path d="M88 52l12-24 12 24z" fill="currentColor"/>
+<rect x="88" y="52" width="24" height="30" fill="currentColor"/>
+<rect x="96" y="60" width="8" height="12" rx="4" fill="#ebe3d1"/>
+<path d="M30 112 100 66l70 46z" fill="currentColor"/>
+<rect x="40" y="110" width="120" height="72" fill="#ebe3d1" stroke-width="4"/>
+<path d="M40 120h120M40 130h120M40 140h120M40 150h120M40 160h120M40 170h120" stroke-width="1.5"/>
+<path d="M86 182v-34a14 14 0 0 1 28 0v34z" fill="currentColor"/>
+<path d="M100 150v32" stroke="#ebe3d1" stroke-width="1.5"/>
+<rect x="52" y="136" width="18" height="24" fill="currentColor"/><path d="M61 136v24M52 148h18" stroke="#ebe3d1" stroke-width="1.5"/>
+<rect x="130" y="136" width="18" height="24" fill="currentColor"/><path d="M139 136v24M130 148h18" stroke="#ebe3d1" stroke-width="1.5"/>
+<path d="M8 184h184" stroke-width="4"/>
+<path d="M14 192h40M70 191h60M146 192h40" stroke-width="2"/>
+<path d="M172 182l6-20 6 20M180 166l-6-6" stroke-width="2"/>
+<path d="M20 178c6-10 12-10 16 0M24 172l4-8" stroke-width="2"/>
+</g></svg>

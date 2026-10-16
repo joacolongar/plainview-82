@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import Aviso from '../components/Aviso'
+import { getAviso } from '../data/anuncios'
 import { ultimaEdicion } from '../data/pasatiempos'
 import Cifrado from '../components/pasatiempos/Cifrado'
 import Cinedoku from '../components/pasatiempos/Cinedoku'
@@ -18,6 +20,7 @@ const paperLink = 'inline-flex min-h-11 items-center font-display text-sm font-b
  */
 export default function Pasatiempos() {
   const edicion = ultimaEdicion()
+  const recompensa = getAviso('recompensa')
 
   return (
     <div>
@@ -27,6 +30,13 @@ export default function Pasatiempos() {
           {edicion ? `Edición N° ${edicion.numero}` : 'Edición en imprenta'} · Para el lector que mira de cerca
         </p>
       </header>
+
+      {/* El aviso "Recompensa" anuncia el Cifrado, que es lo primero de la página */}
+      {edicion && recompensa && (
+        <aside className="mx-auto mt-4 max-w-xs">
+          <Aviso aviso={recompensa} />
+        </aside>
+      )}
 
       {!edicion ? (
         <p className="py-10 text-center font-display italic">La sección no llegó a imprenta. Vuelva pronto.</p>

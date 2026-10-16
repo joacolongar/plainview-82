@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="none" color="#141210"><defs><pattern id="h" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="currentColor" stroke-width="1.6"/></pattern></defs>
+<g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+<path d="M8 182h184" stroke-width="5"/>
+<path d="M18 190h30M60 189h40M120 190h22M156 189h30" stroke-width="2"/>
+<rect x="44" y="170" width="132" height="10" fill="currentColor"/>
+<path d="M96 170 112 82 128 170" stroke-width="6"/>
+<path d="M100 150h24M103 130h18M106 110h12M100 150l21-20M124 150l-21-20M103 130l15-20M121 130l-15-20" stroke-width="2.5"/>
+<path d="M58 66 172 96" stroke-width="11"/>
+<path d="M58 66 172 96" stroke="#ebe3d1" stroke-width="3" stroke-dasharray="6 7"/>
+<circle cx="112" cy="81" r="6" fill="currentColor"/>
+<path d="M58 52c-14 2-24 14-26 30-1 14 4 26 12 34l14-50z" fill="currentColor"/>
+<path d="M38 112v58" stroke-width="2.5"/>
+<rect x="30" y="160" width="16" height="10" fill="currentColor"/>
+<path d="M168 96l-6 46M174 98l-2 44" stroke-width="3.5"/>
+<rect x="144" y="140" width="38" height="30" fill="currentColor"/>
+<path d="M150 136a22 22 0 0 1 26 2l-6 18h-14z" fill="url(#h)" stroke-width="3"/>
+<circle cx="163" cy="146" r="5" fill="#ebe3d1"/>
+<path d="M136 182c4-6 10-6 14 0M66 182c5-7 12-7 16 0" stroke-width="2"/>
+</g></svg>

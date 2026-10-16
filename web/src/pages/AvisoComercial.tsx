@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
+import Aviso from '../components/Aviso'
 import { useCart } from '../context/CartContext'
+import { avisoDeProducto } from '../data/anuncios'
 import { ESTADOS, getProduct, numeroArticulo, rutaAviso, type Product, type Size } from '../data/products'
 import NotFound from './NotFound'
 
@@ -12,7 +14,7 @@ const miles = new Intl.NumberFormat('es-AR') // 25000 → "25.000"
  * Mobile-first: titular a todo el ancho; bajada y precio en una fila; comprar pegado abajo.
  * (La tabla de medidas y el cupón recortable llegan en S4b.)
  */
-export default function Aviso() {
+export default function AvisoComercial() {
   const { slug = '' } = useParams()
   const p = getProduct(slug)
   const { add } = useCart()
@@ -22,6 +24,7 @@ export default function Aviso() {
 
   if (!p) return <NotFound />
   const canBuy = p.status !== 'proximamente' && size !== null
+  const avisoChico = avisoDeProducto(p.slug)
 
   return (
     <article>
@@ -116,6 +119,13 @@ export default function Aviso() {
           </div>
         </div>
       </div>
+
+      {/* Al pie, el aviso chico de esta remera (sin link: ya estamos en su página) */}
+      {avisoChico && (
+        <aside className="mt-8 max-w-sm">
+          <Aviso aviso={avisoChico} sinLink />
+        </aside>
+      )}
     </article>
   )
 }
