@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ultimaEdicion } from '../data/pasatiempos'
 import Cifrado from '../components/pasatiempos/Cifrado'
 import Cinedoku from '../components/pasatiempos/Cinedoku'
+import Crucigrama from '../components/pasatiempos/Crucigrama'
 import type { Edicion, Juego } from '../data/pasatiempos/types'
 import { SELLOS, useProgreso, type Progreso, type Sello } from '../lib/progresoPasatiempos'
 
@@ -11,7 +12,7 @@ const paperLink = 'inline-flex min-h-11 items-center font-display text-sm font-b
 /**
  * Página de Pasatiempos. Sigue docs/pasatiempos-maqueta.png:
  * cabecera de página, título, las tres secciones de la edición y el Carnet de lector al pie.
- * El Cifrado (P2) y el Cinedoku (P3) ya se juegan; el Crucigrama muestra "En imprenta" hasta P4.
+ * Los tres juegos se juegan: Cifrado (P2), Cinedoku (P3) y Crucigrama (P4; sus ayudas llegan en P4b).
  */
 export default function Pasatiempos() {
   const edicion = ultimaEdicion()
@@ -84,7 +85,13 @@ function EdicionPasatiempos({ edicion }: { edicion: Edicion }) {
         titulo={edicion.crucigrama.titulo}
         entradilla="Palabras cruzadas, todas sacadas de las páginas de este diario."
         dato={`${edicion.crucigrama.ancho}×${edicion.crucigrama.alto} · ${edicion.crucigrama.horizontales.length + edicion.crucigrama.verticales.length} palabras`}
-      />
+      >
+        <Crucigrama
+          datos={edicion.crucigrama}
+          progreso={progreso.juegos.crucigrama ?? {}}
+          onCambio={(crucigrama) => setProgreso((p) => ({ ...p, juegos: { ...p.juegos, crucigrama } }))}
+        />
+      </Seccion>
 
       <p className="border-t-4 border-double border-print pt-3 font-display text-[15px] italic">
         Mientras se terminan de imprimir, puede probar suerte con La Función del Día.

@@ -37,10 +37,17 @@ export type ProgresoCinedoku = ProgresoJuego & {
   resuelto?: boolean
 }
 
+/** Celdas del Crucigrama numeradas como fila * ancho + columna */
+export type ProgresoCrucigrama = ProgresoJuego & {
+  letras?: Record<number, string> // letra que escribió el lector
+  reveladas?: number[] // celdas que dio el editor (P4b)
+  resuelto?: boolean
+}
+
 // `v` es la versión del formato: si algún día cambia, los datos viejos se descartan en vez de romper la página
 export type Progreso = {
   v: 1
-  juegos: { cifrado?: ProgresoCifrado; cinedoku?: ProgresoCinedoku; crucigrama?: ProgresoJuego }
+  juegos: { cifrado?: ProgresoCifrado; cinedoku?: ProgresoCinedoku; crucigrama?: ProgresoCrucigrama }
 }
 
 /**
