@@ -15,6 +15,13 @@
   --font-display: "Old Standard TT", Georgia, "Times New Roman", serif;
   --font-body: "Inter", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  /* Ambientaciones (docs/AMBIENTACIONES.md): decorativas, no rigen las reglas de contraste del texto */
+  --color-sangre: #a8261c; /* rojo sangre oscuro de los pecados */
+  --color-cafe: #3b271b;
+  --color-cafe-claro: #7a5a44; /* el brillo del chorro */
+  --color-loza: #ffffff; /* el pocillo: blanco puro, sin sombreado */
+  --font-fell-sc: "IM Fell English SC", Georgia, serif; /* números romanos */
+  --font-fell: "IM Fell English", Georgia, serif; /* nombres, en itálica */
 
   /* Logo giratorio (RotatingLogo): 5 s el 8:2 · giro 0,6 s · 5 s PLAINVIEW · giro 0,6 s = 11,2 s.
      44.64% = 5 / 11.2 y 50% = 5.6 / 11.2. El easing va en cada tramo de giro. */
@@ -59,4 +66,41 @@ html[data-direccion="atras"]::view-transition-new(hoja) { animation-name: hoja-e
 /* Con movimiento reducido no hay animación: la página cambia y listo */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* Ambientaciones (docs/AMBIENTACIONES.md y components/ambientacion/).
+   El estilo de cada elemento ES su estado final: las animaciones solo existen con movimiento permitido
+   (no-preference), así que con prefers-reduced-motion todo queda quieto en su lugar sin código extra.
+   Solo se anima transform y opacity: el navegador lo resuelve en la GPU, sin recalcular la página.
+   Los keyframes con solo "from" terminan en el estilo propio del elemento (por ejemplo, la opacidad baja de VI y VII). */
+@media (prefers-reduced-motion: no-preference) {
+  /* Ranas: la franja ocupa todo el alto de la página; moverla un 100% de su alto la lleva de arriba abajo.
+     --y es dónde está la rana dentro de la franja (cuando está quieta). */
+  .amb-cae { animation: amb-cae var(--dur) linear var(--retraso) infinite; }
+  .amb-balancea { animation: amb-balancea calc(var(--dur) / 3) ease-in-out var(--retraso) infinite; }
+  /* Café: una sola vez al entrar */
+  .amb-chorro { animation: amb-estira 0.6s ease-out 0.3s both; }
+  .amb-gota { animation: amb-gota 0.45s ease-in var(--retraso) both; }
+  .amb-mancha { animation: amb-aparece 1.2s ease-out 1.1s both; }
+  /* Pecados: de a uno, como si alguien los fuera escribiendo */
+  .amb-escribe { animation: amb-escribe 0.7s ease-out var(--retraso) both; }
+}
+@keyframes amb-cae {
+  from { transform: translateY(calc(-1 * var(--y) - 8%)); }
+  to { transform: translateY(calc(100% - var(--y))); }
+}
+@keyframes amb-balancea {
+  0%, 100% { transform: rotate(var(--giro)); }
+  50% { transform: rotate(calc(var(--giro) + 12deg)); }
+}
+@keyframes amb-estira { from { transform: scaleY(0); } }
+@keyframes amb-gota { from { transform: translateY(-28px); opacity: 0; } }
+@keyframes amb-aparece { from { opacity: 0; } }
+@keyframes amb-escribe { from { opacity: 0; transform: translateY(3px); } }
+/* El chorro se estira desde el borde del pocillo: el origen es la parte de arriba del propio trazo */
+.amb-chorro { transform-box: fill-box; transform-origin: top; }
+.amb-gota { transform-box: fill-box; }
+/* Lluvia de los pecados: líneas diagonales muy tenues, quietas */
+.amb-lluvia {
+  background-image: repeating-linear-gradient(105deg, color-mix(in oklab, var(--color-print) 7%, transparent) 0 1px, transparent 1px 15px);
 }

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 320" color="#141210">
+<!-- pocillo volcado, todo blanco, con el café cayendo en chorro -->
+<g transform="rotate(-40 160 90)" stroke="currentColor" stroke-linejoin="round" stroke-linecap="round">
+  <!-- asa -->
+  <path d="M212 70 C246 66 248 108 210 104" fill="none" stroke-width="11"/>
+  <path d="M212 70 C246 66 248 108 210 104" fill="none" stroke="#ffffff" stroke-width="4.5"/>
+  <!-- cuerpo -->
+  <path d="M100 60 C102 104 128 124 160 124 C192 124 218 104 220 60 Z" fill="#ffffff" stroke-width="4.5"/>
+  <!-- pie -->
+  <path d="M138 123 C140 130 180 130 182 123" fill="#ffffff" stroke-width="4"/>
+  <!-- boca con café -->
+  <ellipse cx="160" cy="60" rx="60" ry="13" fill="#ffffff" stroke-width="4.5"/>
+  <ellipse cx="158" cy="62" rx="51" ry="8.5" fill="#3b271b" stroke="none"/>
+</g>
+<!-- chorro que cae desde el borde -->
+<path d="M92 112 C80 118 74 132 74 152 C74 176 78 196 79 214 C79 220 85 220 85 214 C86 194 84 172 86 152 C88 136 96 124 108 116 Z" fill="#3b271b"/>
+<path d="M82 140 C80 156 80 172 81 186" stroke="#7a5a44" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".8"/>
+<!-- gotas en el aire (cayendo) -->
+<path d="M82 234 C80 242 77 248 77 252 C77 258 87 258 87 252 C87 248 84 242 82 234 Z" fill="#3b271b"/>
+<path d="M80 270 C79 275 77 279 77 282 C77 286 83 286 83 282 C83 279 81 275 80 270 Z" fill="#3b271b"/>
+<path d="M84 300 C83.4 303 82 305 82 307 C82 310 86 310 86 307 C86 305 84.6 303 84 300 Z" fill="#3b271b"/>
+</svg>

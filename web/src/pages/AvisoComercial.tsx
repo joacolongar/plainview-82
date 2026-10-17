@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import Aviso from '../components/Aviso'
+import Ambientacion from '../components/ambientacion/Ambientacion'
 import { useCart } from '../context/CartContext'
 import { avisoDeProducto } from '../data/anuncios'
 import { MEDIDAS, MEDIDAS_DE_EJEMPLO } from '../data/medidas'
@@ -28,9 +29,14 @@ export default function AvisoComercial() {
   const avisoChico = avisoDeProducto(p.slug)
 
   return (
-    <article>
+    // relative + isolate: la ambientación se ubica contra la página y lo que va detrás del texto (la lluvia) queda
+    // sobre el papel pero debajo de las palabras
+    <article className="relative isolate">
+      <Ambientacion tipo={p.ambientacion} zona="pagina" />
       <p className="font-display text-[11px] font-bold uppercase tracking-[0.15em] text-print-muted">
-        Art. N° {numeroArticulo(p)} · {p.movie} · {p.director} · {p.year}
+        Art. N° {numeroArticulo(p)}
+        {/* el lugar, si no es el nombre de la película (Casablanca · Casablanca) */}
+        {p.lugar && p.lugar !== p.movie && ` · ${p.lugar}`} · {p.movie} · {p.director} · {p.year}
       </p>
       <h1 className="mt-1 font-headline text-[clamp(2.5rem,12vw,5.5rem)] uppercase leading-[0.92] text-balance hyphens-auto">{p.titular}</h1>
       <div className="mt-3 flex items-start gap-3">
@@ -41,7 +47,7 @@ export default function AvisoComercial() {
       <div className="mt-5 grid gap-5 md:grid-cols-2 md:gap-8">
         <figure>
           {/* Grabado: la foto si hay, si no el placeholder con trama, siempre con doble filete y epígrafe */}
-          <div className="border-4 border-double border-print p-1">
+          <div className="relative border-4 border-double border-print p-1">
             {p.images[0] ? (
               <img src={p.images[0]} alt={p.name} className="aspect-[4/5] w-full object-cover" />
             ) : (
@@ -49,6 +55,8 @@ export default function AvisoComercial() {
                 <span className="bg-paper px-2 font-display text-xs uppercase tracking-widest text-print-muted">Grabado en preparación</span>
               </div>
             )}
+            {/* Lo que puede pasar por encima de la foto (nunca de una palabra) */}
+            <Ambientacion tipo={p.ambientacion} zona="grabado" />
           </div>
           <figcaption className="mt-1 font-display text-sm italic leading-snug text-print-muted">{p.epigrafe}</figcaption>
         </figure>

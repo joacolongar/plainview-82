@@ -13,7 +13,7 @@ export type Pagina = {
 // Los avisos van por N° de artículo, como en un catálogo por correo
 const avisos: Pagina[] = [...products]
   .sort((a, b) => a.articulo - b.articulo)
-  .map((p) => ({ ruta: rutaAviso(p.slug), seccion: `Avisos · Art. N° ${numeroArticulo(p)}` }))
+  .map((p) => ({ ruta: rutaAviso(p.slug), seccion: `${p.seccion ?? 'Avisos'} · Art. N° ${numeroArticulo(p)}` }))
 
 export const paginas: Pagina[] = [
   { ruta: '/', seccion: 'Primera plana' },
