@@ -1,11 +1,14 @@
-import type { CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import type { Zona } from './Ambientacion'
 import Capa, { BORDES_GRABADO } from './Capa'
+import { movimientoReducido } from './movimiento'
 
 /**
- * Casablanca: un pocillo volcado que asoma cortado por el borde derecho de la hoja, sobre el grabado.
- * El chorro de café todavía está cayendo (se estira una sola vez al entrar) y las gotas caen en cascada;
- * abajo, donde caerían, la mancha absorbida por el papel (multiply).
+ * Casablanca, una sola vez al entrar: el pocillo volcado asoma por el borde derecho de la hoja, sobre el grabado;
+ * el chorro se estira hacia abajo y caen las gotas. Cuando caen, aparece abajo la mancha (absorbida por el papel,
+ * multiply), que se queda. Unos 2 s después de aparecer, el pocillo, el chorro y las gotas se desvanecen
+ * (amb-taza en index.css, que dura DURACION_TAZA) y el componente los saca de la página.
+ * Con movimiento reducido, solo la mancha.
  *
  * El dibujo es el de public/ilustraciones/ambientacion/taza-derramada.svg, copiado acá como JSX porque el chorro
  * y las gotas se animan por separado (un <img> se anima entero). Si se cambia el SVG, cambiarlo también acá.
@@ -21,7 +24,18 @@ const GOTAS_DESDE_BORDE = (150 - 82) * ESCALA
 const ANCHO_MANCHA = 130
 const CENTRO_MANCHA = (112 / 260) * ANCHO_MANCHA
 
+// La animación del pocillo entero (entra, espera y se desvanece). Se le pasa al CSS para no escribirla dos veces
+const DURACION_TAZA = 3.3
+
 export default function Cafe({ zona }: { zona: Zona }) {
+  const [taza, setTaza] = useState(() => zona === 'grabado' && !movimientoReducido())
+
+  useEffect(() => {
+    if (!taza) return
+    const t = setTimeout(() => setTaza(false), DURACION_TAZA * 1000 + 200)
+    return () => clearTimeout(t)
+  }, [taza])
+
   if (zona !== 'grabado') return null
   return (
     <Capa className={BORDES_GRABADO}>
@@ -32,7 +46,12 @@ export default function Cafe({ zona }: { zona: Zona }) {
         className="amb-mancha absolute bottom-0.5 mix-blend-multiply"
         style={{ right: GOTAS_DESDE_BORDE - (ANCHO_MANCHA - CENTRO_MANCHA) }}
       />
-      <TazaDerramada className="absolute top-[4%]" style={{ width: ANCHO_TAZA, right: SE_VE - ANCHO_TAZA }} />
+      {taza && (
+        <TazaDerramada
+          className="amb-taza absolute top-[4%]"
+          style={{ width: ANCHO_TAZA, right: SE_VE - ANCHO_TAZA, ['--dur' as string]: `${DURACION_TAZA}s` }}
+        />
+      )}
     </Capa>
   )
 }
@@ -63,7 +82,7 @@ function TazaDerramada({ className, style }: { className: string; style: CSSProp
         'M80 270 C79 275 77 279 77 282 C77 286 83 286 83 282 C83 279 81 275 80 270 Z',
         'M84 300 C83.4 303 82 305 82 307 C82 310 86 310 86 307 C86 305 84.6 303 84 300 Z',
       ].map((d, i) => (
-        <path key={d} d={d} className="amb-gota fill-cafe" style={{ ['--retraso' as string]: `${0.75 + i * 0.18}s` }} />
+        <path key={d} d={d} className="amb-gota fill-cafe" style={{ ['--retraso' as string]: `${1.1 + i * 0.18}s` }} />
       ))}
     </svg>
   )

@@ -32,7 +32,8 @@ export default function AvisoComercial() {
     // relative + isolate: la ambientación se ubica contra la página y lo que va detrás del texto (la lluvia) queda
     // sobre el papel pero debajo de las palabras
     <article className="relative isolate">
-      <Ambientacion tipo={p.ambientacion} zona="pagina" />
+      {/* key: al pasar a otra remera se monta de nuevo y su animación de entrada vuelve a empezar */}
+      <Ambientacion key={p.slug} tipo={p.ambientacion} zona="pagina" />
       <p className="font-display text-[11px] font-bold uppercase tracking-[0.15em] text-print-muted">
         Art. N° {numeroArticulo(p)}
         {/* el lugar, si no es el nombre de la película (Casablanca · Casablanca) */}
@@ -56,7 +57,7 @@ export default function AvisoComercial() {
               </div>
             )}
             {/* Lo que puede pasar por encima de la foto (nunca de una palabra) */}
-            <Ambientacion tipo={p.ambientacion} zona="grabado" />
+            <Ambientacion key={p.slug} tipo={p.ambientacion} zona="grabado" />
           </div>
           <figcaption className="mt-1 font-display text-sm italic leading-snug text-print-muted">{p.epigrafe}</figcaption>
         </figure>

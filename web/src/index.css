@@ -69,29 +69,31 @@ html[data-direccion="atras"]::view-transition-new(hoja) { animation-name: hoja-e
 }
 
 /* Ambientaciones (docs/AMBIENTACIONES.md y components/ambientacion/).
-   El estilo de cada elemento ES su estado final: las animaciones solo existen con movimiento permitido
-   (no-preference), así que con prefers-reduced-motion todo queda quieto en su lugar sin código extra.
-   Solo se anima transform y opacity: el navegador lo resuelve en la GPU, sin recalcular la página.
-   Los keyframes con solo "from" terminan en el estilo propio del elemento (por ejemplo, la opacidad baja de VI y VII). */
+   Las animaciones solo existen con movimiento permitido (no-preference). Solo se anima transform y opacity:
+   el navegador lo resuelve en la GPU, sin recalcular la página. "both" mantiene el primer cuadro durante el
+   retraso y el último al terminar. Los keyframes con solo "from" terminan en el estilo propio del elemento. */
 @media (prefers-reduced-motion: no-preference) {
-  /* Ranas: la franja ocupa todo el alto de la página; moverla un 100% de su alto la lleva de arriba abajo.
-     --y es dónde está la rana dentro de la franja (cuando está quieta). */
-  .amb-cae { animation: amb-cae var(--dur) linear var(--retraso) infinite; }
-  .amb-balancea { animation: amb-balancea calc(var(--dur) / 3) ease-in-out var(--retraso) infinite; }
-  /* Café: una sola vez al entrar */
-  .amb-chorro { animation: amb-estira 0.6s ease-out 0.3s both; }
+  /* Ranas: una sola pasada por la pantalla, al entrar. Después el componente las saca de la página (Ranas.tsx) */
+  .amb-rana { animation: amb-rana-cae var(--dur) cubic-bezier(0.45, 0, 0.8, 1) var(--retraso) both; }
+  /* Café: el pocillo entra, el chorro se estira, caen las gotas y el pocillo se va; la mancha se queda */
+  .amb-taza { animation: amb-taza var(--dur) ease-in-out both; } /* --dur: DURACION_TAZA en Cafe.tsx */
+  .amb-chorro { animation: amb-estira 0.6s ease-out 0.5s both; }
   .amb-gota { animation: amb-gota 0.45s ease-in var(--retraso) both; }
-  .amb-mancha { animation: amb-aparece 1.2s ease-out 1.1s both; }
+  .amb-mancha { animation: amb-aparece 1s ease-out 1.5s both; }
   /* Pecados: de a uno, como si alguien los fuera escribiendo */
   .amb-escribe { animation: amb-escribe 0.7s ease-out var(--retraso) both; }
 }
-@keyframes amb-cae {
-  from { transform: translateY(calc(-1 * var(--y) - 8%)); }
-  to { transform: translateY(calc(100% - var(--y))); }
+/* Quietas (sin animación) las ranas y el pocillo no se ven: con movimiento reducido no aparecen */
+.amb-rana, .amb-taza { opacity: 0; }
+@keyframes amb-rana-cae {
+  from { opacity: 1; transform: translate(0, -110%) rotate(var(--giro-desde)); }
+  to { opacity: 1; transform: translate(var(--deriva), calc(100vh + 10%)) rotate(var(--giro-hasta)); }
 }
-@keyframes amb-balancea {
-  0%, 100% { transform: rotate(var(--giro)); }
-  50% { transform: rotate(calc(var(--giro) + 12deg)); }
+/* En 3,3 s: entra en 0,5 s (15%), queda hasta los 2,5 s (76%) y se desvanece en 0,8 s */
+@keyframes amb-taza {
+  0% { opacity: 0; transform: translateX(24px); }
+  15%, 76% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(0); }
 }
 @keyframes amb-estira { from { transform: scaleY(0); } }
 @keyframes amb-gota { from { transform: translateY(-28px); opacity: 0; } }
@@ -100,6 +102,7 @@ html[data-direccion="atras"]::view-transition-new(hoja) { animation-name: hoja-e
 /* El chorro se estira desde el borde del pocillo: el origen es la parte de arriba del propio trazo */
 .amb-chorro { transform-box: fill-box; transform-origin: top; }
 .amb-gota { transform-box: fill-box; }
+
 /* Lluvia de los pecados: líneas diagonales muy tenues, quietas */
 .amb-lluvia {
   background-image: repeating-linear-gradient(105deg, color-mix(in oklab, var(--color-print) 7%, transparent) 0 1px, transparent 1px 15px);

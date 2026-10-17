@@ -93,16 +93,16 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
     sección, titular y **2 o 3 oraciones**. Las noticias mandan: tienen que pesar más que los avisos.
 - **Ambientaciones** (`docs/AMBIENTACIONES.md`, `src/components/ambientacion/`): cada aviso comercial puede llevar
   `ambientacion` (`'ranas' | 'cafe' | 'pecados'`), un detalle de su película que vive en la página. Reglas:
-  - **Nunca tapar texto, precio ni botones:** lo decorativo va en los bordes (cortado por el borde de la hoja) o encima
-    del grabado, nunca de una palabra. Todo con `aria-hidden` y `pointer-events: none` (componente `Capa`).
+  - **Lo que se queda nunca tapa texto, precio ni botones:** va en los bordes (cortado por el borde de la hoja) o encima
+    del grabado, nunca de una palabra. **Lo que pasa una sola vez y se va** (las ranas de Magnolia) puede cruzar por
+    encima de todo. Siempre `aria-hidden` y `pointer-events: none` (componente `Capa`); lo que ya pasó se saca del DOM.
   - **Recorte con `overflow: clip` en la capa**, nunca `overflow: hidden` en la página: rompe el `sticky` del botón.
-  - **Poco es más:** de 3 a 7 elementos, menos y más chicos en mobile. A 375 px el margen de la hoja mide 12 px:
-    lo que cae por el margen asoma como mucho 9 px.
+  - **Poco es más:** de 3 a 7 elementos, menos y más chicos en mobile. A 375 px el margen de la hoja mide 12 px.
   - **Movimiento:** suave y lento, **solo `transform` y `opacity`**, y solo dentro de `prefers-reduced-motion:
-    no-preference` (`index.css`); el estilo propio de cada elemento es su estado final, así con movimiento reducido
-    todo queda quieto en su lugar.
+    no-preference` (`index.css`). Con movimiento reducido no hay animación: lo que solo existe en movimiento
+    (ranas, pocillo) no aparece (`movimiento.ts` + opacidad 0 en el CSS) y lo que se queda (mancha, pecados) se ve quieto.
   - Se prueba con el script de superposición (cajas de cada trazo contra las de cada palabra y botón, y la columna
-    entera para lo que cae), con y sin `--force-prefers-reduced-motion`.
+    entera para lo que cae por el margen), con y sin `--force-prefers-reduced-motion`.
 - **Spoilers de la ficha de Pecados capitales (Se7en, Art. N° 003):** la remera es sobre el final, pero los textos solo
   lo insinúan. Nada de "caja", "cabeza" ni "desierto" escritos en la ficha (titular, bajada, aviso, epígrafe, Fe de
   erratas, avisos chicos ni alt). Los siete pecados van en el orden de la película, con VI y VII casi borrados.
