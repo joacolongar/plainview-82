@@ -1,7 +1,9 @@
 # Plainview 8:2 — sitio web
 
 Marca de remeras con referencias sutiles a películas. Slogan: "Watch closer."
-Sitio: catálogo con fichas, juego "Adiviná la peli" y pedidos por WhatsApp (sin pasarela de pago).
+Sitio: el diario **THE PLAINVIEW** (concepto "La Edición", ver `docs/ROADMAP.md`): primera plana con noticias,
+un aviso comercial por remera, pasatiempos y pedidos por WhatsApp (sin pasarela de pago).
+Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático en cada push a `main`).
 
 ## Cómo trabajamos
 - El dueño del proyecto es estudiante de programación (React, Python, websockets) y trabaja en
@@ -11,6 +13,11 @@ Sitio: catálogo con fichas, juego "Adiviná la peli" y pedidos por WhatsApp (si
 - Explicá las decisiones cuando introduzcas algo nuevo: el proyecto también es para aprender.
   Preferí soluciones simples antes que librerías nuevas; preguntá antes de sumar dependencias.
 - Textos de la interfaz en español rioplatense (vos), tono irónico y cinéfilo.
+- **Commit y push solo con el OK del dueño.** Antes de commitear: `git add -A` (sin rutas a mano: un `git add`
+  con una ruta que ya no existe falla y no agrega nada) y revisar `git status` / `git show --stat` que entre todo.
+- **Archivos que llegan en un zip** (diseños, maquetas, ilustraciones, en la carpeta de diseño del Escritorio):
+  descomprimir aparte, revisar (los SVG sin scripts ni recursos externos), copiar al proyecto **sin pisar nada** y,
+  si algo ya existe, preguntar. Los zip y los HTML de demo no van a git (`.gitignore`).
 
 ## Estructura
 - `web/` — frontend: Vite + React 19 + TypeScript + Tailwind v4 + React Router 7.
@@ -22,7 +29,12 @@ Sitio: catálogo con fichas, juego "Adiviná la peli" y pedidos por WhatsApp (si
   - `src/components/NewspaperPage.tsx` layout común: todo el sitio impreso en la hoja del diario (cabecera chica + pie);
     `src/lib/pasarPagina.ts` pasa de página deslizando o con ← → (los juegos se protegen con `data-no-swipe`)
   - `src/data/paginas.ts` orden y números de página del diario; `src/data/editions.ts` edición del drop
-  - `src/pages/*` una página por ruta
+  - `src/pages/*` una página por ruta. Ojo con los nombres: `AvisoComercial.tsx` es la página de cada remera
+    (`/catalogo/:slug`) e `IndiceAvisos.tsx` el índice (`/catalogo`); `components/Aviso.tsx` son los avisos *chicos*
+  - `src/data/noticias.ts` (portada), `anuncios.ts` (avisos chicos y cuáles van en la portada), `medidas.ts` (talles),
+    `pasatiempos/` (ediciones JSON + tipos); `src/components/pasatiempos/` los juegos y `Ayudas.tsx` (común)
+  - `public/logo/` logos en WebP (los que usa el sitio), `public/ilustraciones/` SVG de los avisos,
+    `public/brand/` PNG originales de la marca (en git, no los carga el sitio), `public/_headers` seguridad
 - `api/` — backend opcional (Etapa 5): FastAPI + websockets. No hace falta para lanzar.
 - `docs/` — ROADMAP.md (plan por sesiones), IDEAS.md (backlog de ideas), PASATIEMPOS.md (diseño de los pasatiempos)
   y pasatiempos-maqueta.png (maqueta a 390px).
@@ -45,11 +57,22 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
 - Acciones importantes (agregar al pedido, enviar por WhatsApp) **al alcance del pulgar**: abajo, fijas si hace falta.
 - **Nada que dependa solo de hover**: todo lo que se revela al pasar el mouse tiene que poder abrirse con un toque.
 - **Imágenes livianas**: tamaño justo, WebP/AVIF, `loading="lazy"` fuera de la primera pantalla.
+- **Primera pantalla:** en la portada, titular, bajada e ilustración con epígrafe entran en **375×667**.
+- Acciones pegadas abajo con `sticky` (no `fixed`): se quedan al alcance del pulgar y no tapan el pie de página.
 - Revisar cada cambio a 375px antes de darlo por terminado.
 
 ## Reglas del proyecto
-- Estética: diario oscuro, serif display, rojo `--color-red` solo para acentos (el 8:2, CTAs, estados activos).
-  Los tokens están en `web/src/index.css` (`@theme`). No hardcodear colores.
+- Estética: hoja de papel hueso (`--color-paper` `#ebe3d1`, utilidad `paper` con textura) sobre fondo oscuro
+  (`--color-ink`), tinta `--color-print`. Tipografías: UnifrakturMaguntia (cabecera), Anton (titulares),
+  Old Standard TT (texto). Tokens en `web/src/index.css` (`@theme`). No hardcodear colores.
+- **Rojo** (`--color-red` `#c84030`, el del logo) solo para acentos: bordes, filetes, el 8:2, rombos, estados activos.
+  **Contraste:** sobre la hoja, texto rojo chico no llega al mínimo (3,9:1) → los activos se marcan con subrayado
+  rojo y el texto va en tinta; en botones rojos el texto va en negrita de **19 px o más** (cuenta como texto grande).
+- **Numeración:** "Vol. 8 · No. 2" es fijo (marca); la edición del drop sale de `src/data/editions.ts`; el número de
+  página, de `src/data/paginas.ts` (no escribirlo a mano). Los pasatiempos tienen su propia numeración de ediciones.
+- **Productos:** precio en 0 se muestra como "Próximo número"; la ruta del aviso sale de `rutaAviso()` y los estados
+  de `ESTADOS` (`products.ts`). Las medidas son **de ejemplo** mientras `MEDIDAS_DE_EJEMPLO` sea `true` (lo avisa la tabla).
+- **Imágenes:** WebP a 3x del tamaño en pantalla (con pérdida para bloques de color plano); ilustraciones en SVG.
 - **Regla de contenido** (noticias, juegos, pasatiempos, avisos): textos e ilustraciones **propios**, nunca fotogramas
   ni afiches. Evita problemas de copyright y promociona las remeras.
   - **Alusiones sí:** se puede aludir a escenas y frases célebres (el ojo del tigre, el batido) con palabras propias.
@@ -63,7 +86,17 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
 - Los **avisos** chicos (`web/src/data/anuncios.ts`, tipos "mini" y "linea") van sueltos entre las noticias y en otras
   páginas, nunca en una página propia. Misma regla de contenido; los teléfonos terminan en el año de la película.
 - El número de WhatsApp va en `web/.env` como `VITE_WHATSAPP_NUMBER` (ver `.env.example`). Nunca commitear `.env`.
-- Antes de dar algo por terminado: `npm run build` y `npm run lint` sin errores.
+- Antes de dar algo por terminado: `npm run build` y `npm run lint` sin errores (y `validar` si se tocaron pasatiempos).
+
+## Cómo verificamos
+- No hay extensión de Chrome conectada: se usa **Edge headless** de Windows
+  (`/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`) contra `npm run dev`.
+- Edge no deja la ventana por debajo de ~500 px: para probar a **375 px** se carga la página dentro de un
+  **iframe de 375 px** (una página temporal `web/public/__*.html`, que se borra al terminar) y se mide con JS:
+  `scrollWidth ≤ 375`, elementos tocables ≥ 44 px, posición de la primera pantalla, etc. Capturas con `--screenshot`.
+- Con `--virtual-time-budget` las View Transitions no llegan a dibujarse: esas partes se prueban sin la API.
+- Lo que el headless no puede probar (teclado del celular, gestos reales, menú de compartir, animaciones)
+  lo prueba el dueño en su teléfono; queda anotado como pendiente en la Bitácora.
 
 ## Seguridad
 - **Secretos:** nunca en el repo ni en variables `VITE_`. Vite copia todo lo que empieza con `VITE_` dentro del JS
