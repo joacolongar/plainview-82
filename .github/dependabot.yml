@@ -1,0 +1,16 @@
+# Dependabot: revisa las dependencias de npm de web/ y abre un pull request cuando hay versiones nuevas
+# o se publica una vulnerabilidad. Las actualizaciones chicas (minor y patch) llegan juntas en un solo PR
+# por semana para no llenar el repo de PRs; las mayores (que pueden romper cosas) llegan de a una.
+# Antes de mergear: que el build de Cloudflare pase y probar el sitio (ver "Seguridad" en CLAUDE.md).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: America/Argentina/Cordoba
+    open-pull-requests-limit: 5
+    groups:
+      menores:
+        update-types: [minor, patch]

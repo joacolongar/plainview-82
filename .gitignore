@@ -6,3 +6,10 @@ __pycache__/
 .venv/
 *.pyc
 .DS_Store
+
+# Material de diseño que no va al repo: los zip que llegan con los diseños, los HTML de demo
+# (como public/brand/logo-giro-demo.html) y los ":Zone.Identifier" que deja Windows al copiar descargas.
+# Ojo: todo lo que está en git dentro de web/public/ se publica con el sitio.
+*.zip
+*demo*.html
+*:Zone.Identifier

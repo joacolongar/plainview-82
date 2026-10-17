@@ -64,3 +64,20 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   páginas, nunca en una página propia. Misma regla de contenido; los teléfonos terminan en el año de la película.
 - El número de WhatsApp va en `web/.env` como `VITE_WHATSAPP_NUMBER` (ver `.env.example`). Nunca commitear `.env`.
 - Antes de dar algo por terminado: `npm run build` y `npm run lint` sin errores.
+
+## Seguridad
+- **Secretos:** nunca en el repo ni en variables `VITE_`. Vite copia todo lo que empieza con `VITE_` dentro del JS
+  que baja el navegador: cualquiera lo puede leer. `VITE_WHATSAPP_NUMBER` está bien porque es un número de contacto
+  público; una clave de API, un token o una contraseña, jamás. Si algún día hace falta un secreto, va en el backend
+  (Etapa 5) o en las variables de Cloudflare que no empiezan con `VITE_`.
+- **`.env` nunca se commitea** (está en `.gitignore`). Revisado el 2026-10-17: no aparece en ningún commit.
+- **Sin HTML ni código armado con texto:** prohibido `dangerouslySetInnerHTML`, `eval`, `new Function`, `innerHTML`
+  y `document.write`. Todo texto (incluida la URL en la Fe de erratas) se muestra con JSX, que lo escapa.
+- **Cabeceras de seguridad** en `web/public/_headers` (Cloudflare Pages): CSP, `nosniff`, `Referrer-Policy`,
+  `Permissions-Policy` y `frame-ancestors 'none'`. La CSP permite solo lo que usamos (nuestro JS y CSS, Google Fonts,
+  imágenes propias y `data:`). **Si se suma algo externo** (analytics, otra fuente, un script), hay que agregarlo
+  a la CSP o el navegador lo bloquea. Nada de scripts ni estilos en línea en `index.html`.
+- **Dependencias:** `npm audit` sin vulnerabilidades antes de lanzar; Dependabot (`.github/dependabot.yml`) abre PRs
+  semanales para `web/`. Antes de mergear uno: que el build de Cloudflare pase y probar el sitio.
+- **Cupones y soluciones** de los pasatiempos viajan en el JS (ofuscados, no secretos): por eso son de bajo valor
+  y se validan a mano por WhatsApp (ver docs/PASATIEMPOS.md).
