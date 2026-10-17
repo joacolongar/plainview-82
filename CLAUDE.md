@@ -111,6 +111,13 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   imágenes propias y `data:`). **Si se suma algo externo** (analytics, otra fuente, un script), hay que agregarlo
   a la CSP o el navegador lo bloquea. Nada de scripts ni estilos en línea en `index.html`.
 - **Dependencias:** `npm audit` sin vulnerabilidades antes de lanzar; Dependabot (`.github/dependabot.yml`) abre PRs
-  semanales para `web/`. Antes de mergear uno: que el build de Cloudflare pase y probar el sitio.
+  semanales para `web/`, y en GitHub están activadas las alertas y las actualizaciones de seguridad. Antes de mergear uno: que el build de Cloudflare pase y probar el sitio.
+- **Pedidos verificados en el servidor** (Etapa 2, `POST /api/pedido` en Cloudflare Pages Functions):
+  - El servidor **nunca confía en precios ni totales del cliente**: recibe solo slug, talle, color y cantidad, valida
+    estrictamente contra `products.ts` (claves conocidas, valores permitidos, largos y cantidades máximas) y calcula el total.
+  - Credenciales (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TURNSTILE_SECRET_KEY`) solo como variables/secretos de
+    Cloudflare, **sin `VITE_`**. Nunca en el repo, en `.env` del front ni en respuestas del endpoint.
+  - Turnstile protege el envío; al sumarlo, la CSP de `_headers` agrega `https://challenges.cloudflare.com`
+    (`script-src` y `frame-src`). WhatsApp se abre recién con la respuesta del servidor (N° de boleta).
 - **Cupones y soluciones** de los pasatiempos viajan en el JS (ofuscados, no secretos): por eso son de bajo valor
   y se validan a mano por WhatsApp (ver docs/PASATIEMPOS.md).

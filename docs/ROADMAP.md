@@ -11,9 +11,9 @@ Usá `/sesion` en Claude Code para arrancar y `/cierre` para terminar.
 | Estilos | Tailwind v4 con tokens propios | Rápido para iterar la estética de diario sin pelear con CSS |
 | Rutas | React Router 7 | Estándar, simple para un sitio de pocas páginas |
 | Catálogo | Archivo `products.ts` en el repo | Con pocos productos no hace falta base de datos; editás y deployás |
-| Pedidos | Link `wa.me` con mensaje armado | Cero backend, cero comisiones; el pago se coordina por chat |
+| Pedidos | `POST /api/pedido` en Cloudflare Pages Functions + aviso por Telegram, y después WhatsApp con N° de boleta | El servidor verifica el pedido contra el catálogo y calcula el total (nunca confía en precios del cliente); sin comisiones, el pago se sigue coordinando por chat |
 | Hosting | Cloudflare Pages o Netlify (gratis) | Deploy automático en cada push; `public/_redirects` ya resuelve las rutas |
-| Backend (después) | FastAPI + websockets | Tu terreno en Python; se suma solo cuando haga falta (stock, ranking, duelos) |
+| Backend (después) | FastAPI + websockets | Tu terreno en Python; se suma solo cuando haga falta (stock, ranking, duelos). Los pedidos no esperan a esto: van por Pages Functions (Etapa 2) |
 
 ## Concepto: La Edición
 
@@ -33,7 +33,7 @@ cada página de cerca.
 | Juego | Pasatiempos | El Cifrado, Cinedoku, Crucigrama del Valle; después Mirá de Cerca y La Función del Día (ver `docs/PASATIEMPOS.md`) |
 | Cómo comprar | Página propia (sin clasificados) | Pasos, guía de talles, pagos, envíos y cambios |
 | Avisos | Avisos chicos sueltos (`anuncios.ts`): "mini" con ilustración y "línea" | Entre las noticias de la portada, al pie de cada aviso comercial y en Pasatiempos; nunca en una página propia |
-| Carrito | Boleta de pedido | Cupón recortable que se envía por WhatsApp |
+| Carrito | Boleta de pedido | Cupón recortable que se verifica en el servidor y sale por WhatsApp con su N° de boleta |
 | Footer | Pie de página + pie de imprenta | "← pág. anterior · Índice · pág. siguiente →", fecha, staff, @plainview.82 |
 | 404 | Fe de erratas | "Esta escena se cortó en el montaje" |
 
@@ -71,7 +71,8 @@ Reglas del concepto:
 | `/catalogo` | Índice de avisos: sumario con N° de página, nombre y precio; filtros en la URL |
 | `/catalogo/:slug` | Aviso comercial: titular grande, precio en recuadro, grabado, texto de aviso irónico, tabla de medidas, "Fe de erratas: mirá de nuevo", cupón "Recorte y agregue a su pedido" (talle, color, agregar); se pasa a la página anterior/siguiente |
 | `/producto/:slug` | Redirige a `/catalogo/:slug` |
-| `/carrito` | Boleta de pedido: cupón recortable editable, nota, "Enviar boleta por WhatsApp" |
+| `/carrito` | Boleta de pedido: cupón recortable editable, datos del pedido, nota; "Enviar boleta" la verifica en `/api/pedido` y después abre WhatsApp con el N° de boleta |
+| `/api/pedido` | Endpoint (Cloudflare Pages Functions): valida el pedido, calcula el total, genera el N° de boleta y avisa por Telegram |
 | `/pasatiempos` | Pasatiempos: una página con El Cifrado, Cinedoku y Crucigrama del Valle de la edición numerada vigente, y el Carnet de lector al pie (maqueta en `docs/pasatiempos-maqueta.png`) |
 | `/juego` | La Función del Día (versión de prueba, hasta P6) |
 | `/como-comprar` | Cómo comprar: pasos, guía de talles, pagos, envíos y cambios |
@@ -95,9 +96,35 @@ Reglas del concepto:
 - [x] S5. Índice de avisos en `/catalogo` (sumario con N° de página, filtros por película, director y década en la URL) y 404 como "Fe de erratas"
 - [ ] S5b. Fotos: carpeta `public/products/` en WebP, galería en el aviso con epígrafes (zoom con un toque en mobile)
 
-## Etapa 2 — Pedidos por WhatsApp (2 sesiones)
-- [ ] S6. Boleta de pedido (página del diario): cupón recortable (borde punteado, tijera), quitar ítem, validaciones, "Enviar boleta por WhatsApp" pegado abajo, campo de cupón (de los pasatiempos) en el mensaje, número real en `.env`, probar en celular
-- [ ] S7. Datos del pedido (nombre, zona, envío/retiro) completados en la boleta y sumados al mensaje; página "Cómo comprar" completa dentro de `NewspaperPage`
+## Etapa 2 — Pedidos verificados en el servidor (4 sesiones)
+Decisión del 2026-10-17: los pedidos se verifican en el servidor antes de llegar a WhatsApp. Se integra con la boleta
+(S6/S7) para no construirla dos veces: primero el endpoint, después la boleta que lo usa.
+
+**Flujo:** boleta → `POST /api/pedido` → la función valida contra el catálogo, calcula el total, genera el N° de
+boleta y avisa por **Telegram** → responde `{ boleta, resumen, total }` → recién ahí se abre **WhatsApp** con el N°
+de boleta y el resumen que armó el servidor.
+
+**Reglas del endpoint** (`web/functions/api/pedido.ts`, Cloudflare Pages Functions):
+- **Recibe solo** `slug`, `talle`, `color` y `cantidad` por ítem (más los datos del pedido y el token de Turnstile en S7).
+  **Nunca precios**: el total se calcula en el servidor con el mismo `products.ts` que usa el sitio.
+- **Validación estricta:** `Content-Type: application/json`, cuerpo chico (por ejemplo, 4 KB), solo claves conocidas
+  (si sobra alguna, 400), slug existente y "disponible", talle y color dentro de los de ese producto, cantidad entera
+  de 1 a 10, máximo de ítems, textos con largo máximo y sin caracteres de control. Errores 400 genéricos
+  (sin contar qué falló).
+- **N° de boleta** generado en el servidor (por ejemplo `PV-AAMMDD-XXXX` con `crypto.getRandomValues`).
+- **Credenciales** (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TURNSTILE_SECRET_KEY`) como variables/secretos de
+  Cloudflare, **sin `VITE_`**: nunca llegan al navegador (ver "Seguridad" en CLAUDE.md).
+- **Turnstile:** widget en la boleta y verificación del token en la función (`siteverify`). La CSP de `_headers`
+  suma `https://challenges.cloudflare.com` en `script-src` y `frame-src`.
+- **WhatsApp después del `await`:** se navega en la misma pestaña. Un `window.open` después de esperar la respuesta
+  lo bloquea el navegador como pop-up.
+- **Desarrollo local:** `wrangler pages dev` para correr las Functions (wrangler es una dependencia nueva: preguntar
+  antes de sumarla).
+
+- [ ] S6a. Endpoint `POST /api/pedido`: catálogo compartido, validación estricta, total del servidor, N° de boleta, aviso por Telegram, respuesta `{ boleta, resumen, total }`. Probar casos inválidos: precio inyectado, slug inexistente o no disponible, talle o color ajenos, cantidad 0 o 999, claves de más, cuerpo gigante, `Content-Type` incorrecto
+- [ ] S6b. Boleta de pedido (página del diario): cupón recortable (borde punteado, tijera), quitar ítem, validaciones del lado del cliente (solo como ayuda: la que vale es la del servidor), campo de cupón de los pasatiempos; "Enviar boleta" llama a `/api/pedido` con estados de espera y de error, y con la respuesta abre WhatsApp con el N° de boleta y el resumen (`whatsapp.ts` pasa a usar la respuesta del servidor)
+- [ ] S7a. Datos del pedido (nombre, zona, envío/retiro) en la boleta, validados en el servidor y sumados al aviso de Telegram y al WhatsApp; Turnstile (widget, verificación en la función y ajuste de la CSP); el cupón de los pasatiempos se puede chequear en el servidor y se informa en Telegram
+- [ ] S7b. Página "Cómo comprar" completa dentro de `NewspaperPage` y prueba de punta a punta en celular real (boleta → Telegram → WhatsApp); límite de pedidos por IP (reglas de Cloudflare) si hace falta
 
 ## Etapa 3 — Pasatiempos (6-8 sesiones, diseño en `docs/PASATIEMPOS.md`)
 Numeradas P1–P6 para no renumerar S11 y S12. Contenido por **edición numerada** (`web/src/data/pasatiempos/edicion-NN.json`),
@@ -153,3 +180,4 @@ generado y validado con `python3 scripts/pasatiempos.py generar|validar N`.
   **Pendientes del dueño:** precios reales (hoy "Próximo número"), medidas reales por talle (pasar `MEDIDAS_DE_EJEMPLO` a false), fotos de las remeras (S5b), ilustraciones para P6 y para los grabados, definir el premio del carnet, revisar el tono de los borradores (noticias, avisos de productos, `anuncios.ts`), activar en GitHub "Dependabot alerts" y "security updates".
   **Pendientes técnicos:** HSTS y dominio propio (S12), `IS_PREVIEW` a false al lanzar (S12), autoalojar fuentes y revisar contraste/teclado (S11), borrar o usar `Product.description`.
   **Próxima sesión:** S6, boleta de pedido (cupón recortable, quitar ítem, validaciones, campo de cupón de los pasatiempos en el mensaje). Si antes llegan las fotos, S5b.
+- 2026-10-17 — **Decisión: pedidos verificados en el servidor.** Endpoint `POST /api/pedido` en Cloudflare Pages Functions que recibe solo slug, talle, color y cantidad (nunca precios), valida estrictamente contra el catálogo, calcula el total, genera un N° de boleta y avisa al dueño por un bot de Telegram (credenciales en variables de entorno de Cloudflare, sin `VITE_`). Recién después se abre WhatsApp con el N° de boleta y el resumen. Protección con Turnstile (la CSP suma `challenges.cloudflare.com`). La Etapa 2 se reescribió en S6a (endpoint), S6b (boleta), S7a (datos del pedido + Turnstile) y S7b (Cómo comprar + prueba de punta a punta), para no construir la boleta dos veces. Pendiente del dueño para S6a: crear el bot de Telegram (BotFather) y cargar `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` en Cloudflare; para S7a, crear el sitio de Turnstile y cargar la clave secreta. **"Dependabot alerts" y "security updates" ya están activados** (sale de los pendientes). Próxima sesión: S6a.
