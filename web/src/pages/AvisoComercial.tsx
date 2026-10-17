@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import { useCart } from '../context/CartContext'
 import { avisoDeProducto } from '../data/anuncios'
+import { MEDIDAS, MEDIDAS_DE_EJEMPLO } from '../data/medidas'
 import { ESTADOS, getProduct, numeroArticulo, rutaAviso, type Product, type Size } from '../data/products'
 import NotFound from './NotFound'
 
@@ -11,8 +12,8 @@ const miles = new Intl.NumberFormat('es-AR') // 25000 → "25.000"
 /**
  * El aviso comercial de una remera, como en los catálogos de venta por correo del lejano oeste:
  * N° de artículo, titular enorme, precio en recuadro, grabado con epígrafe y texto de aviso.
- * Mobile-first: titular a todo el ancho; bajada y precio en una fila; comprar pegado abajo.
- * (La tabla de medidas y el cupón recortable llegan en S4b.)
+ * Mobile-first: titular a todo el ancho; bajada y precio en una fila; después grabado, texto, Fe de erratas,
+ * tabla de medidas y el cupón "Recorte y agregue a su pedido", con su botón pegado abajo.
  */
 export default function AvisoComercial() {
   const { slug = '' } = useParams()
@@ -57,47 +58,56 @@ export default function AvisoComercial() {
           <p className="font-display text-[15px] leading-snug text-pretty first-letter:float-left first-letter:mr-1.5 first-letter:font-headline first-letter:text-5xl first-letter:leading-[0.8]">
             {p.aviso}
           </p>
-          <details className="border-l-2 border-red pl-4">
-            <summary className="flex min-h-11 cursor-pointer items-center font-display text-sm font-bold uppercase tracking-widest">Watch closer: la referencia</summary>
-            <p className="mt-2 font-display text-[15px] italic text-print-muted">{p.reference}</p>
-          </details>
+          <FeDeErratas referencia={p.reference} />
+          <TablaMedidas talles={p.sizes} elegido={size} />
 
-          <fieldset>
-            <legend className="mb-2 font-display text-[11px] font-bold uppercase tracking-[0.15em]">Talle</legend>
-            <div className="flex flex-wrap gap-2">
-              {p.sizes.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSize(s)}
-                  aria-pressed={size === s}
-                  className={`h-11 w-12 border font-display ${size === s ? 'border-2 border-red font-bold' : 'border-print/40'}`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-          {p.colors.length > 1 && (
-            <fieldset>
-              <legend className="mb-2 font-display text-[11px] font-bold uppercase tracking-[0.15em]">Color</legend>
+          {/* El cupón de los catálogos por correo: se "llena" y se agrega al pedido */}
+          <section aria-labelledby="cupon-titulo" className="relative border-2 border-dashed border-print px-3 pt-4 pb-3">
+            <span aria-hidden className="absolute -top-3.5 left-3 bg-paper px-1 text-xl leading-none">✂</span>
+            <h2 id="cupon-titulo" className="font-headline text-lg uppercase leading-none">Recorte y agregue a su pedido</h2>
+            <p className="mt-1 font-display text-[11px] font-bold uppercase tracking-[0.12em] text-print-muted">
+              Art. N° {numeroArticulo(p)} — {p.titular} · Llene y envíe
+            </p>
+            <fieldset className="mt-3">
+              <legend className="mb-2 font-display text-[11px] font-bold uppercase tracking-[0.15em]">Talle</legend>
               <div className="flex flex-wrap gap-2">
-                {p.colors.map((c) => (
+                {p.sizes.map((s) => (
                   <button
-                    key={c}
-                    onClick={() => setColor(c)}
-                    aria-pressed={color === c}
-                    className={`min-h-11 border px-3 font-display ${color === c ? 'border-2 border-red font-bold' : 'border-print/40'}`}
+                    key={s}
+                    onClick={() => setSize(s)}
+                    aria-pressed={size === s}
+                    className={`h-11 w-12 border font-display ${size === s ? 'border-2 border-red font-bold' : 'border-print/40'}`}
                   >
-                    {c}
+                    {s}
                   </button>
                 ))}
               </div>
+              <a href="#medidas" className="mt-1 inline-flex min-h-11 items-center font-display text-sm underline underline-offset-4">
+                ¿Qué talle soy? Ver medidas ↑
+              </a>
             </fieldset>
-          )}
+            {p.colors.length > 1 && (
+              <fieldset className="mt-2">
+                <legend className="mb-2 font-display text-[11px] font-bold uppercase tracking-[0.15em]">Color</legend>
+                <div className="flex flex-wrap gap-2">
+                  {p.colors.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setColor(c)}
+                      aria-pressed={color === c}
+                      className={`min-h-11 border px-3 font-display ${color === c ? 'border-2 border-red font-bold' : 'border-print/40'}`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            )}
+          </section>
 
-          {/* sticky (no fixed): en mobile queda pegado abajo, al alcance del pulgar, mientras se lee el aviso,
-              y al llegar al final vuelve a su lugar sin tapar el pie de página */}
-          <div className="sticky bottom-0 -mx-3 space-y-2 border-t border-print/30 bg-paper px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:static md:mx-0 md:border-0 md:p-0">
+          {/* El botón del cupón. sticky (no fixed): en mobile queda pegado abajo, al alcance del pulgar, mientras se
+              lee el aviso (aunque el cupón no esté a la vista), y al llegar al final vuelve a su lugar debajo del cupón */}
+          <div className="sticky bottom-0 -mx-3 mt-0! space-y-2 border-t border-print/30 bg-paper px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:static md:mx-0 md:border-0 md:p-0">
             <button
               disabled={!canBuy}
               onClick={() => {
@@ -127,6 +137,57 @@ export default function AvisoComercial() {
         </aside>
       )}
     </article>
+  )
+}
+
+/** "Fe de erratas" del diario: la referencia escondida en la estampa se despliega con un toque (no depende de hover) */
+function FeDeErratas({ referencia }: { referencia: string }) {
+  return (
+    <details className="group border-y-4 border-double border-print py-1">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+        <span>
+          <span className="block font-headline text-xl uppercase leading-none">Fe de erratas</span>
+          <span className="block font-display text-sm italic leading-snug">En la edición anterior dijimos que era solo una remera.</span>
+        </span>
+        <span className="shrink-0 font-display text-xs font-bold uppercase tracking-wider">
+          Mire de nuevo <span aria-hidden className="inline-block motion-safe:transition-transform group-open:rotate-90">▸</span>
+        </span>
+      </summary>
+      <p className="mt-2 pb-1 font-display text-[15px] leading-snug">{referencia}</p>
+    </details>
+  )
+}
+
+/** Tabla de medidas de época: solo los talles de esta remera; resalta el elegido en el cupón */
+function TablaMedidas({ talles, elegido }: { talles: Size[]; elegido: Size | null }) {
+  return (
+    <section id="medidas" aria-labelledby="medidas-titulo" className="scroll-mt-4">
+      <h2 id="medidas-titulo" className="font-display text-[11px] font-bold uppercase tracking-[0.15em]">
+        Tabla de medidas (en cm)
+      </h2>
+      <table className="mt-1 w-full border-y-4 border-double border-print font-display text-[15px] tabular-nums">
+        <thead>
+          <tr className="border-b border-print/40 text-[11px] uppercase tracking-widest">
+            <th scope="col" className="py-1 text-left">Talle</th>
+            <th scope="col" className="py-1 text-right">Ancho</th>
+            <th scope="col" className="py-1 text-right">Largo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {talles.map((t) => (
+            <tr key={t} className={`border-b border-dotted border-print/40 last:border-0 ${elegido === t ? 'bg-print/10 font-bold' : ''}`}>
+              <th scope="row" className="py-1 text-left">{t}</th>
+              <td className="py-1 text-right">{MEDIDAS[t].ancho}</td>
+              <td className="py-1 text-right">{MEDIDAS[t].largo}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="mt-1 font-display text-xs italic text-print-muted">Ancho: de axila a axila. Largo: del hombro al ruedo.</p>
+      {MEDIDAS_DE_EJEMPLO && (
+        <p className="mt-1 font-display text-xs font-bold">Medidas de ejemplo: las reales llegan con la próxima edición.</p>
+      )}
+    </section>
   )
 }
 
