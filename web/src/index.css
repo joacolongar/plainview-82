@@ -10,6 +10,7 @@
   /* Tinta para imprimir sobre la hoja crema (portada) */
   --color-print: #1b1915;
   --color-print-muted: #5b554b;
+  --color-mesa: #1a100b; /* madera oscura: respaldo mientras carga la textura de la mesa (desde 768 px) */
   --font-masthead: "UnifrakturMaguntia", "Old English Text MT", serif;
   --font-headline: "Anton", "Impact", "Arial Narrow", sans-serif;
   --font-display: "Old Standard TT", Georgia, "Times New Roman", serif;
@@ -34,6 +35,40 @@
 }
 
 html, body { background: var(--color-ink); color: var(--color-paper); }
+
+/* La mesa (docs/MESA.md): en la compu el diario está apoyado sobre una mesa de madera. En celular, igual que siempre.
+   Dos capas fijas detrás de todo (z-index -1, sin tocar el HTML): la madera y, encima, la luz de una lámpara
+   y la viñeta. Son fijas en vez de background-attachment: fixed porque eso falla en varios navegadores;
+   así la madera queda quieta al scrollear y al pasar de página (la transición mueve solo la hoja). */
+@media (min-width: 768px) {
+  /* Las capas con z-index -1 se pintan sobre el fondo de <html> pero debajo del de <body>: body va transparente */
+  body { background: transparent; }
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  body::before {
+    background: var(--color-mesa) url("/texturas/mesa-madera.webp") center / cover no-repeat;
+  }
+  body::after {
+    background:
+      /* luz cálida muy suave, arriba al centro */
+      radial-gradient(ellipse 60% 45% at 50% 0%, color-mix(in oklab, var(--color-paper) 12%, transparent), transparent 70%),
+      /* viñeta: oscurece los bordes de la pantalla */
+      radial-gradient(ellipse at center, transparent 55%, color-mix(in oklab, var(--color-ink) 70%, transparent) 100%);
+  }
+  /* Papel apoyado: sombra en capas (contacto, cercana y difusa). Gana a shadow-2xl porque no está en una capa de Tailwind */
+  .hoja {
+    box-shadow:
+      0 1px 1px color-mix(in oklab, var(--color-ink) 25%, transparent),
+      0 10px 18px color-mix(in oklab, var(--color-ink) 35%, transparent),
+      0 28px 60px color-mix(in oklab, var(--color-ink) 45%, transparent);
+  }
+}
 body { font-family: var(--font-body); }
 
 /* Hoja de diario: crema con grano de papel (ruido SVG generado, sin imágenes) y bordes apenas más oscuros */

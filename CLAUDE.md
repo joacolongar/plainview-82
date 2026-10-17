@@ -18,6 +18,10 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
 - **Archivos que llegan en un zip** (diseños, maquetas, ilustraciones, en la carpeta de diseño del Escritorio):
   descomprimir aparte, revisar (los SVG sin scripts ni recursos externos), copiar al proyecto **sin pisar nada** y,
   si algo ya existe, preguntar. Los zip y los HTML de demo no van a git (`.gitignore`).
+  Los zips y archivos de diseño que me pasan están en la carpeta plainview, dentro de 1 DISEÑO en mi escritorio de
+  Windows: `"/mnt/c/Users/Usuario/Desktop/1 DISEÑO/plainview"`. La ruta tiene espacios y Ñ, así que siempre entre
+  comillas. `unzip` no está instalado: se descomprime con el módulo `zipfile` de Python (`python3 -I`), chequeando
+  que ninguna ruta del zip se salga de la carpeta de destino.
 
 ## Estructura
 - `web/` — frontend: Vite + React 19 + TypeScript + Tailwind v4 + React Router 7.
@@ -71,6 +75,10 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
 - Estética: hoja de papel hueso (`--color-paper` `#ebe3d1`, utilidad `paper` con textura) sobre fondo oscuro
   (`--color-ink`), tinta `--color-print`. Tipografías: UnifrakturMaguntia (cabecera), Anton (titulares),
   Old Standard TT (texto). Tokens en `web/src/index.css` (`@theme`). No hardcodear colores.
+- **La mesa** (`docs/MESA.md`): **desde 768 px** el diario está apoyado sobre una mesa de madera
+  (`public/texturas/mesa-madera.webp`): capas fijas `body::before` (madera) y `body::after` (luz cálida y viñeta)
+  detrás de todo, y la hoja con sombra en capas. **Nunca rotar la hoja** (el texto se ve borroso). En celular, el fondo
+  negro de siempre. La madera no se mueve al scrollear ni al pasar de página.
 - **Rojo** (`--color-red` `#c84030`, el del logo) solo para acentos: bordes, filetes, el 8:2, rombos, estados activos.
   **Contraste:** sobre la hoja, texto rojo chico no llega al mínimo (3,9:1) → los activos se marcan con subrayado
   rojo y el texto va en tinta; en botones rojos el texto va en negrita de **19 px o más** (cuenta como texto grande).
