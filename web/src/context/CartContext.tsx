@@ -22,16 +22,18 @@ function load(): CartItem[] {
   }
 }
 
+function guardar(items: CartItem[]) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(items))
+  } catch {
+    /* storage no disponible: el carrito vive solo en memoria */
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(load)
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(items))
-    } catch {
-      /* storage no disponible: el carrito vive solo en memoria */
-    }
-  }, [items])
+  useEffect(() => guardar(items), [items])
 
   const add: Cart['add'] = (item) =>
     setItems((prev) => {
@@ -43,7 +45,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const setQty: Cart['setQty'] = (index, qty) =>
     setItems((prev) => (qty <= 0 ? prev.filter((_, i) => i !== index) : prev.map((p, i) => (i === index ? { ...p, qty } : p))))
 
-  const value: Cart = { items, add, setQty, clear: () => setItems([]), count: items.reduce((s, i) => s + i.qty, 0) }
+  // Vaciar también guarda en el acto: la boleta vacía y enseguida se va a WhatsApp, antes de que corra el efecto
+  const clear = () => {
+    guardar([])
+    setItems([])
+  }
+
+  const value: Cart = { items, add, setQty, clear, count: items.reduce((s, i) => s + i.qty, 0) }
   return <CartCtx.Provider value={value}>{children}</CartCtx.Provider>
 }
 

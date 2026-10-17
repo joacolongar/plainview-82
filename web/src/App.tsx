@@ -3,7 +3,7 @@ import NewspaperPage from './components/NewspaperPage'
 import Home from './pages/Home'
 import IndiceAvisos from './pages/IndiceAvisos'
 import AvisoComercial, { RedirigirAviso } from './pages/AvisoComercial'
-import Cart from './pages/Cart'
+import Boleta from './pages/Boleta'
 import Game from './pages/Game'
 import HowToBuy from './pages/HowToBuy'
 import Pasatiempos from './pages/Pasatiempos'
@@ -22,7 +22,7 @@ export const router = createBrowserRouter(
       <Route path="catalogo/:slug" element={<AvisoComercial />} />
       {/* ruta vieja: redirige para no romper links ya compartidos */}
       <Route path="producto/:slug" element={<RedirigirAviso />} />
-      <Route path="carrito" element={<Cart />} />
+      <Route path="carrito" element={<Boleta />} />
       <Route path="pasatiempos" element={<Pasatiempos />} />
       <Route path="juego" element={<Game />} />
       <Route path="como-comprar" element={<HowToBuy />} />

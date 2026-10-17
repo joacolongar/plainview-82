@@ -27,6 +27,8 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `functions/api/pedido.ts` endpoint `POST /api/pedido` (Cloudflare Pages Functions, corre en el servidor; tipos en
     `tsconfig.functions.json`); `src/lib/pedido.ts` valida el pedido contra el catálogo y arma resumen y total
     (lo comparten servidor y boleta: no puede importar `config.ts` ni nada del navegador)
+  - `src/pages/Boleta.tsx` la boleta de pedido (`/carrito`); `src/lib/boleta.ts` la envía a `/api/pedido` y guarda la
+    última boleta enviada (sessionStorage); `src/lib/whatsapp.ts` arma el mensaje con la respuesta del servidor
   - `src/context/CartContext.tsx` carrito (estado + localStorage con try/catch)
   - `src/App.tsx` rutas con el router de datos (`createBrowserRouter`, necesario para la transición de hoja)
   - `src/components/NewspaperPage.tsx` layout común: todo el sitio impreso en la hoja del diario (cabecera chica + pie);
@@ -74,7 +76,9 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   rojo y el texto va en tinta; en botones rojos el texto va en negrita de **19 px o más** (cuenta como texto grande).
 - **Numeración:** "Vol. 8 · No. 2" es fijo (marca); la edición del drop sale de `src/data/editions.ts`; el número de
   página, de `src/data/paginas.ts` (no escribirlo a mano). Los pasatiempos tienen su propia numeración de ediciones.
-- **Productos:** precio en 0 se muestra como "Próximo número"; la ruta del aviso sale de `rutaAviso()` y los estados
+- **Productos:** precio en 0 se muestra como "Próximo número"; `precioDePrueba: true` marca un precio inventado
+  (se lee "Precio de prueba" en el aviso y el índice, y "⚠ PRECIO DE PRUEBA" en Telegram y WhatsApp): antes de lanzar,
+  precios reales y todos en `false`; la ruta del aviso sale de `rutaAviso()` y los estados
   de `ESTADOS` (`products.ts`). Las medidas son **de ejemplo** mientras `MEDIDAS_DE_EJEMPLO` sea `true` (lo avisa la tabla).
 - **Imágenes:** WebP a 3x del tamaño en pantalla (con pérdida para bloques de color plano); ilustraciones en SVG.
 - **Regla de contenido** (noticias, juegos, pasatiempos, avisos): textos e ilustraciones **propios**, nunca fotogramas
@@ -99,6 +103,11 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   **iframe de 375 px** (una página temporal `web/public/__*.html`, que se borra al terminar) y se mide con JS:
   `scrollWidth ≤ 375`, elementos tocables ≥ 44 px, posición de la primera pantalla, etc. Capturas con `--screenshot`.
 - Con `--virtual-time-budget` las View Transitions no llegan a dibujarse: esas partes se prueban sin la API.
+- **Contra `npm run pages`** (wrangler, para probar `/api`), el sitio sale con la CSP de `_headers`: la página de prueba
+  va en `web/dist/` (no en `public/`) con el JS en un archivo aparte y el iframe con `width`/`height` como atributos
+  (la CSP bloquea scripts en línea y el atributo `style`), y a la copia `dist/_headers` se le saca `frame-ancestors`
+  y `X-Frame-Options` (el próximo build la regenera). Para que WhatsApp no cargue: `--host-resolver-rules="MAP wa.me 127.0.0.1:9"`.
+  Cada pedido válido le llega al dueño por Telegram: simular la respuesta cuando no haga falta el servidor real.
 - Lo que el headless no puede probar (teclado del celular, gestos reales, menú de compartir, animaciones)
   lo prueba el dueño en su teléfono; queda anotado como pendiente en la Bitácora.
 

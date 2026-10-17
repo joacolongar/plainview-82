@@ -210,6 +210,10 @@ function Precio({ p }: { p: Product }) {
       )}
       {/* Sin precio, el recuadro ya dice "Próximo número": el estado sería repetirlo */}
       {conPrecio && <p className="mt-1 font-display text-[10px] font-bold uppercase tracking-widest">{ESTADOS[p.status]}</p>}
+      {/* Mientras el precio sea inventado, que se lea: el sitio ya está publicado */}
+      {conPrecio && p.precioDePrueba && (
+        <p className="mt-0.5 border-t border-print/40 pt-0.5 font-display text-[10px] italic">Precio de prueba</p>
+      )}
     </div>
   )
 }

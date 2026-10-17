@@ -1,5 +1,5 @@
 // POST /api/pedido — Cloudflare Pages Function (corre en el servidor de Cloudflare, no en el navegador).
-// Recibe { items: [{ slug, talle, color, cantidad }] }, lo valida contra el catálogo, calcula el total,
+// Recibe { items: [{ slug, talle, color, cantidad }], cupon? }, lo valida contra el catálogo, calcula el total,
 // genera el N° de boleta, avisa por Telegram y responde { boleta, resumen, total }.
 // Reglas en docs/ROADMAP.md (Etapa 2) y "Seguridad" en CLAUDE.md.
 import { resumenPedido, totalPedido, validarPedido } from '../../src/lib/pedido'
@@ -109,15 +109,16 @@ export async function onRequestPost({ request, env }: Contexto): Promise<Respons
     return pedidoInvalido()
   }
 
-  const lineas = validarPedido(cuerpo)
-  if (!lineas) return pedidoInvalido()
+  const pedido = validarPedido(cuerpo)
+  if (!pedido) return pedidoInvalido()
 
   const boleta = numeroBoleta()
-  const resumen = resumenPedido(lineas)
-  const total = totalPedido(lineas)
+  const resumen = resumenPedido(pedido)
+  const total = totalPedido(pedido.lineas)
 
   // Sin el aviso no hay contra qué verificar la boleta que llegue por WhatsApp: mejor que el cliente reintente
-  const avisado = await avisarPorTelegram(env, `🧾 Boleta ${boleta}\n\n${resumen}`)
+  const nota = pedido.cupon ? '\n\n(El cupón todavía no se verifica solo: chequealo con el de la edición.)' : ''
+  const avisado = await avisarPorTelegram(env, `🧾 Boleta ${boleta}\n\n${resumen}${nota}`)
   if (!avisado) return json({ error: 'No pudimos registrar el pedido. Probá de nuevo en un rato.' }, 503)
 
   return json({ boleta, resumen, total })

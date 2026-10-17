@@ -7,6 +7,8 @@ export type Product = {
   director: string
   year: number
   price: number // ARS
+  /** true mientras el precio sea inventado para probar la compra. Antes de lanzar: precio real y false */
+  precioDePrueba: boolean
   sizes: Size[]
   colors: string[]
   images: string[] // rutas en /public/products/...
@@ -31,13 +33,14 @@ export const products: Product[] = [
     movie: 'Magnolia',
     director: 'Paul Thomas Anderson',
     year: 1999,
-    price: 0,
+    price: 32000,
+    precioDePrueba: true,
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Negro'],
     images: [],
     reference: 'Una referencia que aparece apenas un instante en un frame. Hay que mirar de cerca.',
     description: 'Estampa basada en un detalle de fondo de la película. Completar con la descripción real.',
-    status: 'proximamente',
+    status: 'disponible',
     articulo: 1,
     titular: 'El frame de Magnolia',
     bajada: 'Para quien se quedó las tres horas y todavía mira el cielo antes de salir de casa.',
@@ -51,13 +54,14 @@ export const products: Product[] = [
     movie: 'Casablanca',
     director: 'Michael Curtiz',
     year: 1942,
-    price: 0,
+    price: 30000,
+    precioDePrueba: true,
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Hueso'],
     images: [],
     reference: 'Diseño en proceso.',
     description: 'Completar cuando el diseño esté terminado.',
-    status: 'proximamente',
+    status: 'disponible',
     articulo: 2,
     titular: 'Casablanca',
     bajada: 'Para quien entra a un café y elige la mesa con vista a la puerta.',

@@ -1,7 +1,7 @@
 export default function HowToBuy() {
   const steps = [
     'Elegí tu remera y talle en el catálogo y agregala al pedido.',
-    'En "Tu pedido", tocá "Enviar pedido por WhatsApp": el mensaje se arma solo.',
+    'En la boleta, tocá "Enviar boleta": la imprenta te da un N° de boleta y se abre WhatsApp con el pedido armado.',
     'Te respondemos para coordinar pago y envío.',
   ]
   return (

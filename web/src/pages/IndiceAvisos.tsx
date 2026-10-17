@@ -79,7 +79,7 @@ export default function IndiceAvisos() {
                 antes={`Art. N° ${numeroArticulo(p)}`}
                 titulo={p.titular}
                 pagina={paginaDe(rutaAviso(p.slug))?.numero}
-                detalle={`${p.movie} · ${p.director} · ${p.year} · ${p.status === 'disponible' && p.price > 0 ? CURRENCY.format(p.price) : ESTADOS[p.status]}`}
+                detalle={`${p.movie} · ${p.director} · ${p.year} · ${p.status === 'disponible' && p.price > 0 ? `${CURRENCY.format(p.price)}${p.precioDePrueba ? ' (precio de prueba)' : ''}` : ESTADOS[p.status]}`}
               />
             </li>
           ))}
