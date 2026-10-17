@@ -24,6 +24,9 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `src/data/products.ts` catálogo (por ahora estático, en el repo)
   - `src/data/game.ts` rondas del juego
   - `src/lib/whatsapp.ts` arma el mensaje del pedido y el link wa.me
+  - `functions/api/pedido.ts` endpoint `POST /api/pedido` (Cloudflare Pages Functions, corre en el servidor; tipos en
+    `tsconfig.functions.json`); `src/lib/pedido.ts` valida el pedido contra el catálogo y arma resumen y total
+    (lo comparten servidor y boleta: no puede importar `config.ts` ni nada del navegador)
   - `src/context/CartContext.tsx` carrito (estado + localStorage con try/catch)
   - `src/App.tsx` rutas con el router de datos (`createBrowserRouter`, necesario para la transición de hoja)
   - `src/components/NewspaperPage.tsx` layout común: todo el sitio impreso en la hoja del diario (cabecera chica + pie);
@@ -46,6 +49,7 @@ cd web && npm install      # una vez
 npm run dev                # http://localhost:5173
 npm run build              # chequea tipos y compila
 npm run lint               # oxlint
+npm run pages              # sitio compilado + Functions en http://localhost:8788 (secretos en web/.dev.vars, fuera de git)
 python3 scripts/pasatiempos.py validar 1   # (desde la raíz) valida la edición 1 de pasatiempos
 ```
 Backend (cuando llegue la Etapa 5): `cd api && python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && uvicorn main:app --reload`

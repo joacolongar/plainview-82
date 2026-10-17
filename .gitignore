@@ -13,3 +13,5 @@ __pycache__/
 *.zip
 *demo*.html
 *:Zone.Identifier
+.dev.vars
+.wrangler/

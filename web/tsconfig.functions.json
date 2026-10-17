@@ -1,0 +1,27 @@
+{
+  // Las Cloudflare Pages Functions (web/functions/) corren en el servidor de Cloudflare, no en el navegador:
+  // tienen fetch, Request, Response y crypto (como un Web Worker), pero no window ni document.
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.functions.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "WebWorker"],
+    "types": [],
+    "skipLibCheck": true,
+
+    /* Bundler mode (wrangler empaqueta con esbuild) */
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["functions"]
+}
