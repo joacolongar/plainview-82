@@ -1,10 +1,25 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BRAND } from '../config'
+import Turnstile from '../components/Turnstile'
+import { BRAND, TURNSTILE_SITE_KEY } from '../config'
 import { useCart, type CartItem } from '../context/CartContext'
 import { numeroArticulo, getProduct } from '../data/products'
 import { borrarBoletaEnviada, enviarBoleta, guardarBoletaEnviada, leerBoletaEnviada, type BoletaEnviada } from '../lib/boleta'
-import { cuponValido, formatoPesos, MAX_CANTIDAD, MAX_CUPON, MAX_ITEMS, normalizarCupon, subtotal, validarItem } from '../lib/pedido'
+import {
+  cuponValido,
+  ENTREGAS,
+  formatoPesos,
+  MAX_CANTIDAD,
+  MAX_CUPON,
+  MAX_ITEMS,
+  MAX_TEXTO,
+  MIN_TEXTO,
+  normalizarCupon,
+  subtotal,
+  textoValido,
+  validarItem,
+  type Entrega,
+} from '../lib/pedido'
 import { mensajeBoleta, whatsappLink } from '../lib/whatsapp'
 
 const MAX_NOTA = 500
@@ -14,11 +29,20 @@ const MAX_NOTA = 500
  * /api/pedido, que valida contra el catálogo y devuelve el N° de boleta; con eso se abre WhatsApp.
  * Precios y total salen del catálogo (no del precio guardado en el carrito) y cada renglón se valida
  * con la misma función que el servidor, solo para avisar antes: la que vale es la del servidor.
+ * Antes de enviar: nombre, zona y entrega (validados igual que en el servidor) y Turnstile, que confirma que
+ * la boleta la manda una persona.
  */
 export default function Boleta() {
   const { items, setQty, clear, count } = useCart()
   const [cupon, setCupon] = useState('')
   const [nota, setNota] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [zona, setZona] = useState('')
+  const [entrega, setEntrega] = useState<Entrega | null>(null)
+  // Los errores de los datos se muestran recién después del primer intento de envío (no mientras se escribe)
+  const [intentado, setIntentado] = useState(false)
+  const [token, setToken] = useState<string | null>(null)
+  const [reinicio, setReinicio] = useState(0)
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [enviada, setEnviada] = useState<BoletaEnviada | null>(leerBoletaEnviada)
@@ -54,16 +78,31 @@ export default function Boleta() {
   const deprueba = renglones.some((r) => r.linea?.producto.precioDePrueba)
   const cuponFinal = normalizarCupon(cupon)
   const cuponMal = cuponFinal !== '' && !cuponValido(cuponFinal)
-  const puedeEnviar = !hayInvalidos && !demasiados && !cuponMal && !enviando && BRAND.whatsappNumber !== ''
+  const nombreMal = !textoValido(nombre)
+  const zonaMal = !textoValido(zona)
+  const datosOk = !nombreMal && !zonaMal && entrega !== null
+  // El botón se puede tocar aunque falten datos: al tocarlo se muestra qué falta (un botón apagado no explica nada)
+  const puedeEnviar = !hayInvalidos && !demasiados && !cuponMal && !enviando && BRAND.whatsappNumber !== '' && TURNSTILE_SITE_KEY !== ''
 
   async function enviar() {
     if (enVuelo.current) return
+    setIntentado(true)
+    if (!datosOk || entrega === null) {
+      document.getElementById(nombreMal ? 'nombre' : zonaMal ? 'zona' : 'entrega-envio')?.focus()
+      return
+    }
+    if (!token) {
+      setError('Esperá a que termine la verificación de abajo ("Soy humano") y volvé a tocar Enviar.')
+      return
+    }
     enVuelo.current = true
     setEnviando(true)
     setError(null)
-    const r = await enviarBoleta(items, cuponFinal, nota.trim())
+    const r = await enviarBoleta(items, { nombre, zona, entrega }, cuponFinal, nota.trim(), token)
     enVuelo.current = false
     setEnviando(false)
+    // Cada token de Turnstile sirve una sola vez: pase lo que pase, se pide otro
+    setReinicio((n) => n + 1)
     if (!r.ok) {
       setError(r.error)
       return
@@ -100,6 +139,28 @@ export default function Boleta() {
         {demasiados && <p className="mt-1 font-display text-sm font-bold">✗ Hasta {MAX_ITEMS} artículos distintos por boleta.</p>}
       </section>
 
+      <fieldset className="space-y-3">
+        <legend className="font-display text-[11px] font-bold uppercase tracking-[0.15em]">Datos para la entrega</legend>
+        <Campo id="nombre" etiqueta="A nombre de" valor={nombre} cambiar={setNombre} autoComplete="name" error={intentado && nombreMal} />
+        <Campo id="zona" etiqueta="Zona o barrio" valor={zona} cambiar={setZona} autoComplete="address-level2" error={intentado && zonaMal} />
+        <div role="radiogroup" aria-label="Entrega" aria-describedby={intentado && !entrega ? 'entrega-error' : undefined} className="grid grid-cols-2 gap-2">
+          {(Object.keys(ENTREGAS) as Entrega[]).map((e) => (
+            <label
+              key={e}
+              className={`flex min-h-11 cursor-pointer items-center justify-center border-2 px-2 text-center font-display text-[15px] has-focus-visible:outline-2 has-focus-visible:outline-offset-2 ${entrega === e ? 'border-print bg-print text-paper' : 'border-print/40'}`}
+            >
+              <input id={`entrega-${e}`} type="radio" name="entrega" value={e} checked={entrega === e} onChange={() => setEntrega(e)} className="sr-only" />
+              {ENTREGAS[e]}
+            </label>
+          ))}
+        </div>
+        {intentado && !entrega && (
+          <p id="entrega-error" className="font-display text-xs font-bold">
+            ✗ Elegí cómo te la llevás.
+          </p>
+        )}
+      </fieldset>
+
       <div>
         <label htmlFor="cupon" className="font-display text-[11px] font-bold uppercase tracking-[0.15em]">
           Cupón de los pasatiempos <span className="font-normal normal-case tracking-normal italic">(opcional)</span>
@@ -130,11 +191,18 @@ export default function Boleta() {
           value={nota}
           onChange={(e) => setNota(e.target.value)}
           maxLength={MAX_NOTA}
-          placeholder="Zona de envío, horario, etc."
+          placeholder="Horario, timbre, referencias…"
           rows={3}
           className="mt-1 block w-full border border-print/40 bg-paper p-3 text-base"
         />
       </div>
+
+      {/* Turnstile: casi siempre se resuelve solo. Va antes del botón, fuera de la franja pegada abajo */}
+      {TURNSTILE_SITE_KEY ? (
+        <Turnstile siteKey={TURNSTILE_SITE_KEY} alCambiar={setToken} reinicio={reinicio} />
+      ) : (
+        <p className="text-sm text-print-muted">Configurá VITE_TURNSTILE_SITE_KEY en web/.env para activar el envío.</p>
+      )}
 
       {/* Total y envío pegados abajo en mobile (sticky, igual que en el aviso) */}
       <div className="sticky bottom-0 -mx-3 space-y-2 border-t border-print/30 bg-paper px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:border-0 sm:p-0">
@@ -158,6 +226,34 @@ export default function Boleta() {
           {enviando ? 'Esperando el número de boleta…' : hayInvalidos ? 'Quite los artículos marcados con ✗ para enviar.' : 'Se abre WhatsApp con el N° de boleta.'}
         </p>
       </div>
+    </div>
+  )
+}
+
+/** Campo de texto de los datos de entrega, con su error debajo (después del primer intento de envío) */
+function Campo(props: { id: string; etiqueta: string; valor: string; cambiar: (v: string) => void; autoComplete: string; error: boolean }) {
+  const { id, etiqueta, valor, cambiar, autoComplete, error } = props
+  return (
+    <div>
+      <label htmlFor={id} className="font-display text-sm">
+        {etiqueta}
+      </label>
+      <input
+        id={id}
+        value={valor}
+        onChange={(e) => cambiar(e.target.value)}
+        maxLength={MAX_TEXTO + 10}
+        autoComplete={autoComplete}
+        aria-invalid={error}
+        aria-describedby={error ? `${id}-error` : undefined}
+        // 16 px: con menos, el iPhone hace zoom al tocar el campo
+        className={`mt-1 block min-h-11 w-full border bg-paper px-3 font-display text-base ${error ? 'border-2 border-red' : 'border-print/40'}`}
+      />
+      {error && (
+        <p id={`${id}-error`} className="mt-1 font-display text-xs font-bold">
+          ✗ Entre {MIN_TEXTO} y {MAX_TEXTO} letras.
+        </p>
+      )}
     </div>
   )
 }

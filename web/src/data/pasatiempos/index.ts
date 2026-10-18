@@ -1,3 +1,4 @@
+import { EDICION_DEL_CUPON } from '../../lib/cupon'
 import type { Edicion } from './types'
 
 /**
@@ -24,3 +25,8 @@ export const ediciones: Edicion[] = Object.entries(archivos)
 
 /** La edición vigente es la de número más alto */
 export const ultimaEdicion = (): Edicion | undefined => ediciones.at(-1)
+
+// El servidor compara el cupón con la edición que importa src/lib/cupon.ts (a mano: no puede usar glob).
+// Si sale una edición nueva y nadie actualizó ese import, que se note en la consola
+if (import.meta.env.DEV && ultimaEdicion() && ultimaEdicion()!.numero !== EDICION_DEL_CUPON)
+  console.error(`Pasatiempos: la edición vigente es la ${ultimaEdicion()!.numero} pero el servidor compara el cupón de la ${EDICION_DEL_CUPON} (src/lib/cupon.ts)`)

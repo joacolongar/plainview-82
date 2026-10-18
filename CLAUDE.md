@@ -31,8 +31,10 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `functions/api/pedido.ts` endpoint `POST /api/pedido` (Cloudflare Pages Functions, corre en el servidor; tipos en
     `tsconfig.functions.json`); `src/lib/pedido.ts` valida el pedido contra el catálogo y arma resumen y total
     (lo comparten servidor y boleta: no puede importar `config.ts` ni nada del navegador)
-  - `src/pages/Boleta.tsx` la boleta de pedido (`/carrito`); `src/lib/boleta.ts` la envía a `/api/pedido` y guarda la
-    última boleta enviada (sessionStorage); `src/lib/whatsapp.ts` arma el mensaje con la respuesta del servidor
+  - `src/pages/Boleta.tsx` la boleta de pedido (`/carrito`, con datos de entrega y Turnstile); `src/lib/boleta.ts` la
+    envía a `/api/pedido` y guarda la última boleta enviada (sessionStorage); `src/lib/whatsapp.ts` arma el mensaje con
+    la respuesta del servidor; `src/components/Turnstile.tsx` el widget; `src/lib/cupon.ts` el cupón de la edición
+    vigente que compara el servidor (**al publicar una edición de pasatiempos nueva, actualizar su import**)
   - `src/context/CartContext.tsx` carrito (estado + localStorage con try/catch)
   - `src/App.tsx` rutas con el router de datos (`createBrowserRouter`, necesario para la transición de hoja)
   - `src/components/NewspaperPage.tsx` layout común: todo el sitio impreso en la hoja del diario (cabecera chica + pie);
@@ -137,6 +139,10 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   (la CSP bloquea scripts en línea y el atributo `style`), y a la copia `dist/_headers` se le saca `frame-ancestors`
   y `X-Frame-Options` (el próximo build la regenera). Para que WhatsApp no cargue: `--host-resolver-rules="MAP wa.me 127.0.0.1:9"`.
   Cada pedido válido le llega al dueño por Telegram: simular la respuesta cuando no haga falta el servidor real.
+- **Turnstile en headless:** el desafío real no se resuelve (iframe de otro sitio dentro de un shadow DOM): la lógica
+  se prueba con un `window.turnstile` falso puesto antes de abrir la boleta (se entra por un aviso y se navega con el
+  router, con `document.startViewTransition = undefined`). El widget real lo prueba el dueño en el navegador. La página
+  de prueba también recibe la CSP: para usar un iframe propio, sumar `'self'` al `frame-src` de la copia `dist/_headers`.
 - Lo que el headless no puede probar (teclado del celular, gestos reales, menú de compartir, animaciones)
   lo prueba el dueño en su teléfono; queda anotado como pendiente en la Bitácora.
 
@@ -159,7 +165,16 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
     estrictamente contra `products.ts` (claves conocidas, valores permitidos, largos y cantidades máximas) y calcula el total.
   - Credenciales (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TURNSTILE_SECRET_KEY`) solo como variables/secretos de
     Cloudflare, **sin `VITE_`**. Nunca en el repo, en `.env` del front ni en respuestas del endpoint.
-  - Turnstile protege el envío; al sumarlo, la CSP de `_headers` agrega `https://challenges.cloudflare.com`
-    (`script-src` y `frame-src`). WhatsApp se abre recién con la respuesta del servidor (N° de boleta).
+  - **Datos de entrega** (nombre, zona, envío/retiro): se validan en `validarDatos` (`src/lib/pedido.ts`, la comparten
+    boleta y servidor): de 2 a 60 caracteres y sin caracteres de control ni de formato invisibles (`\p{Cc}\p{Cf}`:
+    saltos de línea, marcas de dirección del texto), para que nadie disfrace el mensaje de Telegram o de WhatsApp.
+  - **Turnstile** protege el envío: el widget (script cargado solo en la boleta, nunca en `index.html`) da un token que
+    la función verifica con `siteverify` antes de avisar por Telegram. Cada token sirve una vez: la boleta reinicia el
+    widget después de cada envío. Sin `TURNSTILE_SECRET_KEY` la función rechaza todo (503). Token rechazado: 403 con
+    `codigo: 'turnstile'`. La CSP de `_headers` permite `https://challenges.cloudflare.com` en `script-src` y `frame-src`.
+    La clave pública va en `VITE_TURNSTILE_SITE_KEY` (pública por diseño). En local, claves de prueba de Cloudflare:
+    pública `1x00000000000000000000AA` y secreta `1x0000000000000000000000000000000AA` (siempre pasan; las `2x…`
+    siempre fallan). WhatsApp se abre recién con la respuesta del servidor (N° de boleta).
+  - **Cupón:** el servidor lo compara con el de la edición vigente y lo informa en Telegram (✔ / ✗); no rechaza el pedido.
 - **Cupones y soluciones** de los pasatiempos viajan en el JS (ofuscados, no secretos): por eso son de bajo valor
   y se validan a mano por WhatsApp (ver docs/PASATIEMPOS.md).

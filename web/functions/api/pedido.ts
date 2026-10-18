@@ -1,12 +1,14 @@
 // POST /api/pedido — Cloudflare Pages Function (corre en el servidor de Cloudflare, no en el navegador).
-// Recibe { items: [{ slug, talle, color, cantidad }], cupon? }, lo valida contra el catálogo, calcula el total,
-// genera el N° de boleta, avisa por Telegram y responde { boleta, resumen, total }.
+// Recibe { items: [{ slug, talle, color, cantidad }], datos: { nombre, zona, entrega }, cupon?, token }:
+// verifica con Turnstile que lo mande una persona, valida el pedido contra el catálogo, calcula el total,
+// genera el N° de boleta, avisa por Telegram (con el veredicto del cupón) y responde { boleta, resumen, total }.
 // Reglas en docs/ROADMAP.md (Etapa 2) y "Seguridad" en CLAUDE.md.
+import { veredictoCupon } from '../../src/lib/cupon'
 import { resumenPedido, totalPedido, validarPedido } from '../../src/lib/pedido'
 
 // Variables de Cloudflare (Settings → Variables and Secrets); en local salen de web/.dev.vars (fuera de git).
 // Sin VITE_: nunca llegan al navegador.
-type Env = { TELEGRAM_BOT_TOKEN?: string; TELEGRAM_CHAT_ID?: string }
+type Env = { TELEGRAM_BOT_TOKEN?: string; TELEGRAM_CHAT_ID?: string; TURNSTILE_SECRET_KEY?: string }
 
 // Lo poco que usamos del contexto que arma Cloudflare (así no sumamos @cloudflare/workers-types)
 type Contexto = { request: Request; env: Env }
@@ -74,6 +76,33 @@ function numeroBoleta(): string {
   return `PV-${parte('year')}${parte('month')}${parte('day')}-${azar}`
 }
 
+const MAX_TOKEN = 2048 // los tokens de Turnstile miden unos cientos de caracteres
+
+/**
+ * Turnstile (el "no soy un robot" de Cloudflare): el widget de la boleta le da un token a quien lo pasa, y acá se le
+ * pregunta a Cloudflare si es bueno. Cada token sirve una sola vez. Sin la clave secreta no se acepta nada:
+ * un olvido de configuración no puede dejar el envío sin protección.
+ */
+async function esHumano(env: Env, token: string, ip: string | null): Promise<'si' | 'no' | 'sin-servicio'> {
+  if (!env.TURNSTILE_SECRET_KEY) {
+    console.error('Falta TURNSTILE_SECRET_KEY: se rechazan todos los pedidos')
+    return 'sin-servicio'
+  }
+  const form = new FormData()
+  form.append('secret', env.TURNSTILE_SECRET_KEY)
+  form.append('response', token)
+  if (ip) form.append('remoteip', ip)
+  try {
+    const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form })
+    const datos = (await r.json()) as { success?: boolean; 'error-codes'?: string[] }
+    if (!datos.success) console.warn('Turnstile rechazó el token', datos['error-codes'])
+    return datos.success === true ? 'si' : 'no'
+  } catch {
+    console.error('No se pudo conectar con Turnstile')
+    return 'sin-servicio'
+  }
+}
+
 async function avisarPorTelegram(env: Env, texto: string): Promise<boolean> {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return false
   try {
@@ -109,16 +138,27 @@ export async function onRequestPost({ request, env }: Contexto): Promise<Respons
     return pedidoInvalido()
   }
 
-  const pedido = validarPedido(cuerpo)
+  // El token de Turnstile viaja con el pedido pero no es parte de él: se separa antes de validar
+  if (typeof cuerpo !== 'object' || cuerpo === null || Array.isArray(cuerpo)) return pedidoInvalido()
+  const { token, ...resto } = cuerpo as Record<string, unknown>
+  if (typeof token !== 'string' || token.length === 0 || token.length > MAX_TOKEN) return pedidoInvalido()
+
+  const pedido = validarPedido(resto)
   if (!pedido) return pedidoInvalido()
+
+  // Primero lo barato (validar), después lo que cuesta una consulta a Cloudflare
+  const humano = await esHumano(env, token, request.headers.get('CF-Connecting-IP'))
+  if (humano === 'sin-servicio') return json({ error: 'No pudimos registrar el pedido. Probá de nuevo en un rato.' }, 503)
+  // codigo: para que la boleta sepa que tiene que reiniciar el widget (el 403 de origen no lo lleva)
+  if (humano === 'no') return json({ error: 'No pudimos confirmar que sos humano', codigo: 'turnstile' }, 403)
 
   const boleta = numeroBoleta()
   const resumen = resumenPedido(pedido)
   const total = totalPedido(pedido.lineas)
 
   // Sin el aviso no hay contra qué verificar la boleta que llegue por WhatsApp: mejor que el cliente reintente
-  const nota = pedido.cupon ? '\n\n(El cupón todavía no se verifica solo: chequealo con el de la edición.)' : ''
-  const avisado = await avisarPorTelegram(env, `🧾 Boleta ${boleta}\n\n${resumen}${nota}`)
+  const cupon = veredictoCupon(pedido.cupon)
+  const avisado = await avisarPorTelegram(env, `🧾 Boleta ${boleta}\n\n${resumen}${cupon ? `\n\n${cupon}` : ''}`)
   if (!avisado) return json({ error: 'No pudimos registrar el pedido. Probá de nuevo en un rato.' }, 503)
 
   return json({ boleta, resumen, total })

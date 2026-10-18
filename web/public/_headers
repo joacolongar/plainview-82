@@ -2,14 +2,15 @@
 #
 # Content-Security-Policy: le dice al navegador de dónde puede cargar cada cosa. Solo lo que usamos:
 #   - script-src 'self'          → solo nuestro JS (sin scripts en línea, sin eval)
+#     + challenges.cloudflare.com → Turnstile (el "no soy un robot" de la boleta): su script y su iframe (frame-src)
 #   - style-src 'self' + Google Fonts (la hoja de estilos de las tipografías)
 #   - font-src fonts.gstatic.com → los archivos de las tipografías
 #   - img-src 'self' data:       → logos, íconos, ilustraciones y la textura de papel (un SVG data: en el CSS)
-#   - connect-src 'self'         → el sitio no hace fetch a ningún lado
+#   - connect-src 'self'         → el sitio solo le habla a su propia API (/api/pedido)
 #   - object-src/base-uri 'none', frame-ancestors 'none' (nadie puede meter el sitio en un iframe)
 # Si algún día se suma algo externo (analytics, otra fuente), hay que agregarlo acá o el navegador lo bloquea.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=(), web-share=(self), clipboard-write=(self)
