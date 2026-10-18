@@ -2,8 +2,11 @@ import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import Ambientacion from '../components/ambientacion/Ambientacion'
+import FeDeErratas, { WatchCloser } from '../components/FeDeErratas'
+import Galeria from '../components/Galeria'
 import { useCart } from '../context/CartContext'
 import { avisoDeProducto } from '../data/anuncios'
+import { fotosDe } from '../data/fotos'
 import { MEDIDAS, MEDIDAS_DE_EJEMPLO } from '../data/medidas'
 import { ESTADOS, getProduct, numeroArticulo, rutaAviso, type Product, type Size } from '../data/products'
 import NotFound from './NotFound'
@@ -27,6 +30,7 @@ export default function AvisoComercial() {
   if (!p) return <NotFound />
   const canBuy = p.status !== 'proximamente' && size !== null
   const avisoChico = avisoDeProducto(p.slug)
+  const fotos = fotosDe(p)
 
   return (
     // relative + isolate: la ambientación se ubica contra la página y lo que va detrás del texto (la lluvia) queda
@@ -47,18 +51,20 @@ export default function AvisoComercial() {
 
       <div className="mt-5 grid gap-5 md:grid-cols-2 md:gap-8">
         <figure>
-          {/* Grabado: la foto si hay, si no el placeholder con trama, siempre con doble filete y epígrafe */}
-          <div className="relative border-4 border-double border-print p-1">
-            {p.images[0] ? (
-              <img src={p.images[0]} alt={p.name} className="aspect-[4/5] w-full object-cover" />
-            ) : (
+          {/* Las fotos si hay (galería), si no el grabado con trama; siempre con doble filete y epígrafe */}
+          {fotos.length > 0 ? (
+            <Galeria fotos={fotos} boceto={p.fotoBoceto} marco="border-4 border-double border-print p-1">
+              <Ambientacion key={p.slug} tipo={p.ambientacion} zona="grabado" />
+            </Galeria>
+          ) : (
+            <div className="relative border-4 border-double border-print p-1">
               <div className="engraving flex aspect-[4/5] items-center justify-center">
                 <span className="bg-paper px-2 font-display text-xs uppercase tracking-widest text-print-muted">Grabado en preparación</span>
               </div>
-            )}
-            {/* Lo que puede pasar por encima de la foto (nunca de una palabra) */}
-            <Ambientacion key={p.slug} tipo={p.ambientacion} zona="grabado" />
-          </div>
+              {/* Lo que puede pasar por encima de la foto (nunca de una palabra) */}
+              <Ambientacion key={p.slug} tipo={p.ambientacion} zona="grabado" />
+            </div>
+          )}
           <figcaption className="mt-1 font-display text-sm italic leading-snug text-print-muted">{p.epigrafe}</figcaption>
         </figure>
 
@@ -67,7 +73,8 @@ export default function AvisoComercial() {
           <p className="font-display text-[15px] leading-snug text-pretty first-letter:float-left first-letter:mr-1.5 first-letter:font-headline first-letter:text-5xl first-letter:leading-[0.8]">
             {p.aviso}
           </p>
-          <FeDeErratas referencia={p.reference} />
+          <FeDeErratas p={p} />
+          <WatchCloser referencia={p.reference} />
           <TablaMedidas talles={p.sizes} elegido={size} />
 
           {/* El cupón de los catálogos por correo: se "llena" y se agrega al pedido */}
@@ -146,24 +153,6 @@ export default function AvisoComercial() {
         </aside>
       )}
     </article>
-  )
-}
-
-/** "Fe de erratas" del diario: la referencia escondida en la estampa se despliega con un toque (no depende de hover) */
-function FeDeErratas({ referencia }: { referencia: string }) {
-  return (
-    <details className="group border-y-4 border-double border-print py-1">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
-        <span>
-          <span className="block font-headline text-xl uppercase leading-none">Fe de erratas</span>
-          <span className="block font-display text-sm italic leading-snug">En la edición anterior dijimos que era solo una remera.</span>
-        </span>
-        <span className="shrink-0 font-display text-xs font-bold uppercase tracking-wider">
-          Mire de nuevo <span aria-hidden className="inline-block motion-safe:transition-transform group-open:rotate-90">▸</span>
-        </span>
-      </summary>
-      <p className="mt-2 pb-1 font-display text-[15px] leading-snug">{referencia}</p>
-    </details>
   )
 }
 

@@ -38,6 +38,9 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `src/components/NewspaperPage.tsx` layout común: todo el sitio impreso en la hoja del diario (cabecera chica + pie);
     `src/lib/pasarPagina.ts` pasa de página deslizando o con ← → (los juegos se protegen con `data-no-swipe`)
   - `src/data/paginas.ts` orden y números de página del diario; `src/data/editions.ts` edición del drop
+  - `src/components/FeDeErratas.tsx` la Fe de erratas del aviso (se arma con `detalles` del producto) y el bloque
+    "Watch closer"; `src/components/Galeria.tsx` las fotos del aviso; `src/data/fotos.ts` las encuentra solas
+    (`import.meta.glob` sobre `src/assets/productos/<slug>/<slug>-N.webp`, la 1 es la principal)
   - `src/pages/*` una página por ruta. Ojo con los nombres: `AvisoComercial.tsx` es la página de cada remera
     (`/catalogo/:slug`) e `IndiceAvisos.tsx` el índice (`/catalogo`); `components/Aviso.tsx` son los avisos *chicos*
   - `src/data/noticias.ts` (portada), `anuncios.ts` (avisos chicos y cuáles van en la portada), `medidas.ts` (talles),
@@ -86,9 +89,12 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   página, de `src/data/paginas.ts` (no escribirlo a mano). Los pasatiempos tienen su propia numeración de ediciones.
 - **Productos:** precio en 0 se muestra como "Próximo número"; `precioDePrueba: true` marca un precio inventado
   (se lee "Precio de prueba" en el aviso y el índice, y "⚠ PRECIO DE PRUEBA" en Telegram y WhatsApp): antes de lanzar,
-  precios reales y todos en `false`; la ruta del aviso sale de `rutaAviso()` y los estados
+  precios reales y todos en `false` (la misma bandera marca como de prueba los `detalles` de la Fe de erratas); la ruta del aviso sale de `rutaAviso()` y los estados
   de `ESTADOS` (`products.ts`). Las medidas son **de ejemplo** mientras `MEDIDAS_DE_EJEMPLO` sea `true` (lo avisa la tabla).
 - **Imágenes:** WebP a 3x del tamaño en pantalla (con pérdida para bloques de color plano); ilustraciones en SVG.
+  Fotos de producto: para sumar una, alcanza con dejar el archivo en `src/assets/productos/<slug>/` (y su texto en
+  `altFotos`); al menos 1500 px de ancho (se ven a ~500 px en la compu) y una foto por archivo. Sin `cwebp` ni Pillow:
+  se convierten con el canvas de Edge headless. Mientras sean bocetos, `fotoBoceto: true` (sello "Prueba de imprenta").
 - **Regla de contenido** (noticias, juegos, pasatiempos, avisos): textos e ilustraciones **propios**, nunca fotogramas
   ni afiches. Evita problemas de copyright y promociona las remeras.
   - **Alusiones sí:** se puede aludir a escenas y frases célebres (el ojo del tigre, el batido) con palabras propias.

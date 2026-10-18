@@ -11,7 +11,10 @@ export type Product = {
   precioDePrueba: boolean
   sizes: Size[]
   colors: string[]
-  images: string[] // rutas en /public/products/...
+  /** Textos alternativos de las fotos, en orden (las fotos salen solas de src/assets/productos/<slug>/, ver fotos.ts) */
+  altFotos?: string[]
+  /** true mientras las fotos sean bocetos: cada una lleva el sello "Prueba de imprenta" */
+  fotoBoceto?: boolean
   /** La pista sutil: qué detalle de la peli esconde la estampa (sin spoilers grandes) */
   reference: string
   description: string
@@ -29,11 +32,24 @@ export type Product = {
   seccion?: string
   /** Detalle visual de la película que vive en la página (docs/AMBIENTACIONES.md) */
   ambientacion?: Ambientacion
+  /** Detalles de la prenda: arman la Fe de erratas del aviso. Lo que falte no aparece.
+      Mientras precioDePrueba sea true, también son de prueba (lo avisa la Fe de erratas) */
+  detalles?: Detalles
+}
+
+export type Detalles = {
+  tela?: string
+  calce?: string
+  estampa?: { tecnica: string; tamano: string; ubicacion: string }
+  color?: string
+  cuidado?: string
+  /** La tirada de la remera (no confundir con la edición del diario) */
+  edicion?: string
 }
 
 export type Ambientacion = 'ranas' | 'cafe' | 'pecados'
 
-// TODO: reemplazar precios, imágenes y textos por los reales. Los textos de aviso son borradores.
+// TODO: reemplazar precios, fotos, detalles y textos por los reales. Los textos de aviso son borradores.
 export const products: Product[] = [
   {
     slug: 'magnolia',
@@ -45,7 +61,12 @@ export const products: Product[] = [
     precioDePrueba: true,
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Negro'],
-    images: [],
+    altFotos: [
+      'Frente de la remera negra: cuatro carteles de colores en el pecho y una línea de transmisión en vivo debajo',
+      'Espalda de la remera negra, lisa, con una frase chica cerca del ruedo y la etiqueta Watch closer',
+      'Detalle de la estampa: cuatro carteles redondeados en celeste, rojo, rosa y amarillo',
+    ],
+    fotoBoceto: true,
     reference: 'Una referencia que aparece apenas un instante en un frame. Hay que mirar de cerca.',
     description: 'Estampa basada en un detalle de fondo de la película. Completar con la descripción real.',
     status: 'disponible',
@@ -57,6 +78,14 @@ export const products: Product[] = [
     epigrafe: 'Estampa basada en un detalle de fondo. Mírela de cerca.',
     lugar: 'Valle de San Fernando',
     ambientacion: 'ranas',
+    detalles: {
+      tela: 'jersey de algodón peinado 24/1, 200 g/m²',
+      calce: 'oversize: hombro caído y cuerpo amplio (si dudás, tu talle de siempre)',
+      estampa: { tecnica: 'serigrafía a cuatro tintas', tamano: '28 × 10 cm', ubicacion: 'pecho; frase chica en la espalda, sobre el ruedo' },
+      color: 'negro carbón, teñido en pieza',
+      cuidado: 'lavar del revés con agua fría, sin secadora ni plancha sobre la estampa',
+      edicion: 'tirada de 50 unidades, con etiqueta 8:2 en el ruedo',
+    },
   },
   {
     slug: 'casablanca',
@@ -68,18 +97,25 @@ export const products: Product[] = [
     precioDePrueba: true,
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Hueso'],
-    images: [],
-    reference: 'Diseño en proceso.',
+    reference:
+      'Un café en el norte de África, un pianista que sabe qué canción no tiene que tocar y un dueño que no brinda por nadie.',
     description: 'Completar cuando el diseño esté terminado.',
     status: 'disponible',
     articulo: 2,
     titular: 'Casablanca',
     bajada: 'Para quien entra a un café y elige la mesa con vista a la puerta.',
     aviso:
-      'Remera para quien no se mete en nada, salvo cuando se mete. Ideal para esperar una visa, un salvoconducto o a alguien que no debería volver a entrar. Diseño en proceso: sale en una próxima edición.',
-    epigrafe: 'Diseño en proceso.',
+      'Remera para quien no se mete en nada, salvo cuando se mete. Ideal para esperar una visa, un salvoconducto o a alguien que no debería volver a entrar. Abriga lo justo para noches de humo y piano.',
+    epigrafe: 'El grabado sale en la próxima edición. La mesa de siempre ya está reservada.',
     lugar: 'Casablanca',
     ambientacion: 'cafe',
+    detalles: {
+      tela: 'jersey de algodón peinado 24/1, 180 g/m²',
+      calce: 'clásico: al cuerpo, sin ajustar',
+      estampa: { tecnica: 'serigrafía a una tinta color café', tamano: '22 × 22 cm', ubicacion: 'centro del pecho' },
+      color: 'hueso, como un mantel de café de los de antes',
+      cuidado: 'lavar con agua fría y colores claros; secar a la sombra',
+    },
   },
   {
     // Regla de spoilers de esta ficha (CLAUDE.md): la remera es sobre el final, los textos solo lo insinúan
@@ -92,7 +128,6 @@ export const products: Product[] = [
     precioDePrueba: true,
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Negro'],
-    images: [],
     reference:
       'Una ciudad donde nunca para de llover, un detective a siete días de jubilarse y una lista que alguien completa en orden.',
     description: 'Completar con la descripción real de la estampa.',
@@ -105,6 +140,14 @@ export const products: Product[] = [
     lugar: 'Ciudad sin nombre',
     seccion: 'Policiales',
     ambientacion: 'pecados',
+    detalles: {
+      tela: 'jersey de algodón peinado 20/1, 220 g/m²',
+      calce: 'oversize: largo y ancho, para días de lluvia',
+      estampa: { tecnica: 'serigrafía a dos tintas, rojo oscuro y blanco', tamano: '30 × 38 cm', ubicacion: 'espalda completa; número de artículo chico al frente' },
+      color: 'negro, sin un rayo de sol',
+      cuidado: 'lavar del revés con agua fría; no usar lavandina ni secadora',
+      edicion: 'siete tandas de siete unidades, ni una más',
+    },
   },
 ]
 
