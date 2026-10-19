@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { edicionActual } from '../data/editions'
+import { numeroEdicion } from '../lib/edicion'
 import { fechaLarga, fechaMini } from '../lib/fecha'
+import { useFechaEdicion } from '../lib/useFechaEdicion'
 import RotatingLogo from './RotatingLogo'
 import SiteNav from './SiteNav'
 
@@ -14,9 +14,9 @@ import SiteNav from './SiteNav'
 const BLOQUE = 'h-[52px] w-[50px] md:h-[100px] md:w-24'
 
 export default function Masthead() {
-  // La fecha se calcula una sola vez al montar (inicializador de useState): el render queda puro
-  const [hoy] = useState(() => new Date())
-  const edicion = edicionActual()
+  // La fecha de la edición del día: cambia a la medianoche de Argentina (lib/edicion.ts)
+  const hoy = useFechaEdicion()
+  const edicion = numeroEdicion(hoy)
   return (
     <header>
       {/* Simétrica, como en la maqueta: bloque WATCH CLOSER | título | logo giratorio del mismo tamaño.
@@ -29,10 +29,10 @@ export default function Masthead() {
         <RotatingLogo lado="derecha" tamano={BLOQUE} />
       </div>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 border-y-4 border-double border-print py-1 font-display text-[11px] uppercase tracking-wider md:text-xs">
-        {/* "Vol. 8 · No. 2" es fijo, como marca; lo que avanza con cada drop es la edición (src/data/editions.ts) */}
+        {/* "Vol. 8 · No. 2" es fijo, como marca; la edición avanza todos los días (lib/edicion.ts) */}
         <span>
-          <span className="md:hidden">Vol. 8 · No. 2 · Ed. N° {edicion.numero}</span>
-          <span className="hidden md:inline">Vol. 8 · Córdoba · No. 2 · Edición N° {edicion.numero}</span>
+          <span className="md:hidden">Vol. 8 · No. 2 · Ed. N° {edicion}</span>
+          <span className="hidden md:inline">Vol. 8 · Córdoba · No. 2 · Edición N° {edicion}</span>
         </span>
         <time dateTime={hoy.toISOString().slice(0, 10)}>
           <span className="md:hidden">{fechaMini(hoy)}</span>

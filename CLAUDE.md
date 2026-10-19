@@ -39,7 +39,12 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `src/App.tsx` rutas con el router de datos (`createBrowserRouter`, necesario para la transición de hoja)
   - `src/components/NewspaperPage.tsx` layout común: todo el sitio impreso en la hoja del diario (cabecera chica + pie);
     `src/lib/pasarPagina.ts` pasa de página deslizando o con ← → (los juegos se protegen con `data-no-swipe`)
-  - `src/data/paginas.ts` orden y números de página del diario; `src/data/editions.ts` edición del drop
+  - `src/data/paginas.ts` orden y números de página del diario
+  - `src/lib/edicion.ts` **la edición del día**: `elegirEdicion(fecha, banco)` (función pura, probada en
+    `edicion.test.ts`) arma la portada; `numeroEdicion(fecha)` da el N° que muestran la cabecera, la franja y el pie.
+    `src/lib/useFechaEdicion.ts` da la fecha (en desarrollo, `?fecha=AAAA-MM-DD` muestra otro día)
+  - `src/data/banco.ts` el banco de la portada: noticias y avisos propios + las tandas `src/data/banco/banco-noticias-N.json`
+    (se guardan tal cual llegan; las correcciones de largo van en `CORRECCIONES`)
   - `src/components/FeDeErratas.tsx` la Fe de erratas del aviso (se arma con `detalles` del producto) y el bloque
     "Watch closer"; `src/components/Galeria.tsx` las fotos del aviso; `src/data/fotos.ts` las encuentra solas
     (`import.meta.glob` sobre `src/assets/productos/<slug>/<slug>-N.webp`, la 1 es la principal)
@@ -66,6 +71,7 @@ cd web && npm install      # una vez
 npm run dev                # http://localhost:5173
 npm run build              # chequea tipos y compila
 npm run lint               # oxlint
+npm test                   # Vitest: pruebas (por ahora, la edición del día y los largos del banco)
 npm run pages              # sitio compilado + Functions en http://localhost:8788 (secretos en web/.dev.vars, fuera de git)
 python3 scripts/pasatiempos.py validar 1   # (desde la raíz) valida la edición 1 de pasatiempos
 ```
@@ -92,7 +98,7 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
 - **Rojo** (`--color-red` `#c84030`, el del logo) solo para acentos: bordes, filetes, el 8:2, rombos, estados activos.
   **Contraste:** sobre la hoja, texto rojo chico no llega al mínimo (3,9:1) → los activos se marcan con subrayado
   rojo y el texto va en tinta; en botones rojos el texto va en negrita de **19 px o más** (cuenta como texto grande).
-- **Numeración:** "Vol. 8 · No. 2" es fijo (marca); la edición del drop sale de `src/data/editions.ts`; el número de
+- **Numeración:** "Vol. 8 · No. 2" es fijo (marca); la edición es la del día (`numeroEdicion`, `lib/edicion.ts`); el número de
   página, de `src/data/paginas.ts` (no escribirlo a mano). Los pasatiempos tienen su propia numeración de ediciones.
 - **Productos:** precio en 0 se muestra como "Próximo número"; `precioDePrueba: true` marca un precio inventado
   (se lee "Precio de prueba" en el aviso y el índice, y "⚠ PRECIO DE PRUEBA" en Telegram y WhatsApp): antes de lanzar,
@@ -108,10 +114,15 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   - **Diálogo textual nunca:** ninguna línea de una película copiada tal cual, ni entre comillas ni sin ellas.
   - **Spoilers solo como guiño velado:** se insinúan ("lluvias inusuales"), nunca se escriben como respuesta,
     palabra del crucigrama ni dato explícito.
-- Las **noticias** de la portada (diario "THE PLAINVIEW") viven en `web/src/data/noticias.ts` y cuentan la premisa de
-  la película como si pasara hoy, con la regla de arriba. Tono irónico de diario de época.
-  - **Largo:** la principal lleva titular, bajada de **una línea** y epígrafe (sin cuerpo); las secundarias,
-    sección, titular y **2 o 3 oraciones**. Las noticias mandan: tienen que pesar más que los avisos.
+- Las **noticias** de la portada (diario "THE PLAINVIEW") viven en `web/src/data/noticias.ts` (propias) y en las tandas
+  del banco (`web/src/data/banco/`), y cuentan la premisa de la película como si pasara hoy, con la regla de arriba.
+  Tono irónico de diario de época. Cada noticia y cada aviso llevan `pelicula` (id en minúsculas con guiones).
+  - **Edición del día:** la portada cambia a la medianoche de Córdoba (N° 1 = 16/10/2026). Cada edición: 1 principal,
+    3 o 4 secundarias, 1 aviso ilustrado y 2 de línea, sin repetir película y con al menos una película con remera.
+    Una noticia no vuelve antes de 7 ediciones si el banco alcanza (las principales sí; las secundarias, con 14,
+    vuelven cada 3 a 6: hacen falta unas 24 para los 7 días). Si se toca la elección, correr `npm test`.
+  - **Largo:** la principal lleva titular, bajada de **una línea** (hasta 55 caracteres) y epígrafe (sin cuerpo); las
+    secundarias, sección, titular y **2 o 3 oraciones**. Las pruebas lo chequean en todo el banco. Las noticias mandan: tienen que pesar más que los avisos.
 - **Ambientaciones** (`docs/AMBIENTACIONES.md`, `src/components/ambientacion/`): cada aviso comercial puede llevar
   `ambientacion` (`'ranas' | 'cafe' | 'pecados'`), un detalle de su película que vive en la página. Reglas:
   - **Lo que se queda nunca tapa texto, precio ni botones:** va en los bordes (cortado por el borde de la hoja) o encima

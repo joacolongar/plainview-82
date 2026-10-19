@@ -2,22 +2,24 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import Masthead from '../components/Masthead'
-import { getAviso, PORTADA, type Aviso as DatosAviso } from '../data/anuncios'
-import { principal, secundarias, SECCIONES, type Noticia } from '../data/noticias'
+import { CIERRE_PORTADA, getAviso, type Aviso as DatosAviso } from '../data/anuncios'
+import { BANCO } from '../data/banco'
+import { SECCIONES, type Noticia } from '../data/noticias'
 import { getProduct, rutaAviso } from '../data/products'
+import { elegirEdicion } from '../lib/edicion'
+import { useFechaEdicion } from '../lib/useFechaEdicion'
 
 type Item = { tipo: 'noticia'; noticia: Noticia } | { tipo: 'aviso'; aviso: DatosAviso }
 
 /**
- * Reparte las noticias secundarias en dos columnas e intercala los avisos de la portada (PORTADA en anuncios.ts):
+ * Reparte las noticias secundarias en dos columnas e intercala los avisos de la edición del día:
  * - las noticias van alternadas: izquierda, derecha, izquierda…
  * - los minis van desfasados: la derecha arranca con uno y la izquierda lo pone después de su primera noticia
  *   (así nunca quedan dos a la misma altura y hay como mucho 2 a la vista en el celular)
  * - los avisos de línea rellenan el final: el primero a la columna más corta, el siguiente a la otra
  */
-function armarColumnas(noticias: Noticia[]): [Item[], Item[]] {
-  const minis = PORTADA.minis.map(getAviso).filter((a): a is DatosAviso => !!a)
-  const lineas = PORTADA.lineas.map(getAviso).filter((a): a is DatosAviso => !!a)
+function armarColumnas(noticias: Noticia[], minisDelDia: DatosAviso[], lineas: DatosAviso[]): [Item[], Item[]] {
+  const minis = [...minisDelDia] // se van sacando de a uno
   const izq: Item[] = []
   const der: Item[] = []
   const mini = (col: Item[]) => {
@@ -42,11 +44,13 @@ function armarColumnas(noticias: Noticia[]): [Item[], Item[]] {
  * Primera plana del diario THE PLAINVIEW (maqueta: docs/portada-con-avisos.png).
  * Principal corta (titular, bajada, grabado, epígrafe) y abajo dos columnas, también en el celular,
  * con noticias breves y avisos sueltos. Cierra el aviso rojo de la marca.
+ * Cambia todos los días: la edición la elige elegirEdicion (lib/edicion.ts) con la fecha de Córdoba.
  */
 export default function Home() {
-  const p = principal()
-  const columnas = armarColumnas(secundarias())
-  const cierre = getAviso(PORTADA.cierre)
+  const edicion = elegirEdicion(useFechaEdicion(), BANCO)
+  const p = edicion.principal
+  const columnas = armarColumnas(edicion.secundarias, edicion.minis, edicion.lineas)
+  const cierre = getAviso(CIERRE_PORTADA)
 
   return (
     <div>
@@ -54,7 +58,7 @@ export default function Home() {
 
       {/* Noticia principal: en 375×667 entran titular, bajada y grabado con epígrafe */}
       <article className="pt-2 md:pt-5">
-        <h2 className="text-center font-headline text-[clamp(3rem,15vw,9rem)] uppercase leading-[0.92] text-balance hyphens-auto">{p.titular}</h2>
+        <h2 className={`text-center font-headline uppercase leading-[0.92] text-balance hyphens-auto ${tamanoTitular(p.titular)}`}>{p.titular}</h2>
         <p className="mx-auto mt-2 max-w-3xl text-center font-display text-[17px] italic leading-snug md:text-2xl">{p.bajada}</p>
         <figure className="mt-3 md:mt-5">
           {/* Grabado: doble filete y trama rayada que se apaga hacia el centro (grabado-vineta en index.css),
@@ -105,6 +109,16 @@ export default function Home() {
       )}
     </div>
   )
+}
+
+/**
+ * El titular principal achica la letra según el largo, para que en 375×667 entren titular, bajada y grabado con
+ * epígrafe (regla de la primera pantalla). Medido con todas las principales del banco.
+ */
+function tamanoTitular(titular: string) {
+  if (titular.length <= 18) return 'text-[clamp(3rem,15vw,9rem)]'
+  if (titular.length <= 30) return 'text-[clamp(2.5rem,11vw,7rem)]'
+  return 'text-[clamp(2rem,9vw,5.5rem)]'
 }
 
 function Volanta({ children }: { children: ReactNode }) {

@@ -1,0 +1,278 @@
+{
+  "noticias": [
+    {
+      "pelicula": "Pelotón",
+      "anio": 1986,
+      "director": "Oliver Stone",
+      "tipo": "principal",
+      "seccion": "Internacional",
+      "titular": "DOS SARGENTOS, UN PELOTÓN",
+      "bajada": "Un voluntario recién llegado a la selva descubre que la guerra también es puertas adentro.",
+      "cuerpo": "Uno de los sargentos lleva cicatrices en la cara; el otro, una paciencia que no le alcanza para todos."
+    },
+    {
+      "pelicula": "Pelotón",
+      "anio": 1986,
+      "director": "Oliver Stone",
+      "tipo": "secundaria",
+      "seccion": "Internacional",
+      "titular": "Universitario deja los estudios para ir a la guerra",
+      "bajada": "",
+      "cuerpo": "Dice que quiere ser uno más. Sus compañeros de pelotón le dan una semana."
+    },
+    {
+      "pelicula": "Ella",
+      "anio": 2013,
+      "director": "Spike Jonze",
+      "tipo": "principal",
+      "seccion": "Sociedad",
+      "titular": "HOMBRE SE ENAMORA DE SU SISTEMA OPERATIVO",
+      "bajada": "Escribe cartas de amor ajenas por oficio; la propia se la contesta una voz.",
+      "cuerpo": "Los vecinos aseguran que se lo ve feliz. Nadie la vio a ella."
+    },
+    {
+      "pelicula": "Ella",
+      "anio": 2013,
+      "director": "Spike Jonze",
+      "tipo": "secundaria",
+      "seccion": "Tecnología",
+      "titular": "Nuevo sistema operativo aprende a conocerte",
+      "bajada": "",
+      "cuerpo": "Sus creadores prometen que escucha, entiende y crece. No aclaran hasta dónde."
+    },
+    {
+      "pelicula": "Oldboy",
+      "anio": 2003,
+      "director": "Park Chan-wook",
+      "tipo": "principal",
+      "seccion": "Policiales",
+      "titular": "LIBERAN A UN HOMBRE TRAS QUINCE AÑOS DE ENCIERRO",
+      "bajada": "No sabe quién lo encerró ni por qué. Le dieron cinco días para averiguarlo.",
+      "cuerpo": "Salió con un traje viejo, un reloj y muy pocas ganas de perdonar."
+    },
+    {
+      "pelicula": "Oldboy",
+      "anio": 2003,
+      "director": "Park Chan-wook",
+      "tipo": "secundaria",
+      "seccion": "Comercio",
+      "titular": "Casa de dumplings pierde a su mejor cliente",
+      "bajada": "",
+      "cuerpo": "Durante quince años despachó la misma orden a la misma dirección. Esta semana, nadie la recibió."
+    },
+    {
+      "pelicula": "Proyecto Fin del Mundo (Project Hail Mary)",
+      "anio": 2026,
+      "director": "Phil Lord y Christopher Miller",
+      "tipo": "principal",
+      "seccion": "Ciencia",
+      "titular": "MAESTRO DE CIENCIAS DESPIERTA EN EL ESPACIO",
+      "bajada": "No recuerda su nombre ni su misión. Sí recuerda que el Sol se está apagando.",
+      "cuerpo": "Lo que tiene a mano: un laboratorio, una computadora y una memoria que vuelve de a pedazos."
+    },
+    {
+      "pelicula": "Proyecto Fin del Mundo (Project Hail Mary)",
+      "anio": 2026,
+      "director": "Phil Lord y Christopher Miller",
+      "tipo": "secundaria",
+      "seccion": "Clima",
+      "titular": "El Sol, cada año un poco más débil",
+      "bajada": "",
+      "cuerpo": "Los científicos culpan a algo diminuto. Mandaron a alguien a averiguarlo. Muy lejos."
+    },
+    {
+      "pelicula": "Cónclave",
+      "anio": 2024,
+      "director": "Edward Berger",
+      "tipo": "principal",
+      "seccion": "Cultos",
+      "titular": "HUMO NEGRO, OTRA VEZ",
+      "bajada": "Los cardenales siguen encerrados y sin acuerdo; en los pasillos se habla más que en la capilla.",
+      "cuerpo": "El decano pide paciencia. Afuera, la plaza también reza, pero por otros motivos."
+    },
+    {
+      "pelicula": "Cónclave",
+      "anio": 2024,
+      "director": "Edward Berger",
+      "tipo": "secundaria",
+      "seccion": "Cultos",
+      "titular": "El decano defiende la duda",
+      "bajada": "",
+      "cuerpo": "Asegura que la certeza es la enemiga de la fe. Varios colegas toman nota, por si acaso."
+    },
+    {
+      "pelicula": "El código Da Vinci",
+      "anio": 2006,
+      "director": "Ron Howard",
+      "tipo": "principal",
+      "seccion": "Policiales",
+      "titular": "MISTERIO DE MADRUGADA EN EL LOUVRE",
+      "bajada": "El curador dejó un mensaje cifrado antes de morir; la policía convoca a un profesor de simbología.",
+      "cuerpo": "Los turistas no notaron nada. Los cuadros, al parecer, sí."
+    },
+    {
+      "pelicula": "El código Da Vinci",
+      "anio": 2006,
+      "director": "Ron Howard",
+      "tipo": "secundaria",
+      "seccion": "Cultura",
+      "titular": "Profesor de simbología, buscado en París",
+      "bajada": "",
+      "cuerpo": "Llegó para dar una charla. Se va con más preguntas que respuestas, y con la policía detrás."
+    },
+    {
+      "pelicula": "La odisea",
+      "anio": 2026,
+      "director": "Christopher Nolan",
+      "tipo": "principal",
+      "seccion": "Internacional",
+      "titular": "ÍTACA SIGUE ESPERANDO A SU REY",
+      "bajada": "Diez años después de Troya, Ulises no vuelve; en su palacio, los pretendientes no se van.",
+      "cuerpo": "La reina asegura que su marido está vivo. Los invitados, que el vino se acaba."
+    },
+    {
+      "pelicula": "La odisea",
+      "anio": 2026,
+      "director": "Christopher Nolan",
+      "tipo": "secundaria",
+      "seccion": "Sociedad",
+      "titular": "Tejedora de Ítaca no termina nunca su trabajo",
+      "bajada": "",
+      "cuerpo": "Promete elegir marido cuando termine el sudario. Los vecinos sospechan que de noche lo desteje."
+    },
+    {
+      "pelicula": "El último rey de Escocia",
+      "anio": 2006,
+      "director": "Kevin Macdonald",
+      "tipo": "principal",
+      "seccion": "Internacional",
+      "titular": "JOVEN MÉDICO ESCOCÉS, AL LADO DEL PRESIDENTE",
+      "bajada": "Llegó a Uganda por aventura; un accidente en la ruta le consiguió el cargo.",
+      "cuerpo": "Dice que el presidente es carismático y generoso. Por ahora."
+    },
+    {
+      "pelicula": "El último rey de Escocia",
+      "anio": 2006,
+      "director": "Kevin Macdonald",
+      "tipo": "secundaria",
+      "seccion": "Salud",
+      "titular": "Clínica rural pierde a su médico más nuevo",
+      "bajada": "",
+      "cuerpo": "Se fue a la capital con un auto nuevo y un puesto que nadie le explicó del todo."
+    },
+    {
+      "pelicula": "El odio",
+      "anio": 1995,
+      "director": "Mathieu Kassovitz",
+      "tipo": "principal",
+      "seccion": "Policiales",
+      "titular": "UN POLICÍA PERDIÓ SU ARMA EN LOS DISTURBIOS",
+      "bajada": "La buscan por todo el barrio; tres amigos tienen un día muy largo por delante.",
+      "cuerpo": "Uno de ellos jura que sabe dónde está. Los otros dos preferirían no saberlo."
+    },
+    {
+      "pelicula": "El odio",
+      "anio": 1995,
+      "director": "Mathieu Kassovitz",
+      "tipo": "secundaria",
+      "seccion": "Ciudad",
+      "titular": "Suburbios amanecen tras una noche de disturbios",
+      "bajada": "",
+      "cuerpo": "Las autoridades piden calma. En el barrio cuentan las horas, una por una."
+    },
+    {
+      "pelicula": "Pandillas de Nueva York",
+      "anio": 2002,
+      "director": "Martin Scorsese",
+      "tipo": "principal",
+      "seccion": "Policiales",
+      "titular": "EL CARNICERO MANDA EN CINCO PUNTOS",
+      "bajada": "Nadie discute con el hombre de la galera y el ojo de vidrio.",
+      "cuerpo": "Un joven recién llegado se ganó su confianza. Demasiado rápido, según algunos."
+    },
+    {
+      "pelicula": "Pandillas de Nueva York",
+      "anio": 2002,
+      "director": "Martin Scorsese",
+      "tipo": "secundaria",
+      "seccion": "Ciudad",
+      "titular": "Cinco Puntos, el barrio que no figura en los mapas",
+      "bajada": "",
+      "cuerpo": "Las pandillas reparten las calles. La policía, prudente, reparte su tiempo en otras."
+    }
+  ],
+  "avisos": [
+    {
+      "pelicula": "Pelotón",
+      "anio": 1986,
+      "tipo": "linea",
+      "titulo": "SE BUSCAN",
+      "texto": "voluntarios. Experiencia no requerida. Los sargentos no se ponen de acuerdo.",
+      "telefono": "82-1986"
+    },
+    {
+      "pelicula": "Ella",
+      "anio": 2013,
+      "tipo": "linea",
+      "titulo": "SE ESCRIBEN",
+      "texto": "cartas de amor por encargo. Letra a mano, sentimiento garantizado.",
+      "telefono": "82-2013"
+    },
+    {
+      "pelicula": "Oldboy",
+      "anio": 2003,
+      "tipo": "linea",
+      "titulo": "SE ALQUILA",
+      "texto": "habitación sin ventanas. Comida incluida. Estadía mínima a convenir.",
+      "telefono": "82-2003"
+    },
+    {
+      "pelicula": "Proyecto Fin del Mundo (Project Hail Mary)",
+      "anio": 2026,
+      "tipo": "linea",
+      "titulo": "SE BUSCA",
+      "texto": "profesor de ciencias para viaje largo. Regreso no confirmado.",
+      "telefono": "82-2026"
+    },
+    {
+      "pelicula": "Cónclave",
+      "anio": 2024,
+      "tipo": "linea",
+      "titulo": "SE VENDEN",
+      "texto": "chimeneas. Humo blanco o negro, a elección del cliente.",
+      "telefono": "82-2024"
+    },
+    {
+      "pelicula": "El código Da Vinci",
+      "anio": 2006,
+      "tipo": "linea",
+      "titulo": "VENDO",
+      "texto": "cilindro con clave de cinco letras. No sé la clave.",
+      "telefono": "82-2006"
+    },
+    {
+      "pelicula": "La odisea",
+      "anio": 2026,
+      "tipo": "linea",
+      "titulo": "SE BUSCA",
+      "texto": "navegante con buena memoria y cera para los oídos.",
+      "telefono": "82-2026"
+    },
+    {
+      "pelicula": "El odio",
+      "anio": 1995,
+      "tipo": "linea",
+      "titulo": "BUSCO",
+      "texto": "reloj que no adelante. Necesito saber cuánto falta.",
+      "telefono": "82-1995"
+    },
+    {
+      "pelicula": "Pandillas de Nueva York",
+      "anio": 2002,
+      "tipo": "linea",
+      "titulo": "CARNICERÍA",
+      "texto": "de Cinco Puntos. Cortes precisos, atención muy personalizada.",
+      "telefono": "82-2002"
+    }
+  ]
+}

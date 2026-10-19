@@ -16,11 +16,15 @@ export type Aviso = {
   ilustracion?: string
   productSlug?: string
   href?: string
+  /** De qué película es (como en noticias.ts). Sin película: los de la marca */
+  pelicula?: string
 }
 
-export const avisos: Aviso[] = [
+// Estos son los avisos propios; las tandas del banco (data/banco/) se suman en data/banco.ts
+export const avisosPropios: Aviso[] = [
   {
     "id": "plainview-perforaciones",
+    "pelicula": "petroleo-sangriento",
     "tipo": "mini",
     "ilustracion": "torre-petrolera",
     "titulo": "PLAINVIEW & HIJO",
@@ -29,6 +33,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "cafe-americano",
+    "pelicula": "casablanca",
     "tipo": "mini",
     "estilo": "invertido",
     "ilustracion": "piano-cafe",
@@ -39,6 +44,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "seminario-confianza",
+    "pelicula": "magnolia",
     "tipo": "mini",
     "ilustracion": "televisor",
     "titulo": "¿LO DEJARON EN VISTO?",
@@ -48,6 +54,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "concurso-bombay",
+    "pelicula": "quien-quiere-ser-millonario",
     "tipo": "mini",
     "ilustracion": "atril-concurso",
     "titulo": "¿SABE LA RESPUESTA?",
@@ -56,6 +63,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "iglesia",
+    "pelicula": "petroleo-sangriento",
     "tipo": "mini",
     "ilustracion": "capilla",
     "titulo": "IGLESIA DE LA REVELACIÓN",
@@ -64,6 +72,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "sparrings",
+    "pelicula": "rocky-iii",
     "tipo": "mini",
     "ilustracion": "guantes",
     "titulo": "SE BUSCAN SPARRINGS",
@@ -72,6 +81,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "recompensa",
+    "pelicula": "zodiac",
     "tipo": "mini",
     "ilustracion": "sobre-cifrado",
     "titulo": "RECOMPENSA",
@@ -80,6 +90,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "paraguas",
+    "pelicula": "magnolia",
     "tipo": "mini",
     "ilustracion": "paraguas",
     "titulo": "PARAGUAS REFORZADOS",
@@ -97,6 +108,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "pianista",
+    "pelicula": "casablanca",
     "tipo": "linea",
     "titulo": "SE BUSCA",
     "texto": "pianista discreto. Repertorio completo salvo una canción.",
@@ -104,6 +116,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "batidora",
+    "pelicula": "petroleo-sangriento",
     "tipo": "linea",
     "titulo": "VENDO",
     "texto": "batidora industrial. Ideal para compartir.",
@@ -111,6 +124,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "tigre",
+    "pelicula": "rocky-iii",
     "tipo": "linea",
     "titulo": "PERDIDO",
     "texto": "ojo de tigre. Se gratifica.",
@@ -118,6 +132,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "vias",
+    "pelicula": "pecados-capitales",
     "tipo": "linea",
     "titulo": "ALQUILO",
     "texto": "depto. junto a las vías. Se mueve un poco.",
@@ -125,6 +140,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "pronosticos",
+    "pelicula": "magnolia",
     "tipo": "linea",
     "titulo": "SE HACEN",
     "texto": "pronósticos. Especialidad: lluvias inusuales.",
@@ -132,6 +148,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "salvoconductos",
+    "pelicula": "casablanca",
     "tipo": "linea",
     "titulo": "VENDO",
     "texto": "salvoconductos. Sin preguntas.",
@@ -139,6 +156,7 @@ export const avisos: Aviso[] = [
   },
   {
     "id": "detective",
+    "pelicula": "zodiac",
     "tipo": "linea",
     "titulo": "BUSCO",
     "texto": "detective paciente. Caso de cartas.",
@@ -146,22 +164,16 @@ export const avisos: Aviso[] = [
   }
 ]
 
-export const getAviso = (id: string) => avisos.find((a) => a.id === id)
+export const getAviso = (id: string) => avisosPropios.find((a) => a.id === id)
 
 /** El aviso "mini" de una remera (para el pie de su aviso comercial) */
-export const avisoDeProducto = (slug: string) => avisos.find((a) => a.tipo === 'mini' && a.productSlug === slug)
+export const avisoDeProducto = (slug: string) => avisosPropios.find((a) => a.tipo === 'mini' && a.productSlug === slug)
 
 /**
- * Qué avisos salen en la portada y en qué orden. Para cambiarlos alcanza con editar esta lista.
- * - minis: se intercalan entre las noticias (uno cada 2 noticias por columna, desfasados)
- * - lineas: rellenan el final de las columnas
- * - cierre: el aviso de la marca, a todo el ancho al final
+ * Avisos de la portada: los elige la edición del día (lib/edicion.ts), salvo estos:
+ * - CIERRE: el aviso de la marca, a todo el ancho al final de todas las ediciones
+ * - FUERA_DE_PORTADA: Café Americano sale al pie del aviso de Casablanca y Recompensa habla de "la carta de esta
+ *   página" (vive en Pasatiempos)
  */
-export const PORTADA = {
-  // Con 5 noticias, las dos columnas miden menos de una pantalla: un mini + el rojo de cierre ya son 2 avisos
-  // a la vista, el máximo en el celular. Si la portada crece, se pueden sumar minis (por ejemplo 'paraguas').
-  // Café Americano no va acá: sale al pie del aviso de Casablanca.
-  minis: ['plainview-perforaciones'],
-  lineas: ['tigre', 'batidora'],
-  cierre: 'plainview-82',
-}
+export const CIERRE_PORTADA = 'plainview-82'
+export const FUERA_DE_PORTADA = ['plainview-82', 'cafe-americano', 'recompensa']

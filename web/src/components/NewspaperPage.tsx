@@ -1,10 +1,10 @@
-import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { BRAND, IS_PREVIEW } from '../config'
-import { edicionActual } from '../data/editions'
 import { paginaDe, RUTA_INDICE, seccionSuelta } from '../data/paginas'
+import { numeroEdicion } from '../lib/edicion'
 import { fechaCorta, fechaLarga } from '../lib/fecha'
 import { marcarDireccion, usePasarPagina } from '../lib/pasarPagina'
+import { useFechaEdicion } from '../lib/useFechaEdicion'
 import RotatingLogo from './RotatingLogo'
 import SiteNav from './SiteNav'
 
@@ -20,14 +20,14 @@ type Pagina = ReturnType<typeof paginaDe>
 export default function NewspaperPage() {
   const { pathname } = useLocation()
   const pagina = paginaDe(pathname)
-  const edicion = edicionActual()
+  const edicion = numeroEdicion(useFechaEdicion())
   const gestos = usePasarPagina(pagina)
 
   return (
     <div className="flex min-h-screen flex-col">
       {IS_PREVIEW && (
         <p className="border-b border-line px-4 py-1.5 text-center font-mono text-[11px] uppercase tracking-wider text-muted md:tracking-[0.2em]">
-          Edición N° {edicion.numero} · <span className="text-red">Número de prueba</span> · Precios y fotos todavía no son reales
+          Edición N° {edicion} · <span className="text-red">Número de prueba</span> · Precios y fotos todavía no son reales
         </p>
       )}
       <main className="mx-auto w-full max-w-6xl flex-1 px-2 py-2 md:px-4 md:py-6">
@@ -44,7 +44,7 @@ export default function NewspaperPage() {
 }
 
 function CabeceraChica({ pagina, suelta }: { pagina: Pagina; suelta: string | null }) {
-  const edicion = edicionActual()
+  const edicion = numeroEdicion(useFechaEdicion())
   return (
     <header className="mb-5">
       {/* Mobile: el logo a la izquierda y nombre + página apilados a la derecha (en una línea no entran a 375 px) */}
@@ -57,7 +57,7 @@ function CabeceraChica({ pagina, suelta }: { pagina: Pagina; suelta: string | nu
       </div>
       <div className="mt-1 flex items-center justify-between gap-3 border-y-4 border-double border-print py-1 font-display text-[11px] font-bold uppercase tracking-[0.15em]">
         <span className="truncate">{pagina?.seccion ?? suelta ?? 'Esta página no existe'}</span>
-        <span className="shrink-0">Edición N° {edicion.numero}</span>
+        <span className="shrink-0">Edición N° {edicion}</span>
       </div>
       <SiteNav />
     </header>
@@ -67,9 +67,9 @@ function CabeceraChica({ pagina, suelta }: { pagina: Pagina; suelta: string | nu
 const enlacePie = 'flex min-h-11 items-center font-display text-sm underline-offset-4 hover:underline'
 
 function PieDePagina({ pagina }: { pagina: Pagina }) {
-  // La fecha se calcula una sola vez al montar (inicializador de useState): el render queda puro
-  const [hoy] = useState(() => new Date())
-  const edicion = edicionActual()
+  // La misma fecha que arma la edición del día (useFechaEdicion: una sola vez al montar)
+  const hoy = useFechaEdicion()
+  const edicion = numeroEdicion(hoy)
   return (
     <footer className="mt-8 border-t-4 border-double border-print pt-1">
       <nav aria-label="Pasar de página" className="grid grid-cols-3 items-center">
@@ -113,7 +113,7 @@ function PieDePagina({ pagina }: { pagina: Pagina }) {
           {pagina && <> · Pág. {pagina.numero}</>}
         </p>
         <p>
-          THE PLAINVIEW · Vol. 8 · No. 2 · Edición N° {edicion.numero} · Córdoba · Redacción:{' '}
+          THE PLAINVIEW · Vol. 8 · No. 2 · Edición N° {edicion} · Córdoba · Redacción:{' '}
           <a href={BRAND.instagram} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center underline underline-offset-2">
             @plainview.82
           </a>

@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "pages": "vite build && wrangler pages dev dist"
+    "pages": "vite build && wrangler pages dev dist",
+    "test": "vitest run"
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -25,6 +26,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "~7.0.2",
     "vite": "^8.3.0",
+    "vitest": "^5.0.5",
     "wrangler": "^4.151.1"
   }
 }
