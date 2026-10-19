@@ -159,7 +159,10 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   imágenes propias y `data:`). **Si se suma algo externo** (analytics, otra fuente, un script), hay que agregarlo
   a la CSP o el navegador lo bloquea. Nada de scripts ni estilos en línea en `index.html`.
 - **Dependencias:** `npm audit` sin vulnerabilidades antes de lanzar; Dependabot (`.github/dependabot.yml`) abre PRs
-  semanales para `web/`, y en GitHub están activadas las alertas y las actualizaciones de seguridad. Antes de mergear uno: que el build de Cloudflare pase y probar el sitio.
+  semanales para `web/`, y en GitHub están activadas las alertas y las actualizaciones de seguridad.
+  **`@types/node` sigue a `web/.nvmrc`** (hoy Node 22 → `@types/node` `^22`): Dependabot no ofrece sus saltos mayores
+  (`ignore` en `dependabot.yml`); se suben a mano y junto con `.nvmrc`. Los PR viejos de Dependabot se ponen al día
+  con un comentario `@dependabot rebase` antes de mergear. Antes de mergear uno: que el build de Cloudflare pase y probar el sitio.
 - **Pedidos verificados en el servidor** (Etapa 2, `POST /api/pedido` en Cloudflare Pages Functions):
   - El servidor **nunca confía en precios ni totales del cliente**: recibe solo slug, talle, color y cantidad, valida
     estrictamente contra `products.ts` (claves conocidas, valores permitidos, largos y cantidades máximas) y calcula el total.

@@ -14,3 +14,9 @@ updates:
     groups:
       menores:
         update-types: [minor, patch]
+    # @types/node describe la versión de Node que corre el sitio (web/.nvmrc, la que usa Cloudflare para compilar).
+    # Si los tipos fueran más nuevos, se podrían usar funciones que esa versión no tiene. Los saltos mayores se hacen
+    # a mano y junto con .nvmrc; Dependabot solo ofrece arreglos dentro de la misma versión mayor.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
