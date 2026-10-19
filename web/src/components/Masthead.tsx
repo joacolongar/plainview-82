@@ -2,6 +2,7 @@ import { numeroEdicion } from '../lib/edicion'
 import { fechaLarga, fechaMini } from '../lib/fecha'
 import { useFechaEdicion } from '../lib/useFechaEdicion'
 import RotatingLogo from './RotatingLogo'
+import { TiraPaginas } from './NavegacionPaginas'
 import SiteNav from './SiteNav'
 
 
@@ -40,6 +41,7 @@ export default function Masthead() {
         </time>
       </div>
       <SiteNav />
+      <TiraPaginas />
     </header>
   )
 }

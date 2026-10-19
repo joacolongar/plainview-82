@@ -27,7 +27,7 @@ export default function Pasatiempos() {
       <header className="border-b-4 border-double border-print pt-3 pb-3 text-center">
         <h1 className="font-headline text-[clamp(2.75rem,14vw,6rem)] uppercase leading-none">Pasatiempos</h1>
         <p className="mt-1 font-display italic">
-          {edicion ? `Edición N° ${edicion.numero}` : 'Edición en imprenta'} · Para el lector que mira de cerca
+          {edicion ? `Pasatiempos N° ${edicion.numero}` : 'Pasatiempos en imprenta'} · Para el lector que mira de cerca
         </p>
       </header>
 
@@ -169,7 +169,7 @@ function Carnet({ edicion, progreso }: { edicion: Edicion; progreso: Progreso })
   return (
     <section aria-labelledby="carnet-titulo" className="mt-6 border-2 border-dashed border-print p-3">
       <h2 id="carnet-titulo" className="font-display text-sm font-bold uppercase tracking-[0.2em]">Carnet de lector</h2>
-      <p className="font-display text-xs italic text-print-muted">Edición N° {numero} · Los sellos se guardan en este dispositivo.</p>
+      <p className="font-display text-xs italic text-print-muted">Pasatiempos N° {numero} · Los sellos se guardan en este dispositivo.</p>
       <ul className="mt-3 grid grid-cols-3 gap-2">
         {JUEGOS.map(({ id, nombre }) => {
           const sello = progreso.juegos[id]?.sello

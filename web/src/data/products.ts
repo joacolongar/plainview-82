@@ -15,6 +15,9 @@ export type Product = {
   altFotos?: string[]
   /** true mientras las fotos sean bocetos: cada una lleva el sello "Prueba de imprenta" */
   fotoBoceto?: boolean
+  /** Miniatura cuadrada del índice: un recorte de la estampa (no la remera entera), WebP de 216 px en
+      public/recortes/. Sin recorte, el índice muestra la trama de grabado. Se reemplaza al llegar las fotos finales */
+  recorte?: string
   /** La pista sutil: qué detalle de la peli esconde la estampa (sin spoilers grandes) */
   reference: string
   description: string
@@ -67,6 +70,7 @@ export const products: Product[] = [
       'Detalle de la estampa: cuatro carteles redondeados en celeste, rojo, rosa y amarillo',
     ],
     fotoBoceto: true,
+    recorte: '/recortes/magnolia.webp',
     reference: 'Una referencia que aparece apenas un instante en un frame. Hay que mirar de cerca.',
     description: 'Estampa basada en un detalle de fondo de la película. Completar con la descripción real.',
     status: 'disponible',

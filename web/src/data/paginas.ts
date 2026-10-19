@@ -3,25 +3,26 @@ import { numeroArticulo, products, rutaAviso } from './products'
 /**
  * El orden de las páginas del diario. El número de página es la posición en esta lista,
  * así que se recalcula solo cuando entra una remera nueva. Lo usan la cabecera chica ("Pág. 5")
- * y el pie ("← pág. anterior · Índice · pág. siguiente →"); en S3b, también el deslizamiento.
+ * la tira de arriba y el pie (components/NavegacionPaginas.tsx) y el deslizamiento (lib/pasarPagina.ts).
  */
 export type Pagina = {
   ruta: string
   seccion: string // lo que se lee en la cabecera chica
+  corto: string // el nombre en la tira de arriba y el pie ("Pág. 3 · Magnolia")
 }
 
 // Los avisos van por N° de artículo, como en un catálogo por correo
 const avisos: Pagina[] = [...products]
   .sort((a, b) => a.articulo - b.articulo)
-  .map((p) => ({ ruta: rutaAviso(p.slug), seccion: `${p.seccion ?? 'Avisos'} · Art. N° ${numeroArticulo(p)}` }))
+  .map((p) => ({ ruta: rutaAviso(p.slug), seccion: `${p.seccion ?? 'Avisos'} · Art. N° ${numeroArticulo(p)}`, corto: p.movie }))
 
 export const paginas: Pagina[] = [
-  { ruta: '/', seccion: 'Primera plana' },
-  { ruta: '/catalogo', seccion: 'Índice de avisos' },
+  { ruta: '/', seccion: 'Primera plana', corto: 'Primera plana' },
+  { ruta: '/catalogo', seccion: 'Índice de avisos', corto: 'Catálogo' },
   ...avisos,
-  { ruta: '/pasatiempos', seccion: 'Pasatiempos' },
-  { ruta: '/atencion-al-lector', seccion: 'Atención al lector' },
-  { ruta: '/carrito', seccion: 'Boleta de pedido' },
+  { ruta: '/pasatiempos', seccion: 'Pasatiempos', corto: 'Pasatiempos' },
+  { ruta: '/atencion-al-lector', seccion: 'Atención al lector', corto: 'Atención al lector' },
+  { ruta: '/carrito', seccion: 'Boleta de pedido', corto: 'Boleta' },
 ]
 
 export const RUTA_INDICE = '/catalogo'

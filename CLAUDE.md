@@ -39,7 +39,10 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `src/App.tsx` rutas con el router de datos (`createBrowserRouter`, necesario para la transición de hoja)
   - `src/components/NewspaperPage.tsx` layout común: todo el sitio impreso en la hoja del diario (cabecera chica + pie);
     `src/lib/pasarPagina.ts` pasa de página deslizando o con ← → (los juegos se protegen con `data-no-swipe`)
-  - `src/data/paginas.ts` orden y números de página del diario
+  - `src/data/paginas.ts` orden, números y nombre corto (`corto`) de cada página del diario;
+    `src/components/NavegacionPaginas.tsx` la tira de arriba ("◂ Pág. 1 · Primera plana … Pág. 3 · Magnolia ▸", debajo
+    de la barra de secciones) y el pie, con el mismo orden; a 375 px, si los dos nombres suman más de 46 caracteres,
+    solo los números
   - `src/lib/edicion.ts` **la edición del día**: `elegirEdicion(fecha, banco)` (función pura, probada en
     `edicion.test.ts`) arma la portada; `numeroEdicion(fecha)` da el N° que muestran la cabecera, la franja y el pie.
     `src/lib/useFechaEdicion.ts` da la fecha (en desarrollo, `?fecha=AAAA-MM-DD` muestra otro día)
@@ -108,6 +111,8 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   precios reales y todos en `false` (la misma bandera marca como de prueba los `detalles` de la Fe de erratas); la ruta del aviso sale de `rutaAviso()` y los estados
   de `ESTADOS` (`products.ts`). Las medidas son **de ejemplo** mientras `MEDIDAS_DE_EJEMPLO` sea `true` (lo avisa la tabla).
 - **Imágenes:** WebP a 3x del tamaño en pantalla (con pérdida para bloques de color plano); ilustraciones en SVG.
+  Recortes del índice: `recorte` en `products.ts` apunta a `public/recortes/<slug>.webp`, un cuadrado de 216 px con
+  un recorte de la **estampa** (no la remera entera); sin recorte, el índice muestra la trama de grabado.
   Fotos de producto: para sumar una, alcanza con dejar el archivo en `src/assets/productos/<slug>/` (y su texto en
   `altFotos`); al menos 1500 px de ancho (se ven a ~500 px en la compu) y una foto por archivo. Sin `cwebp` ni Pillow:
   se convierten con el canvas de Edge headless. Mientras sean bocetos, `fotoBoceto: true` (sello "Prueba de imprenta").

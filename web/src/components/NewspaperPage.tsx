@@ -1,11 +1,12 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { BRAND, IS_PREVIEW } from '../config'
-import { paginaDe, RUTA_INDICE, seccionSuelta } from '../data/paginas'
+import { paginaDe, seccionSuelta } from '../data/paginas'
 import { numeroEdicion } from '../lib/edicion'
 import { fechaCorta, fechaLarga } from '../lib/fecha'
-import { marcarDireccion, usePasarPagina } from '../lib/pasarPagina'
+import { usePasarPagina } from '../lib/pasarPagina'
 import { useFechaEdicion } from '../lib/useFechaEdicion'
 import RotatingLogo from './RotatingLogo'
+import { PiePaginas, TiraPaginas } from './NavegacionPaginas'
 import SiteNav from './SiteNav'
 
 type Pagina = ReturnType<typeof paginaDe>
@@ -60,11 +61,10 @@ function CabeceraChica({ pagina, suelta }: { pagina: Pagina; suelta: string | nu
         <span className="shrink-0">Edición N° {edicion}</span>
       </div>
       <SiteNav />
+      <TiraPaginas />
     </header>
   )
 }
-
-const enlacePie = 'flex min-h-11 items-center font-display text-sm underline-offset-4 hover:underline'
 
 function PieDePagina({ pagina }: { pagina: Pagina }) {
   // La misma fecha que arma la edición del día (useFechaEdicion: una sola vez al montar)
@@ -72,37 +72,7 @@ function PieDePagina({ pagina }: { pagina: Pagina }) {
   const edicion = numeroEdicion(hoy)
   return (
     <footer className="mt-8 border-t-4 border-double border-print pt-1">
-      <nav aria-label="Pasar de página" className="grid grid-cols-3 items-center">
-        {pagina?.anterior ? (
-          <Link
-            to={pagina.anterior.ruta}
-            viewTransition
-            onClick={() => marcarDireccion('atras')}
-            className={enlacePie}
-            aria-label={`Página anterior: ${pagina.anterior.seccion}`}
-          >
-            ← pág. {pagina.anterior.numero}
-          </Link>
-        ) : (
-          <span />
-        )}
-        <Link to={RUTA_INDICE} className={`${enlacePie} justify-center font-bold uppercase tracking-wider`}>
-          Índice
-        </Link>
-        {pagina?.siguiente ? (
-          <Link
-            to={pagina.siguiente.ruta}
-            viewTransition
-            onClick={() => marcarDireccion('adelante')}
-            className={`${enlacePie} justify-end`}
-            aria-label={`Página siguiente: ${pagina.siguiente.seccion}`}
-          >
-            pág. {pagina.siguiente.numero} →
-          </Link>
-        ) : (
-          <span />
-        )}
-      </nav>
+      <PiePaginas />
       {/* Pie de imprenta */}
       <div className="mt-1 border-t border-print/30 pt-2 text-center font-display text-xs leading-relaxed text-print-muted">
         <p>

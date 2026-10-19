@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CURRENCY } from '../config'
 import { paginaDe, paginas } from '../data/paginas'
@@ -39,8 +40,10 @@ export default function IndiceAvisos() {
 
   return (
     <div>
-      <h1 className="font-headline text-[clamp(2.5rem,12vw,5rem)] uppercase leading-none">Índice de avisos</h1>
-      <p className="mt-1 font-display italic">Artículos de esta edición, en el orden del catálogo.</p>
+      <p className="font-display text-[11px] font-bold uppercase tracking-[0.2em] text-print-muted">Índice de avisos</p>
+      {/* mt: el acento de la Á sube por encima del renglón (leading-none) y pisaría el antetítulo */}
+      <h1 className="mt-2 font-headline text-[clamp(2.5rem,12vw,5rem)] uppercase leading-none md:mt-3">Catálogo</h1>
+      <p className="mt-1 font-display italic">Las remeras de esta edición. Tocá una para ver su página.</p>
 
       {/* Filtros: select nativos (cómodos en el celular), 16 px para que iPhone no haga zoom */}
       <div className="mt-4 grid grid-cols-3 gap-2 border-y-4 border-double border-print py-2">
@@ -79,7 +82,8 @@ export default function IndiceAvisos() {
                 antes={`Art. N° ${numeroArticulo(p)}`}
                 titulo={p.titular}
                 pagina={paginaDe(rutaAviso(p.slug))?.numero}
-                detalle={`${p.movie} · ${p.director} · ${p.year} · ${p.status === 'disponible' && p.price > 0 ? `${CURRENCY.format(p.price)}${p.precioDePrueba ? ' (precio de prueba)' : ''}` : ESTADOS[p.status]}`}
+                recorte={<Recorte p={p} />}
+                detalle={`Remera · ${p.movie} · ${p.director} · ${p.year} · ${p.status === 'disponible' && p.price > 0 ? `${CURRENCY.format(p.price)}${p.precioDePrueba ? ' (precio de prueba)' : ''}` : ESTADOS[p.status]}`}
               />
             </li>
           ))}
@@ -98,18 +102,39 @@ export default function IndiceAvisos() {
   )
 }
 
-/** Una línea de sumario: título … puntos guía … pág. N. La fila entera es el link (44 px o más) */
-function FilaIndice({ to, antes, titulo, pagina, detalle }: { to: string; antes?: string; titulo: string; pagina?: number; detalle?: string }) {
+/** Una línea de sumario: [recorte] título … puntos guía … pág. N. La fila entera es el link (44 px o más) */
+function FilaIndice(props: { to: string; antes?: string; titulo: string; pagina?: number; detalle?: string; recorte?: ReactNode }) {
+  const { to, antes, titulo, pagina, detalle, recorte } = props
   return (
-    <Link to={to} className="group block min-h-11 border-b border-print/30 py-2">
-      <span className="flex items-baseline gap-2">
-        {antes && <span className="shrink-0 font-mono text-[11px] text-print-muted">{antes}</span>}
-        <span className="font-display text-lg font-bold leading-tight underline-offset-4 group-hover:underline">{titulo}</span>
-        {/* puntos guía hasta el número de página, como en los sumarios impresos */}
-        <span aria-hidden className="min-w-4 flex-1 self-end border-b-2 border-dotted border-print/50 mb-1.5" />
-        {pagina && <span className="shrink-0 whitespace-nowrap font-display text-sm">pág. {pagina}</span>}
+    <Link to={to} className="group flex min-h-11 items-start gap-3 border-b border-print/30 py-2">
+      {recorte}
+      {/* min-w-0: el título puede bajar de renglón sin empujar los puntos guía ni el número de página */}
+      <span className="block min-w-0 flex-1">
+        {/* El N° de artículo va arriba, chico: así, si el título baja de renglón, los puntos guía y el número de
+            página siguen juntos en el último renglón (items-end), como en los sumarios impresos */}
+        {antes && <span className="block font-mono text-[11px] leading-tight text-print-muted">{antes}</span>}
+        <span className="flex items-end gap-2">
+          <span className="min-w-0 font-display text-lg font-bold leading-tight underline-offset-4 group-hover:underline">{titulo}</span>
+          <span aria-hidden className="mb-1.5 min-w-4 flex-1 border-b-2 border-dotted border-print/50" />
+          {pagina && <span className="shrink-0 whitespace-nowrap font-display text-sm leading-tight">pág. {pagina}</span>}
+        </span>
+        {detalle && <span className="mt-0.5 block font-display text-sm text-print-muted">{detalle}</span>}
       </span>
-      {detalle && <span className="mt-0.5 block font-display text-sm text-print-muted">{detalle}</span>}
     </Link>
+  )
+}
+
+/**
+ * La miniatura del índice: un recorte de la estampa pegado en la hoja (borde fino de tinta y apenas torcido, como
+ * pegado a mano: solo la miniatura, nunca la hoja). Sin recorte todavía, un cuadrado con la trama de grabado.
+ */
+function Recorte({ p }: { p: Product }) {
+  const marco = 'size-14 shrink-0 -rotate-2 border border-print bg-paper p-0.5 shadow-[1px_2px_0_color-mix(in_oklab,var(--color-print)_25%,transparent)] md:size-[72px]'
+  return p.recorte ? (
+    <img src={p.recorte} alt={p.name} width={72} height={72} loading="lazy" className={`${marco} object-cover`} />
+  ) : (
+    <span role="img" aria-label={`${p.name}: recorte en preparación`} className={`${marco} block`}>
+      <span className="engraving block size-full" />
+    </span>
   )
 }
