@@ -176,6 +176,8 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   que baja el navegador: cualquiera lo puede leer. `VITE_WHATSAPP_NUMBER` está bien porque es un número de contacto
   público; una clave de API, un token o una contraseña, jamás. Si algún día hace falta un secreto, va en el backend
   (Etapa 5) o en las variables de Cloudflare que no empiezan con `VITE_`.
+- **Noindex mientras está en prueba:** `X-Robots-Tag: noindex, nofollow` en `public/_headers`; `public/robots.txt` no
+  bloquea nada (si bloqueara, el buscador no vería el noindex). Se saca en la S12 junto con `IS_PREVIEW`.
 - **`.env` nunca se commitea** (está en `.gitignore`). Revisado el 2026-10-17: no aparece en ningún commit.
 - **Sin HTML ni código armado con texto:** prohibido `dangerouslySetInnerHTML`, `eval`, `new Function`, `innerHTML`
   y `document.write`. Todo texto (incluida la URL en la Fe de erratas) se muestra con JSX, que lo escapa.

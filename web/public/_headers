@@ -15,3 +15,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=(), web-share=(self), clipboard-write=(self)
   X-Frame-Options: DENY
+  # Mientras el sitio está en prueba, que los buscadores no lo indexen (se saca en la S12, junto con IS_PREVIEW).
+  # Va como cabecera y no en index.html: así cubre todas las rutas, las imágenes y las vistas previas de Cloudflare.
+  # robots.txt NO bloquea nada a propósito: si el buscador no puede entrar, tampoco ve este noindex
+  X-Robots-Tag: noindex, nofollow

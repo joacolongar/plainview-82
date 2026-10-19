@@ -1,0 +1,4 @@
+# THE PLAINVIEW · el sitio está en prueba: no se indexa por la cabecera X-Robots-Tag (public/_headers).
+# Acá no se bloquea nada a propósito: si un buscador no puede entrar, no ve el noindex. En la S12 se suma el sitemap.
+User-agent: *
+Allow: /
