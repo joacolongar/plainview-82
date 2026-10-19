@@ -43,6 +43,9 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `src/lib/edicion.ts` **la edición del día**: `elegirEdicion(fecha, banco)` (función pura, probada en
     `edicion.test.ts`) arma la portada; `numeroEdicion(fecha)` da el N° que muestran la cabecera, la franja y el pie.
     `src/lib/useFechaEdicion.ts` da la fecha (en desarrollo, `?fecha=AAAA-MM-DD` muestra otro día)
+  - `src/data/peliculas.ts` las películas del diario (id, título, año, director y **grabado** de su principal): cada
+    película nueva del banco se suma acá; las pruebas fallan si falta una, si una principal no tiene grabado o si un
+    teléfono no termina en el año
   - `src/data/banco.ts` el banco de la portada: noticias y avisos propios + las tandas `src/data/banco/banco-noticias-N.json`
     (se guardan tal cual llegan; las correcciones de largo van en `CORRECCIONES`)
   - `src/components/FeDeErratas.tsx` la Fe de erratas del aviso (se arma con `detalles` del producto) y el bloque
@@ -71,7 +74,7 @@ cd web && npm install      # una vez
 npm run dev                # http://localhost:5173
 npm run build              # chequea tipos y compila
 npm run lint               # oxlint
-npm test                   # Vitest: pruebas (por ahora, la edición del día y los largos del banco)
+npm test                   # Vitest: pruebas (edición del día y banco); tipos en tsconfig.test.json (Node)
 npm run pages              # sitio compilado + Functions en http://localhost:8788 (secretos en web/.dev.vars, fuera de git)
 python3 scripts/pasatiempos.py validar 1   # (desde la raíz) valida la edición 1 de pasatiempos
 ```
@@ -119,8 +122,10 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   Tono irónico de diario de época. Cada noticia y cada aviso llevan `pelicula` (id en minúsculas con guiones).
   - **Edición del día:** la portada cambia a la medianoche de Córdoba (N° 1 = 16/10/2026). Cada edición: 1 principal,
     3 o 4 secundarias, 1 aviso ilustrado y 2 de línea, sin repetir película y con al menos una película con remera.
-    Una noticia no vuelve antes de 7 ediciones si el banco alcanza (las principales sí; las secundarias, con 14,
-    vuelven cada 3 a 6: hacen falta unas 24 para los 7 días). Si se toca la elección, correr `npm test`.
+    Una noticia no vuelve antes de 7 ediciones si el banco alcanza (las principales sí; las secundarias, con 24,
+    vuelven cada 6 a 9, casi siempre 7: hacen falta unas 30). Si se toca la elección, correr `npm test`.
+    **Sumar una tanda reacomoda las ediciones** (también las de días pasados): la edición es la misma para todos el
+    mismo día, pero puede cambiar cuando se publica un banco nuevo.
   - **Largo:** la principal lleva titular, bajada de **una línea** (hasta 55 caracteres) y epígrafe (sin cuerpo); las
     secundarias, sección, titular y **2 o 3 oraciones**. Las pruebas lo chequean en todo el banco. Las noticias mandan: tienen que pesar más que los avisos.
 - **Ambientaciones** (`docs/AMBIENTACIONES.md`, `src/components/ambientacion/`): cada aviso comercial puede llevar

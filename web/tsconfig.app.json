@@ -22,5 +22,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Las pruebas corren en Node (Vitest): tienen su propio tsconfig con los tipos de Node
+  "exclude": ["src/**/*.test.ts"]
 }

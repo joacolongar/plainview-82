@@ -25,6 +25,8 @@ export type Seccion =
   | 'cultura'
   | 'salud'
   | 'ciudad'
+  | 'negocios'
+  | 'agro'
 
 export type Noticia = {
   id: string
@@ -36,7 +38,7 @@ export type Noticia = {
   bajada?: string // solo la principal: una línea
   texto?: string // solo las secundarias: 2 o 3 oraciones
   epigrafe?: string // solo la principal: texto bajo la ilustración
-  /** Solo la principal: el grabado (SVG propio en public/ilustraciones/, sin extensión) y su texto alternativo */
+  /** Solo la principal: el grabado de su película. No se escribe acá: lo pone data/banco.ts desde peliculas.ts */
   ilustracion?: { archivo: string; alt: string }
   productSlug?: string
 }
@@ -56,6 +58,8 @@ export const SECCIONES: Record<Seccion, string> = {
   cultura: 'Cultura',
   salud: 'Salud',
   ciudad: 'Ciudad',
+  negocios: 'Negocios',
+  agro: 'Agro',
 }
 
 // Largos de la regla de CLAUDE.md, que chequean las pruebas (edicion.test.ts) y el adaptador del banco
@@ -72,7 +76,6 @@ export const noticiasPropias: Noticia[] = [
     titular: '¡Brota el crudo!',
     bajada: 'Un petrolero compra Little Boston por monedas.',
     epigrafe: 'La primera torre, vista desde la iglesia.',
-    ilustracion: { archivo: 'torre-petrolera', alt: 'Grabado de una torre petrolera con su balancín, junto a un tanque' },
   },
   {
     id: 'casablanca',

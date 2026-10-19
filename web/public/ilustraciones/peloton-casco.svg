@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" color="#141210"><defs><pattern id="h" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="currentColor" stroke-width="1.6"/></pattern></defs><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+<path d="M20 60c10-30 40-40 50-30M30 70c4-26 22-40 40-38M178 56c-12-28-40-36-52-24M170 68c-6-24-24-36-42-32" stroke-width="3"/>
+<path d="M30 70c8 6 16 6 22 0M36 58c8 6 16 4 20-2M170 68c-8 6-16 6-22 0M164 56c-8 6-16 4-20-2" stroke-width="2"/>
+<path d="M44 140c0-44 24-68 56-68s56 24 56 68z" fill="currentColor"/>
+<path d="M60 112c10-22 26-30 40-30" stroke="#ebe3d1" stroke-width="2" stroke-dasharray="4 5"/>
+<path d="M66 128c6-10 14-14 22-14M120 98l10 8M128 92l8 10" stroke="#ebe3d1" stroke-width="2"/>
+<path d="M30 140h140c4 0 6 6 2 8-24 6-120 6-144 0-4-2-2-8 2-8z" fill="currentColor"/>
+<path d="M150 108l18 34M154 104l18 36" stroke-width="2.5"/>
+<path d="M14 170h172" stroke-width="4"/><path d="M22 180h40M80 179h50M146 180h34" stroke-width="2"/>
+<path d="M40 166c4-10 10-12 14-4M150 166c4-8 10-10 14-2" stroke-width="2"/>
+</g></svg>

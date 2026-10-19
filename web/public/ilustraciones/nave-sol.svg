@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" color="#141210"><defs><pattern id="h" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="currentColor" stroke-width="1.6"/></pattern></defs><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="128" cy="72" r="38" fill="url(#h)" stroke-width="3"/>
+<g stroke-width="2.5" stroke-dasharray="4 6"><path d="M128 20v-12M128 136v-12M76 72H64M192 72h-12M92 36l-8-8M164 108l8 8M164 36l8-8M92 108l-8 8"/></g>
+<g transform="rotate(-30 70 140)">
+<path d="M40 140c0-10 30-20 60-20s40 10 40 20-10 20-40 20-60-10-60-20z" fill="currentColor"/>
+<path d="M140 140l18-10v20z" fill="currentColor"/>
+<path d="M60 130l-14-22h26l14 22M60 150l-14 22h26l14-22" fill="currentColor"/>
+<circle cx="112" cy="140" r="6" fill="#ebe3d1" stroke="none"/><circle cx="92" cy="140" r="4" fill="#ebe3d1" stroke="none"/>
+<path d="M40 140h-20M38 134h-12M38 146h-12" stroke-width="2.5"/>
+</g>
+<g fill="currentColor" stroke="none"><circle cx="24" cy="30" r="2"/><circle cx="50" cy="60" r="1.5"/><circle cx="180" cy="160" r="2"/><circle cx="160" cy="190" r="1.5"/><circle cx="20" cy="100" r="1.5"/></g>
+</g></svg>

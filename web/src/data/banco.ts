@@ -1,5 +1,6 @@
 import { avisosPropios, FUERA_DE_PORTADA, type Aviso } from './anuncios'
 import { noticiasPropias, SECCIONES, type Noticia, type Seccion } from './noticias'
+import { getPelicula } from './peliculas'
 import { products } from './products'
 
 /**
@@ -51,6 +52,8 @@ const CORRECCIONES: Record<string, Partial<Pick<Noticia, 'bajada' | 'texto'>>> =
   'el-odio-principal': { bajada: 'Tres amigos y un día muy largo por delante.' },
   'pandillas-de-nueva-york-principal': { bajada: 'Nadie discute con el hombre de la galera.' },
   'el-ultimo-rey-de-escocia-secundaria': { texto: 'Se fue a la capital con un auto nuevo. Nadie le explicó del todo el puesto.' },
+  // Tanda 2: "una lluvia de verdad" traducía casi tal cual una línea de la película (regla: diálogo textual nunca)
+  'taxi-driver-secundaria': { texto: 'A cualquier hora y a cualquier barrio. Dice que a la ciudad le hace falta que llueva fuerte y por varios días.' },
 }
 
 export function adaptarTanda(tanda: Tanda): { noticias: Noticia[]; avisos: Aviso[] } {
@@ -59,6 +62,7 @@ export function adaptarTanda(tanda: Tanda): { noticias: Noticia[]; avisos: Aviso
     const id = `${pelicula}-${n.tipo}`
     const seccion = idSeccion(n.seccion)
     if (import.meta.env?.DEV && !(seccion in SECCIONES)) console.warn(`Banco: sección desconocida "${n.seccion}" (${id})`)
+    if (import.meta.env?.DEV && !getPelicula(pelicula)) console.warn(`Banco: película "${n.pelicula}" sin sumar a peliculas.ts`)
     const base = { id, tipo: n.tipo, seccion, pelicula, titular: n.titular }
     // La principal no lleva cuerpo: el cuerpo de la tanda es su epígrafe. En la secundaria, el cuerpo es el texto
     const adaptada: Noticia =
@@ -94,8 +98,14 @@ const tandas = Object.keys(TANDAS)
   .map((ruta) => adaptarTanda(TANDAS[ruta]))
 
 /** Todo lo que puede salir en una portada, en un orden fijo (propios primero, después las tandas por número) */
+// La principal lleva el grabado de su película (peliculas.ts); sin grabado, la portada muestra "Grabado en preparación"
+const conGrabado = (n: Noticia): Noticia => {
+  const grabado = n.tipo === 'principal' ? getPelicula(n.pelicula)?.grabado : undefined
+  return grabado ? { ...n, ilustracion: grabado } : n
+}
+
 export const BANCO: Banco = {
-  noticias: [...noticiasPropias, ...tandas.flatMap((t) => t.noticias)],
+  noticias: [...noticiasPropias, ...tandas.flatMap((t) => t.noticias)].map(conGrabado),
   avisos: [...avisosPropios, ...tandas.flatMap((t) => t.avisos)].filter((a) => !FUERA_DE_PORTADA.includes(a.id)),
   conRemera: products.map((p) => idPelicula(p.movie)),
 }

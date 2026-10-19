@@ -1,9 +1,11 @@
 // Pruebas de la edición del día (npm test). Recorren un año entero de ediciones con el banco real y chequean las
 // reglas: determinismo, cambio de día a la medianoche de Argentina, sin película repetida, siempre una con remera,
 // separación entre repeticiones y los largos de la regla de CLAUDE.md.
+import { existsSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { BANCO, type Banco } from '../data/banco'
 import { MAX_BAJADA, ORACIONES_SECUNDARIA, SECCIONES } from '../data/noticias'
+import { getPelicula } from '../data/peliculas'
 import { elegirEdicion, numeroEdicion, SEPARACION, type Edicion } from './edicion'
 
 const DIA = 86_400_000
@@ -85,8 +87,14 @@ describe('elegirEdicion', () => {
         if (antes !== undefined) minimo = Math.min(minimo, e.numero - antes)
         ultima.set(n.id, e.numero)
       }
-    // Con 14 secundarias y 3 o 4 por día, el piso posible ronda las 3 ediciones. Cuando el banco crezca, subir esto
-    expect(minimo).toBeGreaterThanOrEqual(3)
+    // Con 24 secundarias y 3 o 4 por día vuelven cada 6 a 9 ediciones (casi siempre 7). Con unas 30 se llega a la
+    // separación completa: entonces cambiar esto por toBeGreaterThan(SEPARACION). Antes de la tanda 2 el piso era 3
+    expect(minimo).toBeGreaterThanOrEqual(6)
+  })
+
+  it('ninguna portada del año sale sin grabado', () => {
+    const sin = ediciones.filter((e) => !e.principal.ilustracion).map((e) => `${e.numero}: ${e.principal.id}`)
+    expect(sin).toEqual([])
   })
 
   it('con todas las noticias del banco, las principales cumplen la separación completa', () => {
@@ -111,9 +119,24 @@ describe('el banco respeta los largos de CLAUDE.md', () => {
     }
   })
 
-  it('ids únicos y cada pieza con su película', () => {
+  it('ids únicos y cada pieza con una película de peliculas.ts', () => {
     const ids = [...BANCO.noticias, ...BANCO.avisos].map((p) => p.id)
     expect(new Set(ids).size).toBe(ids.length)
-    for (const p of [...BANCO.noticias, ...BANCO.avisos]) expect(p.pelicula, p.id).toBeTruthy()
+    for (const p of [...BANCO.noticias, ...BANCO.avisos]) expect(getPelicula(p.pelicula ?? ''), `${p.id}: "${p.pelicula}"`).toBeTruthy()
+  })
+
+  it('cada principal tiene grabado y el archivo existe', () => {
+    for (const n of BANCO.noticias.filter((x) => x.tipo === 'principal')) {
+      expect(n.ilustracion, `${n.id} sin grabado en peliculas.ts`).toBeTruthy()
+      expect(existsSync(`public/ilustraciones/${n.ilustracion!.archivo}.svg`), n.ilustracion!.archivo).toBe(true)
+      expect(n.ilustracion!.alt.length, `${n.id}: falta el texto alternativo`).toBeGreaterThan(10)
+    }
+  })
+
+  it('los teléfonos de los avisos terminan en el año de su película', () => {
+    for (const a of BANCO.avisos) {
+      const anio = a.telefono.match(/(\d{4})$/)?.[1]
+      if (anio) expect(Number(anio), `${a.id}: ${a.telefono}`).toBe(getPelicula(a.pelicula ?? '')?.anio)
+    }
   })
 })

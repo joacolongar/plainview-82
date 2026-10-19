@@ -1,0 +1,138 @@
+{
+  "noticias": [
+    {
+      "pelicula": "Ciudad de Dios",
+      "anio": 2002,
+      "director": "Fernando Meirelles y Kátia Lund",
+      "tipo": "secundaria",
+      "seccion": "Ciudad",
+      "titular": "Gallina escapa y desata una persecución en la favela",
+      "bajada": "",
+      "cuerpo": "Medio barrio corrió detrás. Un joven fotógrafo quedó justo en el medio."
+    },
+    {
+      "pelicula": "Memento",
+      "anio": 2000,
+      "director": "Christopher Nolan",
+      "tipo": "secundaria",
+      "seccion": "Policiales",
+      "titular": "Hombre investiga un crimen que no puede recordar",
+      "bajada": "",
+      "cuerpo": "Anota todo en fotos y en la piel. El problema es saber a quién creerle, empezando por él."
+    },
+    {
+      "pelicula": "Psicópata americano",
+      "anio": 2000,
+      "director": "Mary Harron",
+      "tipo": "secundaria",
+      "seccion": "Negocios",
+      "titular": "Ejecutivos de Wall Street, en guerra por una tarjeta",
+      "bajada": "",
+      "cuerpo": "Mismo cargo, mismo traje, casi la misma tipografía. Uno de ellos se lo toma demasiado a pecho."
+    },
+    {
+      "pelicula": "Buenos muchachos",
+      "anio": 1990,
+      "director": "Martin Scorsese",
+      "tipo": "secundaria",
+      "seccion": "Sociedad",
+      "titular": "Presos cocinan mejor que muchos restaurantes",
+      "bajada": "",
+      "cuerpo": "El ajo se corta con hoja de afeitar, en láminas finísimas. La salsa lleva todo el día."
+    },
+    {
+      "pelicula": "Interestelar",
+      "anio": 2014,
+      "director": "Christopher Nolan",
+      "tipo": "secundaria",
+      "seccion": "Agro",
+      "titular": "Tormentas de polvo arruinan otra cosecha",
+      "bajada": "",
+      "cuerpo": "Los granjeros miran al cielo. Algunos, bastante más arriba de lo habitual."
+    },
+    {
+      "pelicula": "La isla siniestra",
+      "anio": 2010,
+      "director": "Martin Scorsese",
+      "tipo": "secundaria",
+      "seccion": "Policiales",
+      "titular": "Dos agentes federales llegan a una isla-hospital",
+      "bajada": "",
+      "cuerpo": "Buscan a una paciente que desapareció de una celda cerrada. Se avecina tormenta."
+    },
+    {
+      "pelicula": "Whiplash",
+      "anio": 2014,
+      "director": "Damien Chazelle",
+      "tipo": "secundaria",
+      "seccion": "Cultura",
+      "titular": "Conservatorio: un baterista ensaya hasta sangrar",
+      "bajada": "",
+      "cuerpo": "Su director no grita, exige. Para él, el tempo nunca es casi correcto."
+    },
+    {
+      "pelicula": "Nueve reinas",
+      "anio": 2000,
+      "director": "Fabián Bielinsky",
+      "tipo": "secundaria",
+      "seccion": "Policiales",
+      "titular": "Aparece una plancha de estampillas valiosísima",
+      "bajada": "",
+      "cuerpo": "Un coleccionista ofrece una fortuna. Los vendedores se conocieron esa misma mañana."
+    },
+    {
+      "pelicula": "La sustancia",
+      "anio": 2024,
+      "director": "Coralie Fargeat",
+      "tipo": "secundaria",
+      "seccion": "Espectáculos",
+      "titular": "Actriz despedida prueba un tratamiento milagroso",
+      "bajada": "",
+      "cuerpo": "Promete una versión mejor de una misma. La letra chica habla de equilibrio."
+    },
+    {
+      "pelicula": "Taxi Driver",
+      "anio": 1976,
+      "director": "Martin Scorsese",
+      "tipo": "secundaria",
+      "seccion": "Ciudad",
+      "titular": "Taxista nocturno acepta cualquier viaje",
+      "bajada": "",
+      "cuerpo": "A cualquier hora y a cualquier barrio. Dice que la ciudad necesita una lluvia de verdad."
+    }
+  ],
+  "avisos": [
+    {
+      "pelicula": "Memento",
+      "anio": 2000,
+      "tipo": "linea",
+      "titulo": "VENDO",
+      "texto": "cámara instantánea, poco uso. Las fotos se acuerdan mejor que yo.",
+      "telefono": "82-2000"
+    },
+    {
+      "pelicula": "Psicópata americano",
+      "anio": 2000,
+      "tipo": "linea",
+      "titulo": "IMPRENTA",
+      "texto": "tarjetas de presentación. Hueso, cáscara de huevo o lo que pida su ego.",
+      "telefono": "82-2000"
+    },
+    {
+      "pelicula": "Interestelar",
+      "anio": 2014,
+      "tipo": "linea",
+      "titulo": "VENDO",
+      "texto": "cosechadora casi nueva. El maíz es lo único que todavía crece.",
+      "telefono": "82-2014"
+    },
+    {
+      "pelicula": "Whiplash",
+      "anio": 2014,
+      "tipo": "linea",
+      "titulo": "SE DAN",
+      "texto": "clases de batería. Tempo exacto o empezamos de nuevo.",
+      "telefono": "82-2014"
+    }
+  ]
+}
