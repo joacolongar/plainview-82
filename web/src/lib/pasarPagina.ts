@@ -27,7 +27,7 @@ export const marcarDireccion = (dir: Direccion) => {
  */
 export function usePasarPagina(pagina: Pagina) {
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
 
   const ir = useCallback(
     (dir: Direccion) => {
@@ -39,10 +39,14 @@ export function usePasarPagina(pagina: Pagina) {
     [pagina, navigate],
   )
 
-  // En un diario, la página nueva se empieza a leer desde arriba (si no, queda el scroll de la anterior)
+  // En un diario, la página nueva se empieza a leer desde arriba (si no, queda el scroll de la anterior).
+  // Si el link trae un ancla (/atencion-al-lector#arrepentimiento), se va a esa sección. Este efecto corre después
+  // de que la página nueva se dibujó (los efectos del padre van después de los del hijo), así que el ancla ya existe.
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [pathname])
+    const ancla = hash ? document.getElementById(decodeURIComponent(hash.slice(1))) : null
+    if (ancla) ancla.scrollIntoView()
+    else window.scrollTo(0, 0)
+  }, [pathname, hash])
 
   // Flechas ← →. El Cifrado y el Cinedoku también las usan (y llaman a preventDefault).
   // Esperamos a que el evento termine de pasar por todos los listeners (queueMicrotask corre después)

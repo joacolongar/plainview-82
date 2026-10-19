@@ -16,6 +16,10 @@ Lo que ya se hizo o tiene sesión en el roadmap está al final, en "Hechas o pla
   (con 5 noticias solo entra 1 + el rojo sin pasar de 2 a la vista).
 
 ## Pasatiempos
+- **Ranking del juego** (M): tiempos de La Función del Día guardados en una base (era la S14 del plan viejo con
+  FastAPI; si vuelve, va con D1 en Cloudflare).
+- **Duelo en vivo** (L): dos personas, misma pista, gana el más rápido (era la S15 con websockets; en Cloudflare
+  serían Durable Objects).
 - **Zoom progresivo** (M): del concepto "Moviola": un detalle de estampa muy ampliado que se va alejando en cada
   error. Puede ser la mecánica de Mirá de Cerca o de La Función del Día (P6).
 - **Premio por completar el carnet** (S): está sin definir (ver docs/PASATIEMPOS.md).

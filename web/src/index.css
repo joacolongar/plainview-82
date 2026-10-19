@@ -85,6 +85,12 @@ body { font-family: var(--font-body); }
   background-image: repeating-linear-gradient(135deg, color-mix(in oklab, var(--color-print) 22%, transparent) 0 1px, transparent 1px 6px);
 }
 
+/* Con ilustración encima: la trama se apaga hacia el centro (máscara radial), así el dibujo queda sobre papel limpio
+   y el rayado solo enmarca, como en los grabados de diario */
+@utility grabado-vineta {
+  mask-image: radial-gradient(ellipse 34% 62% at center, transparent 55%, black 100%);
+}
+
 /* Transición de hoja al pasar de página (View Transitions API; React Router la dispara con `viewTransition`).
    Solo se anima la hoja: la franja de arriba queda quieta. La dirección la marca pasarPagina.ts en <html>. */
 .hoja { view-transition-name: hoja; }

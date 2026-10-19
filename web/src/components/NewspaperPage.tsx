@@ -59,9 +59,7 @@ function CabeceraChica({ pagina, suelta }: { pagina: Pagina; suelta: string | nu
         <span className="truncate">{pagina?.seccion ?? suelta ?? 'Esta página no existe'}</span>
         <span className="shrink-0">Edición N° {edicion.numero}</span>
       </div>
-      <div className="border-b border-print/30">
-        <SiteNav onPaper cart="always" />
-      </div>
+      <SiteNav />
     </header>
   )
 }
@@ -121,6 +119,12 @@ function PieDePagina({ pagina }: { pagina: Pagina }) {
           </a>
         </p>
         <p className="italic">{BRAND.slogan}</p>
+        {/* Obligatorio a la vista en la portada (Res. 424/2020): va en el pie de todas las páginas */}
+        <p>
+          <Link to="/atencion-al-lector#arrepentimiento" className="inline-flex min-h-11 items-center font-bold text-print underline underline-offset-2">
+            Botón de arrepentimiento
+          </Link>
+        </p>
       </div>
     </footer>
   )

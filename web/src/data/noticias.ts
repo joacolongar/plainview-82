@@ -16,6 +16,8 @@ export type Noticia = {
   bajada?: string // solo la principal: una línea
   texto?: string // solo las secundarias: 2 o 3 oraciones
   epigrafe?: string // solo la principal: texto bajo la ilustración
+  /** Solo la principal: el grabado (SVG propio en public/ilustraciones/, sin extensión) y su texto alternativo */
+  ilustracion?: { archivo: string; alt: string }
   productSlug?: string
 }
 
@@ -35,6 +37,7 @@ export const noticias: Noticia[] = [
     titular: '¡Brota el crudo!',
     bajada: 'Un petrolero compra Little Boston por monedas.',
     epigrafe: 'La primera torre, vista desde la iglesia.',
+    ilustracion: { archivo: 'torre-petrolera', alt: 'Grabado de una torre petrolera con su balancín, junto a un tanque' },
   },
   {
     id: 'casablanca',

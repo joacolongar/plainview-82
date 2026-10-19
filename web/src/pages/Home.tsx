@@ -57,11 +57,27 @@ export default function Home() {
         <h2 className="text-center font-headline text-[clamp(3rem,15vw,9rem)] uppercase leading-[0.92] text-balance hyphens-auto">{p.titular}</h2>
         <p className="mx-auto mt-2 max-w-3xl text-center font-display text-[17px] italic leading-snug md:text-2xl">{p.bajada}</p>
         <figure className="mt-3 md:mt-5">
-          {/* Placeholder con borde de grabado hasta que esté la ilustración propia */}
+          {/* Grabado: doble filete y trama rayada que se apaga hacia el centro (grabado-vineta en index.css),
+              con la ilustración propia encima. Sin ilustración, la trama entera y "Grabado en preparación" */}
           <div className="border-4 border-double border-print p-1">
-            <div className="engraving flex aspect-[2/1] items-center justify-center md:aspect-[5/2]">
-              <span className="bg-paper px-2 font-display text-xs uppercase tracking-widest text-print-muted">Grabado en preparación</span>
-            </div>
+            {p.ilustracion ? (
+              <div className="relative aspect-[2/1] md:aspect-[5/2]">
+                <div aria-hidden className="engraving grabado-vineta absolute inset-0" />
+                <img
+                  src={`/ilustraciones/${p.ilustracion.archivo}.svg`}
+                  alt={p.ilustracion.alt}
+                  width={200}
+                  height={200}
+                  // En la primera pantalla: carga ya
+                  fetchPriority="high"
+                  className="relative mx-auto h-full w-auto py-1"
+                />
+              </div>
+            ) : (
+              <div className="engraving flex aspect-[2/1] items-center justify-center md:aspect-[5/2]">
+                <span className="bg-paper px-2 font-display text-xs uppercase tracking-widest text-print-muted">Grabado en preparación</span>
+              </div>
+            )}
           </div>
           {p.epigrafe && <figcaption className="mt-1 font-display text-sm italic leading-snug text-print-muted">{p.epigrafe}</figcaption>}
         </figure>

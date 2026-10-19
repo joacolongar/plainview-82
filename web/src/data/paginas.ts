@@ -20,7 +20,7 @@ export const paginas: Pagina[] = [
   { ruta: '/catalogo', seccion: 'Índice de avisos' },
   ...avisos,
   { ruta: '/pasatiempos', seccion: 'Pasatiempos' },
-  { ruta: '/como-comprar', seccion: 'Cómo comprar' },
+  { ruta: '/atencion-al-lector', seccion: 'Atención al lector' },
   { ruta: '/carrito', seccion: 'Boleta de pedido' },
 ]
 

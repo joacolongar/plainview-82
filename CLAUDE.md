@@ -43,13 +43,19 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `src/components/FeDeErratas.tsx` la Fe de erratas del aviso (se arma con `detalles` del producto) y el bloque
     "Watch closer"; `src/components/Galeria.tsx` las fotos del aviso; `src/data/fotos.ts` las encuentra solas
     (`import.meta.glob` sobre `src/assets/productos/<slug>/<slug>-N.webp`, la 1 es la principal)
+  - `src/pages/AtencionAlLector.tsx` Atención al lector (`/atencion-al-lector`; `/como-comprar` redirige): cómo se compra,
+    envíos y pagos, cambios y devoluciones y el Botón de arrepentimiento (`#arrepentimiento`, sale por WhatsApp)
+  - `src/components/SiteNav.tsx` la barra de secciones (CATÁLOGO · PASATIEMPOS · ATENCIÓN AL LECTOR · BOLETA (n)),
+    centrada entre los filetes de la cabecera y en Anton; a 375 px entra justo en un renglón: si se suma o se alarga
+    una sección, medirla en 360 px
   - `src/pages/*` una página por ruta. Ojo con los nombres: `AvisoComercial.tsx` es la página de cada remera
     (`/catalogo/:slug`) e `IndiceAvisos.tsx` el índice (`/catalogo`); `components/Aviso.tsx` son los avisos *chicos*
   - `src/data/noticias.ts` (portada), `anuncios.ts` (avisos chicos y cuáles van en la portada), `medidas.ts` (talles),
     `pasatiempos/` (ediciones JSON + tipos); `src/components/pasatiempos/` los juegos y `Ayudas.tsx` (común)
   - `public/logo/` logos en WebP (los que usa el sitio), `public/ilustraciones/` SVG de los avisos,
     `public/brand/` PNG originales de la marca (en git, no los carga el sitio), `public/_headers` seguridad
-- `api/` — backend opcional (Etapa 5): FastAPI + websockets. No hace falta para lanzar.
+- `api/` — quedó del plan viejo (FastAPI) y **no se usa**: la Etapa 5 va toda en Cloudflare (Pages Functions + D1,
+  ver ROADMAP). Se borra cuando el dueño lo confirme.
 - `docs/` — ROADMAP.md (plan por sesiones), IDEAS.md (backlog de ideas), PASATIEMPOS.md (diseño de los pasatiempos)
   y pasatiempos-maqueta.png (maqueta a 390px).
 - `scripts/pasatiempos.py` — genera y valida las ediciones de pasatiempos (`web/src/data/pasatiempos/edicion-NN.json`).
@@ -63,7 +69,6 @@ npm run lint               # oxlint
 npm run pages              # sitio compilado + Functions en http://localhost:8788 (secretos en web/.dev.vars, fuera de git)
 python3 scripts/pasatiempos.py validar 1   # (desde la raíz) valida la edición 1 de pasatiempos
 ```
-Backend (cuando llegue la Etapa 5): `cd api && python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && uvicorn main:app --reload`
 
 ## Mobile-first
 La mayoría de las visitas llegan desde el celular (links de Instagram).
@@ -125,6 +130,10 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
 - Los **avisos** chicos (`web/src/data/anuncios.ts`, tipos "mini" y "linea") van sueltos entre las noticias y en otras
   páginas, nunca en una página propia. Misma regla de contenido; los teléfonos terminan en el año de la película.
 - El número de WhatsApp va en `web/.env` como `VITE_WHATSAPP_NUMBER` (ver `.env.example`). Nunca commitear `.env`.
+- **Textos legales** (Atención al lector: envíos, cambios, arrepentimiento) son **borrador** mientras `BORRADOR_LEGAL`
+  sea `true` (lo avisa cada sección). Antes de lanzar, que los revise alguien que sepa y pasar la bandera a `false`.
+  El link "Botón de arrepentimiento" tiene que estar a la vista en la portada (Res. 424/2020): va en el pie de todas
+  las páginas; no sacarlo.
 - Antes de dar algo por terminado: `npm run build` y `npm run lint` sin errores (y `validar` si se tocaron pasatiempos).
 
 ## Cómo verificamos

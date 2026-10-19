@@ -1,11 +1,11 @@
-import { createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, Navigate, Route } from 'react-router-dom'
 import NewspaperPage from './components/NewspaperPage'
 import Home from './pages/Home'
 import IndiceAvisos from './pages/IndiceAvisos'
 import AvisoComercial, { RedirigirAviso } from './pages/AvisoComercial'
 import Boleta from './pages/Boleta'
 import Game from './pages/Game'
-import HowToBuy from './pages/HowToBuy'
+import AtencionAlLector from './pages/AtencionAlLector'
 import Pasatiempos from './pages/Pasatiempos'
 import NotFound from './pages/NotFound'
 
@@ -25,7 +25,9 @@ export const router = createBrowserRouter(
       <Route path="carrito" element={<Boleta />} />
       <Route path="pasatiempos" element={<Pasatiempos />} />
       <Route path="juego" element={<Game />} />
-      <Route path="como-comprar" element={<HowToBuy />} />
+      <Route path="atencion-al-lector" element={<AtencionAlLector />} />
+      {/* ruta vieja ("Cómo comprar"): redirige para no romper links ya compartidos */}
+      <Route path="como-comprar" element={<Navigate to="/atencion-al-lector" replace />} />
       <Route path="*" element={<NotFound />} />
     </Route>,
   ),

@@ -39,9 +39,7 @@ export default function Masthead() {
           <span className="hidden md:inline">{fechaLarga.format(hoy)}</span>
         </time>
       </div>
-      <div className="border-b border-print/30">
-        <SiteNav onPaper cart="always" />
-      </div>
+      <SiteNav />
     </header>
   )
 }
