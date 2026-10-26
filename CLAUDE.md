@@ -39,6 +39,12 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `src/App.tsx` rutas con el router de datos (`createBrowserRouter`, necesario para la transición de hoja)
   - `src/components/NewspaperPage.tsx` layout común: todo el sitio impreso en la hoja del diario (cabecera chica + pie);
     `src/lib/pasarPagina.ts` pasa de página deslizando o con ← → (los juegos se protegen con `data-no-swipe`)
+  - `functions/_middleware.ts` **Open Graph**: le cambia en el servidor el título, la descripción y las etiquetas `og:`
+    del `index.html` a cada página (WhatsApp e Instagram no ejecutan JS), con `HTMLRewriter` y `setAttribute`, sin
+    armar HTML con texto; los datos salen de `src/lib/meta.ts` (`metaDe(ruta)`, que también da el título de la pestaña).
+    `public/_routes.json` deja afuera de las Functions los archivos estáticos. Imágenes 1200×630 en `public/og/`
+    (`portada.jpg` y una por remera), generadas con `python3 -I scripts/og/generar.py` (con `npm run dev` corriendo):
+    **al sumar una remera o cambiar sus fotos, regenerarlas** (las pruebas fallan si falta una)
   - `src/data/paginas.ts` orden, números y nombre corto (`corto`) de cada página del diario;
     `src/components/NavegacionPaginas.tsx` la tira de arriba ("◂ Pág. 1 · Primera plana … Pág. 3 · Magnolia ▸", debajo
     de la barra de secciones) y el pie, con el mismo orden; a 375 px, si los dos nombres suman más de 46 caracteres,
@@ -186,6 +192,8 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
 - **`.env` nunca se commitea** (está en `.gitignore`). Revisado el 2026-10-17: no aparece en ningún commit.
 - **Sin HTML ni código armado con texto:** prohibido `dangerouslySetInnerHTML`, `eval`, `new Function`, `innerHTML`
   y `document.write`. Todo texto (incluida la URL en la Fe de erratas) se muestra con JSX, que lo escapa.
+- **El middleware conserva las cabeceras:** las páginas pasan por `functions/_middleware.ts` y la respuesta transformada
+  mantiene la CSP, el noindex y demás de `_headers` (verificado con wrangler). Si se toca el middleware, revisarlas.
 - **Cabeceras de seguridad** en `web/public/_headers` (Cloudflare Pages): CSP, `nosniff`, `Referrer-Policy`,
   `Permissions-Policy` y `frame-ancestors 'none'`. La CSP permite solo lo que usamos (nuestro JS y CSS, Google Fonts,
   imágenes propias y `data:`). **Si se suma algo externo** (analytics, otra fuente, un script), hay que agregarlo

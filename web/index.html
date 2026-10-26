@@ -8,8 +8,21 @@
     <!-- Color de la barra del navegador en el celular: el fondo de la marca (--color-ink). Acá no llegan los tokens de CSS -->
     <meta name="theme-color" content="#0e0d0b" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Plainview 8:2 — remeras con referencias de cine. Watch closer." />
-    <title>Plainview 8:2</title>
+    <!-- Título, descripción y Open Graph (la vista previa al compartir el link). Estos son los de la portada: en cada
+         página, functions/_middleware.ts les cambia el content en el servidor (WhatsApp e Instagram no ejecutan JS) -->
+    <title>THE PLAINVIEW — remeras con cine adentro</title>
+    <meta name="description" content="El diario de Plainview 8:2: una edición nueva cada día, un aviso por remera y pasatiempos de cine. Watch closer." />
+    <meta property="og:site_name" content="THE PLAINVIEW · Plainview 8:2" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://plainview-82.pages.dev/" />
+    <meta property="og:title" content="THE PLAINVIEW — remeras con cine adentro" />
+    <meta property="og:description" content="El diario de Plainview 8:2: una edición nueva cada día, un aviso por remera y pasatiempos de cine. Watch closer." />
+    <meta property="og:image" content="https://plainview-82.pages.dev/og/portada.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Cabecera del diario THE PLAINVIEW con los bloques rojos de Watch closer y 8:2" />
+    <meta name="twitter:card" content="summary_large_image" />
     <!-- Tipografías de época: cabecera gótica, titulares condensados y texto del siglo XIX; IM Fell para los pecados
          (ambientación de Policiales). Solo los pesos que se usan: el navegador baja cada fuente recién cuando la página la usa -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

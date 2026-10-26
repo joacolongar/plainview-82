@@ -1,8 +1,10 @@
+import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { BRAND, IS_PREVIEW } from '../config'
 import { paginaDe, seccionSuelta } from '../data/paginas'
 import { numeroEdicion } from '../lib/edicion'
 import { fechaCorta, fechaLarga } from '../lib/fecha'
+import { metaDe } from '../lib/meta'
 import { usePasarPagina } from '../lib/pasarPagina'
 import { useFechaEdicion } from '../lib/useFechaEdicion'
 import RotatingLogo from './RotatingLogo'
@@ -23,6 +25,12 @@ export default function NewspaperPage() {
   const pagina = paginaDe(pathname)
   const edicion = numeroEdicion(useFechaEdicion())
   const gestos = usePasarPagina(pagina)
+
+  // El título de la pestaña, el mismo que pone el servidor (lib/meta.ts): al pasar de página dentro del sitio
+  // no se recarga el HTML, así que acá se actualiza a mano
+  useEffect(() => {
+    document.title = metaDe(pathname).titulo
+  }, [pathname])
 
   return (
     <div className="flex min-h-screen flex-col">

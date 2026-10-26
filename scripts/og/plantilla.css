@@ -1,0 +1,51 @@
+/* Estilos de la plantilla de imágenes Open Graph (ver plantilla.html). Los colores son los tokens del sitio
+   (web/src/index.css), copiados acá porque la plantilla no pasa por Tailwind. */
+:root {
+  --paper: #ebe3d1;
+  --print: #1b1915;
+  --print-muted: #5b554b;
+  --red: #c84030;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1200px; height: 630px; overflow: hidden; background: var(--paper); color: var(--print); }
+#hoja {
+  position: relative;
+  width: 1200px;
+  height: 630px;
+  padding: 36px 48px;
+  background:
+    radial-gradient(ellipse at center, transparent 55%, color-mix(in oklab, var(--print) 12%, transparent)),
+    var(--paper);
+  display: flex;
+  flex-direction: column;
+}
+/* Marco de doble filete, como el grabado del sitio */
+#hoja::before { content: ""; position: absolute; inset: 14px; border: 4px double var(--print); pointer-events: none; }
+.filete-doble { border-top: 4px double var(--print); }
+.volanta { font: 700 18px/1 "Old Standard TT", serif; letter-spacing: .2em; text-transform: uppercase; }
+.gotica { font-family: "UnifrakturMaguntia", serif; }
+.anton { font-family: "Anton", sans-serif; text-transform: uppercase; }
+.italica { font: italic 400 30px/1.3 "Old Standard TT", serif; }
+.bloque { width: 120px; height: 125px; flex: none; }
+.trama { background-image: repeating-linear-gradient(135deg, color-mix(in oklab, var(--print) 22%, transparent) 0 1.5px, transparent 1.5px 9px); }
+
+/* Portada */
+.cabecera { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 28px; }
+.cabecera h1 { font-size: 132px; line-height: .95; text-align: center; font-weight: 400; }
+.fecha { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 4px double var(--print); margin-top: 18px; }
+.lema { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 14px; }
+.lema h2 { font-size: 92px; line-height: 1; letter-spacing: .01em; }
+
+/* Aviso de una remera */
+.arriba { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 10px; border-bottom: 4px double var(--print); }
+.arriba .gotica { font-size: 44px; }
+.aviso { flex: 1; display: grid; grid-template-columns: 470px 1fr; gap: 40px; padding-top: 24px; min-height: 0; }
+.foto { border: 4px double var(--print); padding: 5px; height: 100%; min-height: 0; }
+.foto > * { width: 100%; height: 100%; }
+.foto img { object-fit: cover; display: block; }
+.foto .vacia { display: flex; align-items: center; justify-content: center; }
+.texto { display: flex; flex-direction: column; min-width: 0; }
+.texto h2 { font-size: 86px; line-height: .95; margin-top: 22px; } /* aire para los acentos de las mayúsculas (ENVÍO) */
+.texto .italica { margin-top: 18px; }
+.pie { margin-top: auto; display: flex; align-items: center; justify-content: space-between; border-top: 2px solid var(--print); padding-top: 12px; }
+.pie .bloque { width: 64px; height: 67px; }

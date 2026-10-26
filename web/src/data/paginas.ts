@@ -38,6 +38,7 @@ export function paginaDe(ruta: string) {
   return {
     numero: i + 1,
     seccion: paginas[i].seccion,
+    corto: paginas[i].corto,
     anterior: i > 0 ? { ...paginas[i - 1], numero: i } : null,
     siguiente: i < paginas.length - 1 ? { ...paginas[i + 1], numero: i + 2 } : null,
   }

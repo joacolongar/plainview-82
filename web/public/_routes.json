@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "description": "Qué pedidos pasan por las Functions (el middleware de Open Graph y /api). Los archivos estáticos no: se sirven directo, más rápido y sin gastar invocaciones.",
+  "include": ["/*"],
+  "exclude": ["/assets/*", "/og/*", "/ilustraciones/*", "/logo/*", "/recortes/*", "/texturas/*", "/brand/*", "/favicon-32.png", "/apple-touch-icon.png", "/robots.txt"]
+}
