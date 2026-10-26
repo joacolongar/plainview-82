@@ -20,3 +20,14 @@ updates:
     ignore:
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+  # Las actions del CI (.github/workflows/): actions/checkout, actions/setup-node. El directorio "/" es la raíz del
+  # repo; Dependabot busca solo los workflows en .github/workflows/.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: America/Argentina/Cordoba
+    groups:
+      actions:
+        patterns: ["*"]

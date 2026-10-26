@@ -195,6 +195,15 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   **`@types/node` sigue a `web/.nvmrc`** (hoy Node 22 → `@types/node` `^22`): Dependabot no ofrece sus saltos mayores
   (`ignore` en `dependabot.yml`); se suben a mano y junto con `.nvmrc`. Los PR viejos de Dependabot se ponen al día
   con un comentario `@dependabot rebase` antes de mergear. Antes de mergear uno: que el build de Cloudflare pase y probar el sitio.
+  Dependabot también actualiza las actions del CI (ecosistema `github-actions`).
+- **CI** (`.github/workflows/ci.yml`): `npm ci`, lint, pruebas y build en cada push a `main` y en cada PR (los de
+  Dependabot incluidos), con el Node de `web/.nvmrc` y sin secretos. Un PR en rojo no se mergea.
+- **Barreras para Claude Code** (`.claude/settings.json`, va en git): reglas `deny` que no dejan leer ni editar `.env` ni
+  `.dev.vars` (las claves de prueba las cambia el dueño a mano; `.env.example` sí se edita), y un hook PreToolUse
+  (`.claude/hooks/revisar-codigo.py`) que frena las ediciones con las APIs prohibidas de arriba en `web/src/` y
+  `web/functions/`, y los scripts en línea (`<script>` sin `src`, atributos `on…`, `javascript:`) en `web/index.html`.
+  No cubren lo que se escribe por Bash ni lo que no edita Claude: para eso, el CI y la revisión. Los permisos personales
+  (`settings.local.json`, fuera de git) no incluyen `git commit`, `git push`, `npx wrangler` ni código libre (`python3 -c`).
 - **Pedidos verificados en el servidor** (Etapa 2, `POST /api/pedido` en Cloudflare Pages Functions):
   - El servidor **nunca confía en precios ni totales del cliente**: recibe solo slug, talle, color y cantidad, valida
     estrictamente contra `products.ts` (claves conocidas, valores permitidos, largos y cantidades máximas) y calcula el total.

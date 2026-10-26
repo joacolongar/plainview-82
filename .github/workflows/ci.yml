@@ -1,0 +1,36 @@
+# CI: en cada push a main y en cada pull request (también los de Dependabot) corre lint, pruebas y build,
+# con la misma versión de Node que Cloudflare (web/.nvmrc). Si algo falla, el PR lo muestra en rojo antes de mergear.
+# No usa secretos: el build no los necesita y los PR de Dependabot no los reciben.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Si llega otro push a la misma rama, se cancela la corrida vieja.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
