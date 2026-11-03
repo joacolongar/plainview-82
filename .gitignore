@@ -15,3 +15,6 @@ __pycache__/
 *:Zone.Identifier
 .dev.vars
 .wrangler/
+
+# Fotos de referencia de la remera 3D: no van al repo.
+modelos/referencias/
