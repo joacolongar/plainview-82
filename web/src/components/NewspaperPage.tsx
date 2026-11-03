@@ -1,12 +1,15 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { BRAND, IS_PREVIEW } from '../config'
 import { paginaDe, seccionSuelta } from '../data/paginas'
 import { numeroEdicion } from '../lib/edicion'
+import { entradaPendiente, terminarEntrada } from '../lib/entrada'
 import { fechaCorta, fechaLarga } from '../lib/fecha'
 import { metaDe } from '../lib/meta'
 import { usePasarPagina } from '../lib/pasarPagina'
 import { useFechaEdicion } from '../lib/useFechaEdicion'
+import Entrada from './Entrada'
+import { CLASES_HOJA } from './hoja'
 import RotatingLogo from './RotatingLogo'
 import { PiePaginas, TiraPaginas } from './NavegacionPaginas'
 import SiteNav from './SiteNav'
@@ -19,12 +22,16 @@ type Pagina = ReturnType<typeof paginaDe>
  * - El pie pasa de página ("← pág. anterior · Índice · pág. siguiente →") y cierra con el pie de imprenta.
  * El orden y los números de página salen de src/data/paginas.ts. Se pasa de página deslizando, con ← → o
  * con el pie, con transición de hoja (src/lib/pasarPagina.ts + index.css).
+ * Al entrar por la portada en una pestaña nueva, encima va la entrada (Entrada.tsx): mientras está, el sitio de abajo
+ * no se puede tocar ni recorrer con el teclado (inert) y no se pasa de página.
  */
 export default function NewspaperPage() {
   const { pathname } = useLocation()
   const pagina = paginaDe(pathname)
   const edicion = numeroEdicion(useFechaEdicion())
-  const gestos = usePasarPagina(pagina)
+  const [entrada, setEntrada] = useState(entradaPendiente)
+  const gestos = usePasarPagina(pagina, entrada)
+  const hoja = useRef<HTMLDivElement>(null)
 
   // El título de la pestaña, el mismo que pone el servidor (lib/meta.ts): al pasar de página dentro del sitio
   // no se recarga el HTML, así que acá se actualiza a mano
@@ -33,22 +40,33 @@ export default function NewspaperPage() {
   }, [pathname])
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {IS_PREVIEW && (
-        <p className="border-b border-line px-4 py-1.5 text-center font-mono text-[11px] uppercase tracking-wider text-muted md:tracking-[0.2em]">
-          Edición N° {edicion} · <span className="text-red">Número de prueba</span> · Precios y fotos todavía no son reales
-        </p>
+    <>
+      <div className="flex min-h-screen flex-col" inert={entrada}>
+        {IS_PREVIEW && (
+          <p className="border-b border-line px-4 py-1.5 text-center font-mono text-[11px] uppercase tracking-wider text-muted md:tracking-[0.2em]">
+            Edición N° {edicion} · <span className="text-red">Número de prueba</span> · Precios y fotos todavía no son reales
+          </p>
+        )}
+        <main className="mx-auto w-full max-w-6xl flex-1 px-2 py-2 md:px-4 md:py-6">
+          {/* `hoja` es lo que anima la transición (index.css). touch-pan-y + pinch-zoom: el navegador se queda con
+              el scroll vertical y el zoom, y el gesto horizontal llega entero a los pointer events (deslizar) */}
+          <div ref={hoja} className={`hoja ${CLASES_HOJA} touch-pan-y touch-pinch-zoom shadow-2xl`} {...gestos}>
+            {pathname !== '/' && <CabeceraChica pagina={pagina} suelta={seccionSuelta(pathname)} />}
+            <Outlet />
+            <PieDePagina pagina={pagina} />
+          </div>
+        </main>
+      </div>
+      {entrada && (
+        <Entrada
+          hoja={hoja}
+          alTerminar={() => {
+            terminarEntrada()
+            setEntrada(false)
+          }}
+        />
       )}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-2 py-2 md:px-4 md:py-6">
-        {/* `hoja` es lo que anima la transición (index.css). touch-pan-y + pinch-zoom: el navegador se queda con
-            el scroll vertical y el zoom, y el gesto horizontal llega entero a los pointer events (deslizar) */}
-        <div className="hoja paper touch-pan-y touch-pinch-zoom px-3 pt-2 pb-4 shadow-2xl md:px-8 md:pt-4" {...gestos}>
-          {pathname !== '/' && <CabeceraChica pagina={pagina} suelta={seccionSuelta(pathname)} />}
-          <Outlet />
-          <PieDePagina pagina={pagina} />
-        </div>
-      </main>
-    </div>
+    </>
   )
 }
 

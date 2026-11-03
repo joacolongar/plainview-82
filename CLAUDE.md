@@ -45,6 +45,10 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
     `public/_routes.json` deja afuera de las Functions los archivos estáticos. Imágenes 1200×630 en `public/og/`
     (`portada.jpg` y una por remera), generadas con `python3 -I scripts/og/generar.py` (con `npm run dev` corriendo):
     **al sumar una remera o cambiar sus fotos, regenerarlas** (las pruebas fallan si falta una)
+  - `src/components/Entrada.tsx` **la entrada** (`docs/entrada/ENTRADA.md`): la portada de hoy doblada con la faja de
+    INGRESAR, una capa encima de la página real con dos copias quietas de `<Home />` (`CLASES_HOJA` en `components/hoja.ts`).
+    Cuándo aparece lo decide `src/lib/entrada.ts` una sola vez al cargar (solo por `/`, pestaña nueva, sin recargar;
+    en desarrollo `?entrada` la fuerza). Mientras está: `<html data-entrada>` (sin scroll, logo quieto) y el sitio `inert`
   - `src/data/paginas.ts` orden, números y nombre corto (`corto`) de cada página del diario;
     `src/components/NavegacionPaginas.tsx` la tira de arriba ("◂ Pág. 1 · Primera plana … Pág. 3 · Magnolia ▸", debajo
     de la barra de secciones) y el pie, con el mismo orden; a 375 px, si los dos nombres suman más de 46 caracteres,
@@ -177,6 +181,8 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   **iframe de 375 px** (una página temporal `web/public/__*.html`, que se borra al terminar) y se mide con JS:
   `scrollWidth ≤ 375`, elementos tocables ≥ 44 px, posición de la primera pantalla, etc. Capturas con `--screenshot`.
 - Con `--virtual-time-budget` las View Transitions no llegan a dibujarse: esas partes se prueban sin la API.
+  Las Web Animations (`element.animate`, la entrada) tampoco avanzan solas: la página de prueba lleva el reloj a mano
+  (`pause()` + `currentTime`, y `finish()` al llegar al final, así sigue la secuencia).
 - **Contra `npm run pages`** (wrangler, para probar `/api`), el sitio sale con la CSP de `_headers`: la página de prueba
   va en `web/dist/` (no en `public/`) con el JS en un archivo aparte y el iframe con `width`/`height` como atributos
   (la CSP bloquea scripts en línea y el atributo `style`), y a la copia `dist/_headers` se le saca `frame-ancestors`

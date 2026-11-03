@@ -24,8 +24,9 @@ export const marcarDireccion = (dir: Direccion) => {
  * Pasar de página como en un diario: deslizando en el celular, con ← → en la compu, y con la
  * transición de hoja de la View Transitions API (React Router la usa con `viewTransition: true`).
  * Devuelve los handlers para la hoja; las flechas se escuchan en la ventana.
+ * `pausado`: mientras está la entrada (Entrada.tsx), ni las flechas ni el deslizamiento pasan de página.
  */
-export function usePasarPagina(pagina: Pagina) {
+export function usePasarPagina(pagina: Pagina, pausado = false) {
   const navigate = useNavigate()
   const { pathname, hash } = useLocation()
 
@@ -54,20 +55,20 @@ export function usePasarPagina(pagina: Pagina) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
-      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || excluido(e.target)) return
+      if (pausado || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || excluido(e.target)) return
       queueMicrotask(() => {
         if (!e.defaultPrevented) ir(e.key === 'ArrowRight' ? 'adelante' : 'atras')
       })
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [ir])
+  }, [ir, pausado])
 
   // Deslizar: se anota dónde apoyó el dedo y se decide al levantarlo
   const inicio = useRef<{ x: number; y: number; t: number } | null>(null)
   const gestos = {
     onPointerDown: (e: ReactPointerEvent) => {
-      inicio.current = e.pointerType === 'mouse' || excluido(e.target) ? null : { x: e.clientX, y: e.clientY, t: performance.now() }
+      inicio.current = pausado || e.pointerType === 'mouse' || excluido(e.target) ? null : { x: e.clientX, y: e.clientY, t: performance.now() }
     },
     onPointerUp: (e: ReactPointerEvent) => {
       const i = inicio.current
