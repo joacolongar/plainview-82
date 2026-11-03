@@ -18,3 +18,5 @@ __pycache__/
 
 # Fotos de referencia de la remera 3D: no van al repo.
 modelos/referencias/
+# Copias de respaldo que deja Blender al guardar.
+*.blend1

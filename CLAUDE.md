@@ -76,6 +76,13 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
 - `docs/` — ROADMAP.md (plan por sesiones), IDEAS.md (backlog de ideas), PASATIEMPOS.md (diseño de los pasatiempos)
   y pasatiempos-maqueta.png (maqueta a 390px).
 - `scripts/pasatiempos.py` — genera y valida las ediciones de pasatiempos (`web/src/data/pasatiempos/edicion-NN.json`).
+- **Remera 3D** (Blender 5.2 de Windows, sin interfaz): `scripts/blender/remera_base.py` genera `modelos/remera-base.blend`
+  (forma, simulación colgada de la percha y UV; solo se vuelve a correr si cambia la forma, tarda ~3 min).
+  `scripts/blender/aplicar-diseno.sh` (llama a `aplicar_diseno.py`) abre la base, le pone color de tela y estampas
+  (horneadas en una textura, sin nodos Mix) y guarda `modelos/disenos/<nombre>/remera-<nombre>.blend` y `.glb`.
+  Las imágenes de cada diseño van en `modelos/disenos/<nombre>/estampas/`.
+  Primer diseño: `what-do-kids-know`, **en borrador** (medidas sacadas a escala del mockup). Faltan ajustes finos de
+  posición, y la etiqueta del cuello y la de la cintura están por desarrollar.
 
 ## Comandos
 ```bash

@@ -1,7 +1,8 @@
-"""Modela la remera 3D de Plainview 8:2 (talle M, en metros), la cuelga de una percha y la guarda como remera.blend y remera.glb.
+"""Genera la remera base de Plainview 8:2 (talle M, en metros): forma, simulación colgada de la percha y UV.
 
-Se corre con el Blender de Windows, sin abrir la interfaz:
-    blender.exe --background --factory-startup --python remera.py -- <carpeta de salida> <carpeta de capturas> [norender]
+Guarda modelos/remera-base.blend, la base de todos los diseños (los aplica aplicar_diseno.py, sin volver a simular).
+Solo hace falta volver a correrlo si cambia la forma. Se corre con el Blender de Windows, sin abrir la interfaz:
+    blender.exe --background --factory-startup --python remera_base.py -- <carpeta de salida> <carpeta de capturas> [norender]
 
 Cómo está armada:
 - Se modela la mitad derecha (x >= 0) y un Mirror en X arma la otra (con las UV espejadas en U, alrededor de 0,5).
@@ -10,8 +11,8 @@ Cómo está armada:
 - La malla son anillos de media vuelta (del centro del frente al centro de la espalda, pasando por el doblez)
   apilados de abajo hacia arriba; la sisa es un hueco en el doblez del costado y de ahí sale la manga, otro tubo aplanado.
 - Dobladillos y ribete son la tela doblada hacia adentro (unos anillos más), así se ven al mirar por el cuello o la manga.
-- Islas UV: frente, espalda, manga y ribete. La línea del centro del frente queda recta en u = 0,5 para que,
-  con el espejo, el frente sea una sola isla plana donde va la estampa.
+- Islas UV: frente, espalda, manga y ribete. La línea del centro del frente y la de la espalda quedan rectas en
+  u = 0,5 para que, con el espejo, cada una sea una sola isla plana donde va la estampa.
 - Después se cuelga de una percha invisible (la hacen los pines del hombro) y se simula toda la tela (Cloth).
 """
 import math
@@ -277,15 +278,16 @@ if sum(p.normal.y for p in pecho) > 0:
     malla.flip_normals()
 
 # ---------------------------------------------------------------- UV
-UV_POR_METRO = {0: 1.0, 1: 0.15}
-# (u0, v0, u1, v1) de la mitad modelada; el espejo copia del otro lado de 0,5. El frente se queda con casi toda la
-# textura (es donde va la estampa); espalda, manga, ribete y doblez del ruedo, negros lisos, van en la franja de abajo.
+UV_POR_METRO = {0: 1.0, 1: 1.0}
+# (u0, v0, u1, v1) de la mitad modelada; el espejo copia del otro lado de 0,5. Frente y espalda llevan estampa y tienen
+# la misma resolución: el frente en la mitad de arriba y la espalda en la de abajo, los dos centrados en u = 0,5 (lo
+# pide el espejo). Manga, ribete y doblez del ruedo, que van lisos, quedan en las franjas de los costados.
 CASILLAS = {
-    0: (0.5, 0.13, 0.998, 0.998),
-    1: (0.5, 0.004, 0.55, 0.122),
-    2: (0.56, 0.004, 0.80, 0.122),
-    3: (0.82, 0.004, 0.998, 0.058),
-    4: (0.82, 0.066, 0.998, 0.122),
+    0: (0.5, 0.505, 0.69, 0.998),
+    1: (0.5, 0.004, 0.69, 0.495),
+    2: (0.70, 0.505, 0.998, 0.998),
+    3: (0.70, 0.004, 0.998, 0.10),
+    4: (0.70, 0.11, 0.998, 0.20),
 }
 
 bpy.ops.object.mode_set(mode='EDIT')
@@ -334,6 +336,7 @@ def transformar(ls, fn):
 
 
 informe = {}
+MAPA_UV = {}
 for t in (0, 1):
     ls = lazos(t)
     col = columna[t]
@@ -356,6 +359,13 @@ for t in (0, 1):
     cruza = (0.5 - u0) if lado > 0 else (u1 - 0.5)
     informe[t] = dict(lado=lado, caja=(round(u0, 3), round(v0, 3), round(u1, 3), round(v1, 3)),
                       desvio_centro=desvio, cruza_espejo=cruza)
+    # para aplicar_diseno.py: dónde cae el centro del escote en la textura y cuántas UV mide un metro de tela.
+    # Mirando de frente (o de espaldas, para la espalda), la derecha del que mira es u creciente y arriba, v creciente.
+    v_ruedo = [l for l in bm.verts[col[0]].link_loops if l.face[tag] == t][0][uv].uv.y
+    v_escote = [l for l in bm.verts[col[-1]].link_loops if l.face[tag] == t][0][uv].uv.y
+    largo = sum((bm.verts[b_].co - bm.verts[a_].co).length for a_, b_ in zip(col, col[1:]))
+    MAPA_UV['frente' if t == 0 else 'espalda'] = dict(u_centro=0.5, v_escote=v_escote, uv_por_metro=(v_escote - v_ruedo) / largo,
+                                                      escote_a_ruedo=largo, medio_ancho=W)
 
 for t in (2, 3, 4):
     ls = lazos(t)
@@ -732,11 +742,10 @@ if RENDER:
         bpy.ops.render.render(write_still=True)
 apuntar(35)
 
-# ---------------------------------------------------------------- guardar y exportar
-bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT_DIR, 'remera.blend'))
-for o in bpy.context.view_layer.objects:
-    o.select_set(o is obj)
-bpy.ops.export_scene.gltf(filepath=os.path.join(OUT_DIR, 'remera.glb'), export_format='GLB', use_selection=True,
-                          export_apply=True, export_cameras=False, export_lights=False, export_materials='EXPORT',
-                          export_yup=True)
+# ---------------------------------------------------------------- guardar
+# remera-base.blend es la base de todos los diseños: aplicar_diseno.py la abre (sin volver a simular) y le pone la tela
+# y las estampas. Las medidas de las UV de frente y espalda viajan como propiedad del objeto.
+obj['mapa_uv'] = MAPA_UV
+bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT_DIR, 'remera-base.blend'))
+print('MAPA_UV', {k: {c: round(v, 4) for c, v in d.items()} for k, d in MAPA_UV.items()})
 print('LISTO')
