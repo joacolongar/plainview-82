@@ -23,10 +23,14 @@ Khronos PBR Neutral (la misma curva que usa el visor de la web) y un piso que so
 .blend se ve igual que la remera en la ficha. El comando queda guardado en modelos/disenos/<nombre>/aplicar.sh.
 
 Con --web, además exporta web/public/3d/<nombre>.glb para el visor de la ficha: textura de 2048 en WebP (la de 4096
-ocupa unos 64 MB en la memoria del celular) y la malla comprimida con Draco. Y muestra dónde van los puntos de la Fe de
+ocupa unos 64 MB en la memoria del celular) y la malla comprimida con Draco. Y la imagen fija del frente,
+web/public/3d/<nombre>-frente.webp: el render de Cycles con la cámara del visor (web/src/data/camara3d.json), la misma
+luz y fondo transparente; se ve mientras carga el 3D y queda si el navegador no puede mostrarlo. Y muestra dónde van los puntos de la Fe de
 erratas: una posición al lado de cada estampa (en metros, con Y arriba, como el glTF) y hacia dónde mira esa cara.
 """
 import argparse
+import json
+import math
 import os
 import re
 import shlex
@@ -42,6 +46,8 @@ BASE = RAIZ / 'modelos' / 'remera-base.blend'
 LIMITE_GLB = 3 * 1024 * 1024
 RESOLUCIONES = (4096, 2048)  # la primera que deje el .glb debajo de 3 MB
 ESTUDIO = RAIZ / 'web' / 'public' / '3d' / 'estudio.hdr'
+CAMARA = json.loads((RAIZ / 'web' / 'src' / 'data' / 'camara3d.json').read_text(encoding='utf-8'))  # la del visor
+LADO_FRENTE = 900  # la imagen fija del frente: cuadrada (el visor la recorta a los costados, como al 3D)
 SEPARACION = 0.05  # el punto de la Fe de erratas va a 5 cm del borde de su estampa (el círculo no la toca)
 SUBMUESTRAS = 4              # por lado, al achicar la imagen: promedia en vez de saltear píxeles
 
@@ -313,7 +319,36 @@ def exportar_web():
     nodo.image = grande
     bpy.data.images.remove(chica)
     print('WEB', salida.relative_to(RAIZ), f'{salida.stat().st_size / 1024:.0f} KB')
+    frente()
     puntos()
+
+
+def frente():
+    """La imagen fija del frente: Cycles con la cámara exacta del visor (órbita, objetivo y campo visual vertical)."""
+    escena = bpy.context.scene
+    camara = bpy.data.objects.new('Cámara web', bpy.data.cameras.new('Cámara web'))
+    escena.collection.objects.link(camara)
+    escena.camera = camara
+    th, ph, r = math.radians(CAMARA['theta']), math.radians(CAMARA['phi']), CAMARA['radio']
+    ox, oy, oz = CAMARA['objetivo']
+    # La órbita es la de model-viewer (glTF, Y arriba); en Blender, Z arriba: (x, y, z) del glTF → (x, -z, y)
+    gx, gy, gz = ox + r * math.sin(ph) * math.sin(th), oy + r * math.cos(ph), oz + r * math.sin(ph) * math.cos(th)
+    camara.location = (gx, -gz, gy)
+    camara.rotation_euler = (Vector((ox, -oz, oy)) - camara.location).to_track_quat('-Z', 'Y').to_euler()
+    camara.data.sensor_fit = 'VERTICAL'
+    camara.data.angle_y = math.radians(CAMARA['fov'])
+    escena.render.resolution_x = escena.render.resolution_y = LADO_FRENTE
+    escena.render.resolution_percentage = 100
+    escena.cycles.samples = 128
+    escena.cycles.use_denoising = True
+    ajustes = escena.render.image_settings
+    ajustes.file_format = 'WEBP'
+    ajustes.color_mode = 'RGBA'  # fondo transparente: se apoya sobre el mismo papel del visor
+    ajustes.quality = 82
+    salida = RAIZ / 'web' / 'public' / '3d' / f'{args.nombre}-frente.webp'
+    escena.render.filepath = str(salida)
+    bpy.ops.render.render(write_still=True)
+    print('FRENTE', salida.relative_to(RAIZ), f'{salida.stat().st_size / 1024:.0f} KB')
 
 
 estudio()

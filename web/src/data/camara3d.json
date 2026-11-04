@@ -1,0 +1,8 @@
+{
+  "nota": "La cámara del frente del visor 3D. La usan Visor3D.tsx y aplicar_diseno.py --web (la imagen fija del frente): si cambia, regenerar los diseños para que la imagen y el 3D sigan coincidiendo",
+  "theta": 0,
+  "phi": 80,
+  "radio": 1.87,
+  "objetivo": [0, 0, 0],
+  "fov": 31
+}

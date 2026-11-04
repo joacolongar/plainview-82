@@ -49,7 +49,10 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `src/components/Entrada.tsx` **la entrada** (`docs/entrada/ENTRADA.md`): la portada de hoy doblada con la faja de
     INGRESAR, una capa encima de la página real con dos copias quietas de `<Home />` (`CLASES_HOJA` en `components/hoja.ts`).
     Cuándo aparece lo decide `src/lib/entrada.ts` una sola vez al cargar (solo por `/`, pestaña nueva, sin recargar;
-    en desarrollo `?entrada` la fuerza). Mientras está: `<html data-entrada>` (sin scroll, logo quieto) y el sitio `inert`
+    en desarrollo `?entrada` la fuerza). Mientras está: `<html data-entrada>` (sin scroll, logo quieto) y el sitio `inert`.
+    La faja va al medio de la mitad visible en el celular (74 % en la compu) y nunca tapa la cabecera: baja lo justo para
+    no pisar la línea de fecha (`data-linea-fecha` en `Masthead`). El giro, en `GIRO_CELULAR` / `GIRO_ESCRITORIO`
+    (0 = derecho); los bordes llevan `outline` transparente para que Safari los suavice
   - `src/data/paginas.ts` orden, números y nombre corto (`corto`) de cada página del diario;
     `src/components/NavegacionPaginas.tsx` la tira de arriba ("◂ Pág. 1 · Primera plana … Pág. 3 · Magnolia ▸", debajo
     de la barra de secciones) y el pie, con el mismo orden; a 375 px, si los dos nombres suman más de 46 caracteres,
@@ -65,13 +68,18 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   - `src/components/FeDeErratas.tsx` la Fe de erratas del aviso (primero los puntos numerados de la estampa,
     `modelo3d.puntos`; después las líneas de `detalles`) y el bloque "Watch closer"; `src/data/fotos.ts` encuentra las
     fotos solas (`import.meta.glob` sobre `src/assets/productos/<slug>/<slug>-N.webp`, la 1 es la principal)
-  - **La lámina** (`docs/ficha-3d/FICHA-3D.md`): `src/components/Lamina.tsx` las figuras del aviso (fotos con su pie y,
-    al final, la remera en 3D; sello GIRALA) y `src/components/Visor3D.tsx` el visor (`<model-viewer>`, en un archivo
-    JS aparte que se baja recién al abrir la figura 3D). Los modelos van en `public/3d/` (`<diseño>.glb`, de
-    `aplicar_diseno.py --web`), con la luz `public/3d/estudio.hdr` y el decodificador Draco en `public/3d/draco/`
-    (copiado de `three/examples/jsm/libs/draco/gltf/`: **al actualizar three, copiarlo de nuevo**). Datos por producto
-    en `products.ts`: `fotos` (alt, color y `lector`: quién, altura y talle) y `modelo3d` (un .glb por color, `detalle`
-    y `puntos`). Ojo con model-viewer: el decodificador se configura en el objeto global `self.ModelViewerElement`
+  - **La lámina** (`docs/ficha-3d/FICHA-3D.md`): `src/components/Lamina.tsx` las figuras del aviso (la **Fig. 1 es la
+    remera en 3D**, después las fotos con su pie) y `src/components/Visor3D.tsx` el visor (`<model-viewer>`, en un
+    archivo JS aparte). La Fig. 1 arranca con la **imagen fija del frente** (`public/3d/<diseño>-frente.webp`, render de
+    Blender con la misma cámara: `src/data/camara3d.json`, que leen el visor y el script) y el visor se baja **con el
+    primer gesto** (tocar, scrollear, mover el mouse): si arranca solo con la página, Lighthouse en celular cae de ~94 a
+    44 (armar el 3D sin GPU tarda segundos). WebGL también se prueba recién ahí (crear un contexto demora el primer
+    dibujo). Sin WebGL, o sin modelo o sin textura, queda la imagen fija. Tocar un número (sobre la remera o en la lista
+    de la Fe de erratas, `verPunto` por `ref`) acerca la cámara a su estampa; VER ENTERA vuelve. Los modelos van en
+    `public/3d/` (`<diseño>.glb`, de `aplicar_diseno.py --web`), con la luz `public/3d/estudio.hdr` y el decodificador
+    Draco en `public/3d/draco/` (copiado de `three/examples/jsm/libs/draco/gltf/`: **al actualizar three, copiarlo de
+    nuevo**). Datos por producto en `products.ts`: `fotos` (alt, color y `lector`: quién, altura y talle) y `modelo3d`
+    (`colores`: el .glb y la imagen fija de cada color; `puntos`: posición, normal y `centro` de su estampa). Ojo con model-viewer: el decodificador se configura en el objeto global `self.ModelViewerElement`
     (no en la clase); React 19 le pasa como **propiedad** lo que no lleva guiones (`exposure={1.1}`, número, no texto)
   - `src/pages/AtencionAlLector.tsx` Atención al lector (`/atencion-al-lector`; `/como-comprar` redirige): cómo se compra,
     envíos y pagos, cambios y devoluciones y el Botón de arrepentimiento (`#arrepentimiento`, sale por WhatsApp)
@@ -95,7 +103,8 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   (horneadas en una textura, sin nodos Mix) y guarda `modelos/disenos/<nombre>/remera-<nombre>.blend` y `.glb`.
   Las imágenes de cada diseño van en `modelos/disenos/<nombre>/estampas/`. El comando queda en
   `modelos/disenos/<nombre>/aplicar.sh` (para rehacerlo: `bash modelos/disenos/<nombre>/aplicar.sh`). Con `--web`
-  exporta además `web/public/3d/<nombre>.glb` (textura de 2048 en WebP y malla con Draco, ~66 KB) y muestra los
+  exporta además `web/public/3d/<nombre>.glb` (textura de 2048 en WebP y malla con Draco, ~66 KB), la imagen fija
+  `<nombre>-frente.webp` (Cycles con la cámara de `camara3d.json`, fondo transparente, ~50 KB) y muestra los
   `PUNTO` de la Fe de erratas (posición 3D al lado de cada estampa y centro) para copiar a `products.ts`.
   **La luz** (`scripts/blender/estudio.sh` → `web/public/3d/estudio.hdr`, la opción "pareja") es la misma en la web y en
   el `.blend`: entorno HDR neutro y vista **Khronos PBR Neutral** (el visor usa `tone-mapping="neutral"` y

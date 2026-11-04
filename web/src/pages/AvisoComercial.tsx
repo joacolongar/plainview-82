@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import Ambientacion from '../components/ambientacion/Ambientacion'
 import FeDeErratas, { WatchCloser } from '../components/FeDeErratas'
-import Lamina from '../components/Lamina'
+import Lamina, { type ControlLamina } from '../components/Lamina'
 import { useCart } from '../context/CartContext'
 import { avisoDeProducto } from '../data/anuncios'
 import { fotosDe } from '../data/fotos'
@@ -26,6 +26,9 @@ export default function AvisoComercial() {
   const [size, setSize] = useState<Size | null>(null)
   const [color, setColor] = useState(p?.colors[0] ?? '')
   const [added, setAdded] = useState(false)
+  // La lista de la Fe de erratas le pide a la lámina ver un punto de cerca (solo si hay 3D de verdad)
+  const lamina = useRef<ControlLamina>(null)
+  const [hay3d, setHay3d] = useState(false)
 
   if (!p) return <NotFound />
   const canBuy = p.status !== 'proximamente' && size !== null
@@ -52,7 +55,7 @@ export default function AvisoComercial() {
       <div className="mt-5 grid gap-5 md:grid-cols-2 md:gap-8">
         {/* La lámina con las fotos y la remera en 3D si hay; si no, el grabado con trama y su epígrafe */}
         {fotos.length > 0 || p.modelo3d ? (
-          <Lamina p={p} fotos={fotos} color={color} epigrafe={p.epigrafe}>
+          <Lamina ref={lamina} p={p} fotos={fotos} color={color} epigrafe={p.epigrafe} alSaberSi3d={setHay3d}>
             <Ambientacion key={p.slug} tipo={p.ambientacion} zona="grabado" />
           </Lamina>
         ) : (
@@ -73,7 +76,11 @@ export default function AvisoComercial() {
           <p className="font-display text-[15px] leading-snug text-pretty first-letter:float-left first-letter:mr-1.5 first-letter:font-headline first-letter:text-5xl first-letter:leading-[0.8]">
             {p.aviso}
           </p>
-          <FeDeErratas p={p} figura3d={p.modelo3d ? fotos.length + 1 : undefined} />
+          <FeDeErratas
+            p={p}
+            figura3d={p.modelo3d ? 1 : undefined}
+            alTocar={hay3d ? (punto) => lamina.current?.verPunto(punto) : undefined}
+          />
           <WatchCloser referencia={p.reference} />
           <TablaMedidas talles={p.sizes} elegido={size} />
 

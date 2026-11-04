@@ -185,6 +185,11 @@ html[data-entrada] .animate-logo-flip { animation-play-state: paused; }
 .entrada-diario { position: absolute; transform-origin: 0 0; transform-style: preserve-3d; }
 .entrada-arriba, .entrada-abajo { position: absolute; left: 0; width: 100%; }
 .entrada-arriba { top: 0; z-index: 2; overflow: clip; background: var(--color-paper); }
+/* Bordes suaves en lo que está girado: Safari (iPhone) no suaviza el borde de un elemento girado con transform y lo
+   dibuja serruchado. Un outline transparente de 1 px deja el borde visible adentro (ese sí lo suaviza) y
+   backface-visibility lo pasa a su propia capa. Si igual se ve serruchado: GIRO_CELULAR = 0 en Entrada.tsx */
+.entrada-arriba, .entrada-cara, .entrada-tela { outline: 1px solid transparent; }
+.entrada-arriba { backface-visibility: hidden; }
 .entrada-abajo { transform-origin: 50% 0; transform: rotateX(-179.9deg); transform-style: preserve-3d; }
 .entrada-cara { position: absolute; inset: 0; overflow: clip; backface-visibility: hidden; background: var(--color-paper); }
 .entrada-dorso { transform: rotateX(180deg); background: color-mix(in oklab, var(--color-paper) 90%, var(--color-print)); }
@@ -218,8 +223,8 @@ html[data-entrada] .animate-logo-flip { animation-play-state: paused; }
 
 /* La faja: ocupa el ancho del diario cerrado (un poco más: las puntas doblan por detrás) */
 .entrada-lugar-faja { position: absolute; z-index: 2; }
-.entrada-faja { position: absolute; left: -4px; right: -4px; top: 86%; height: 76px; transform: translateY(-50%); }
-@media (min-width: 768px) { .entrada-faja { top: 74%; height: 84px; } }
+/* La altura (al medio de la mitad visible, salvo que tape la cabecera) y el alto los pone Entrada.tsx */
+.entrada-faja { position: absolute; left: -4px; right: -4px; transform: translateY(-50%); }
 .entrada-media {
   position: absolute;
   inset: 0;

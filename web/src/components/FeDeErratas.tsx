@@ -5,6 +5,7 @@ import type { Detalles, Product } from '../data/products'
  * "Donde dice «una remera cualquiera», debió decir «jersey de algodón peinado…»."
  * Se arma sola con los detalles del producto: lo que falta no aparece. Se abre con un toque (no depende de hover).
  * Primero van las erratas de la estampa, numeradas: los mismos números están sobre la remera en 3D (Visor3D.tsx).
+ * Con `alTocar` (si hay 3D), cada una es un botón: la lámina sube y la cámara se acerca a esa parte de la remera.
  */
 type Errata = { campo: string; dice: string; debio: (d: Detalles) => string | undefined }
 
@@ -22,7 +23,7 @@ const ERRATAS: Errata[] = [
   { campo: 'Edición', dice: 'hay para todos', debio: (d) => d.edicion },
 ]
 
-export default function FeDeErratas({ p, figura3d }: { p: Product; figura3d?: number }) {
+export default function FeDeErratas({ p, figura3d, alTocar }: { p: Product; figura3d?: number; alTocar?: (punto: number) => void }) {
   const d = p.detalles
   const lineas = d ? ERRATAS.map((e) => ({ ...e, texto: e.debio(d)?.trim() })).filter((e) => e.texto) : []
   const puntos = p.modelo3d?.puntos ?? []
@@ -41,18 +42,37 @@ export default function FeDeErratas({ p, figura3d }: { p: Product; figura3d?: nu
       </summary>
       {puntos.length > 0 && (
         <ol className="mt-2 space-y-1.5">
-          {puntos.map((punto, i) => (
-            <li key={i} className="flex items-start gap-2 font-display text-[15px] leading-snug">
-              <NumeroErrata n={i + 1} />
-              <span>
-                Donde dice «{punto.dice}», debió decir «{punto.debio}».
-              </span>
-            </li>
-          ))}
+          {puntos.map((punto, i) => {
+            const texto = (
+              <>
+                <NumeroErrata n={i + 1} />
+                <span>
+                  Donde dice «{punto.dice}», debió decir «{punto.debio}».
+                </span>
+              </>
+            )
+            return (
+              <li key={i} className="font-display text-[15px] leading-snug">
+                {alTocar ? (
+                  <button
+                    onClick={() => alTocar(i)}
+                    aria-label={`Ver de cerca la errata ${i + 1}: donde dice «${punto.dice}», debió decir «${punto.debio}»`}
+                    className="flex min-h-11 w-full items-start gap-2 text-left underline-offset-4 hover:underline"
+                  >
+                    {texto}
+                  </button>
+                ) : (
+                  <span className="flex items-start gap-2">{texto}</span>
+                )}
+              </li>
+            )
+          })}
         </ol>
       )}
       {puntos.length > 0 && figura3d && (
-        <p className="mt-1 font-display text-xs italic text-print-muted">En la Fig. {figura3d}, los números están sobre la prenda.</p>
+        <p className="mt-1 font-display text-xs italic text-print-muted">
+          En la Fig. {figura3d}, los números están sobre la prenda{alTocar ? '; tocá uno para verlo de cerca' : ''}.
+        </p>
       )}
       <ul className="mt-2 space-y-1.5 pb-1">
         {lineas.map((e) => (

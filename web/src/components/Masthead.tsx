@@ -29,7 +29,8 @@ export default function Masthead() {
         </h1>
         <RotatingLogo lado="derecha" tamano={BLOQUE} />
       </div>
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 border-y-4 border-double border-print py-1 font-display text-[11px] uppercase tracking-wider md:text-xs">
+      {/* data-linea-fecha: hasta acá llega la cabecera; la faja de la entrada nunca la tapa (Entrada.tsx) */}
+      <div data-linea-fecha className="mt-2 flex flex-wrap items-center justify-between gap-x-3 border-y-4 border-double border-print py-1 font-display text-[11px] uppercase tracking-wider md:text-xs">
         {/* "Vol. 8 · No. 2" es fijo, como marca; la edición avanza todos los días (lib/edicion.ts) */}
         <span>
           <span className="md:hidden">Vol. 8 · No. 2 · Ed. N° {edicion}</span>

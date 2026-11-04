@@ -66,17 +66,17 @@ export type FotoProducto = {
 export type Vec3 = [number, number, number]
 
 export type Modelo3D = {
-  /** El .glb de cada color (de la lista `colors`), en public/3d/. Lo exporta aplicar_diseno.py con --web */
-  glb: Record<string, string>
-  /** Adónde mira la cámara con DETALLE: el centro de la estampa principal (lo muestra aplicar_diseno.py, "centro") */
-  detalle: Vec3
+  /** Por color (de la lista `colors`): el .glb y la imagen fija del frente, en public/3d/. Los dos salen de
+      aplicar_diseno.py --web; la imagen se ve mientras carga el 3D y queda si el navegador no puede mostrarlo */
+  colores: Record<string, { glb: string; frente: string }>
   /** Los puntos de la Fe de erratas, numerados en este orden. posicion y normal, del "PUNTO" de aplicar_diseno.py:
       la normal es la de la cara (frente [0, 0, 1], espalda [0, 0, -1]): el punto se esconde cuando esa cara no se ve */
   puntos: PuntoErrata[]
 }
 
-/** Una errata de la estampa: "Donde dice «dice», debió decir «debio»." */
-export type PuntoErrata = { dice: string; debio: string; posicion: Vec3; normal: Vec3 }
+/** Una errata de la estampa: "Donde dice «dice», debió decir «debio»." centro: el de su estampa, adonde va la cámara al
+    tocar el número (DETALLE va al del primero, la estampa principal) */
+export type PuntoErrata = { dice: string; debio: string; posicion: Vec3; normal: Vec3; centro: Vec3 }
 
 // TODO: reemplazar precios, fotos, detalles y textos por los reales. Los textos de aviso son borradores.
 export const products: Product[] = [
@@ -97,13 +97,12 @@ export const products: Product[] = [
     ],
     // Diseño: modelos/disenos/what-do-kids-know/ (aplicar.sh rehace el .blend y este .glb)
     modelo3d: {
-      glb: { Negro: '/3d/what-do-kids-know.glb' },
-      detalle: [-0.0022, 0.1082, 0.0185],
+      colores: { Negro: { glb: '/3d/what-do-kids-know.glb', frente: '/3d/what-do-kids-know-frente.webp' } },
       puntos: [
-        { dice: 'una estampa grande', debio: 'cuatro carteles de 43 cm de ancho, a 14 cm del cuello', posicion: [0.1745, -0.0108, 0.0516], normal: [0, 0, 1] },
-        { dice: 'un cartel', debio: 'el zócalo del noticiero en vivo, en crema, con su punto rojo', posicion: [-0.1773, -0.0475, 0.0385], normal: [0, 0, 1] },
-        { dice: 'sin firma', debio: 'el 8:2, chico, junto al ruedo', posicion: [0.2272, -0.2702, 0.0553], normal: [0, 0, 1] },
-        { dice: 'la espalda lisa', debio: 'una frase chica sobre el ruedo, para quien se queda hasta el final', posicion: [-0.2051, -0.2281, -0.0007], normal: [0, 0, -1] },
+        { dice: 'una estampa grande', debio: 'cuatro carteles de 43 cm de ancho, a 14 cm del cuello', posicion: [0.1745, -0.0108, 0.0516], normal: [0, 0, 1], centro: [-0.0022, 0.1082, 0.0185] },
+        { dice: 'un cartel', debio: 'el zócalo del noticiero en vivo, en crema, con su punto rojo', posicion: [-0.1773, -0.0475, 0.0385], normal: [0, 0, 1], centro: [-0.1309, 0.0154, 0.012] },
+        { dice: 'sin firma', debio: 'el 8:2, chico, junto al ruedo', posicion: [0.2272, -0.2702, 0.0553], normal: [0, 0, 1], centro: [0.2354, -0.3389, 0.0595] },
+        { dice: 'la espalda lisa', debio: 'una frase chica sobre el ruedo, para quien se queda hasta el final', posicion: [-0.2051, -0.2281, -0.0007], normal: [0, 0, -1], centro: [-0.1765, -0.287, -0.014] },
       ],
     },
     fotoBoceto: true,

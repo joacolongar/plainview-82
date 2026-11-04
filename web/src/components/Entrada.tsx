@@ -19,6 +19,9 @@ type Geo = {
   H: number
   /** Alto de la hoja real entera: la copia lo copia para que el papel (su viñeta) sea idéntico */
   altoReal: number
+  /** Dónde va el centro de la faja, de 0 a 1 en la mitad visible (0,5 = al medio), y su alto en px de pantalla */
+  lugarFaja: number
+  altoFaja: number
   /** Escala, posición y giro del diario cerrado; ty2: la posición abierto, re-centrado */
   s: number
   tx: number
@@ -26,6 +29,17 @@ type Geo = {
   ty2: number
   rot: number
 }
+
+// El giro del diario cerrado, en grados (negativo: hacia la izquierda). Con 0 queda derecho, y la faja también.
+// En el iPhone, Safari puede dibujar serruchados los bordes de lo que está girado (ver .entrada-arriba en index.css):
+// si se siguen viendo así, poner GIRO_CELULAR en 0
+const GIRO_CELULAR = -1
+const GIRO_ESCRITORIO = -2.5
+
+// La faja: en el celular al medio de la mitad visible, a la altura del titular (puede taparlo); en la compu, al 74 %.
+// Nunca tapa la cabecera (el nombre, los bloques y la línea de fecha): si la tocaría, baja lo justo
+const FAJA = { celular: { lugar: 0.5, alto: 76 }, compu: { lugar: 0.74, alto: 84 } }
+const AIRE_CABECERA = 6 // px de pantalla entre la línea de fecha y el borde de la faja
 
 function medir(hoja: HTMLElement): Geo {
   const r = hoja.getBoundingClientRect()
@@ -36,21 +50,19 @@ function medir(hoja: HTMLElement): Geo {
   // Cerrado: casi todo el ancho en el celular, unos 700 px en la compu, y que la mitad visible entre en pantalla
   const escala = (H: number) => Math.min(movil ? (vw - 24) / W : Math.min(700, vw * 0.58) / W, (vh * 0.62) / (H / 2))
   // La hoja que se dobla: al menos la primera pantalla y más alta que ancha, como un diario (nunca más que la real)
-  let H = Math.min(r.height, Math.max(vh - r.top, W * (movil ? 1.7 : 1.3)))
-  // …y con el titular de hoy entero arriba de la faja (va al 86 % o al 74 % de la mitad visible y mide 76 u 84 px de
-  // pantalla). En el celular la cabecera es alta y un titular de tres renglones lo pide. El primer h2 es el titular
-  const titular = hoja.querySelector('h2')?.getBoundingClientRect()
-  if (titular) {
-    const [lugar, alto] = movil ? [0.86, 76] : [0.74, 84]
-    const mitad = (titular.bottom - r.top + alto / 2 / escala(H) + 16) / lugar
-    H = Math.min(r.height, Math.max(H, 2 * mitad))
-  }
+  const H = Math.min(r.height, Math.max(vh - r.top, W * (movil ? 1.7 : 1.3)))
   const s = escala(H)
+  // La faja, con el tope de la cabecera: el borde de arriba de la faja no sube más que el final de la línea de fecha
+  const { lugar, alto } = movil ? FAJA.celular : FAJA.compu
+  const mitad = (H / 2) * s // alto de la mitad visible, en px de pantalla
+  const fecha = hoja.querySelector('[data-linea-fecha]')?.getBoundingClientRect()
+  const minimo = fecha ? ((fecha.bottom - r.top) * s + AIRE_CABECERA + alto / 2) / mitad : 0
+  const lugarFaja = Math.min(Math.max(lugar, minimo), 1 - alto / 2 / mitad)
   // El centro de la mitad visible va al centro de la pantalla
   const tx = vw / 2 - (W * s) / 2 - r.left
   const ty = vh / 2 + (movil ? 0 : 10) - (H * s) / 4 - r.top
   const ty2 = Math.max(vh / 2 - (H * s) / 2 - r.top, 12 - r.top)
-  return { left: r.left, top: r.top, W, H, altoReal: r.height, s, tx, ty, ty2, rot: movil ? -1 : -2.5 }
+  return { left: r.left, top: r.top, W, H, altoReal: r.height, lugarFaja, altoFaja: alto, s, tx, ty, ty2, rot: movil ? GIRO_CELULAR : GIRO_ESCRITORIO }
 }
 
 /**
@@ -189,7 +201,7 @@ export default function Entrada({ hoja, alTerminar }: Props) {
             className="entrada-lugar-faja"
             style={{ left: geo.left + geo.tx, top: geo.top + geo.ty, width: geo.W * geo.s, height: (geo.H / 2) * geo.s, transform: `rotate(${geo.rot}deg)` }}
           >
-            <div className={`entrada-faja ${cortada ? 'cortada' : ''}`}>
+            <div className={`entrada-faja ${cortada ? 'cortada' : ''}`} style={{ top: `${geo.lugarFaja * 100}%`, height: geo.altoFaja }}>
               {/* Cerrada se ve una sola faja entera; las mitades (con el corte en zigzag) aparecen recién al tocar.
                   El botón está dibujado en la faja, así se corta con ella */}
               <Media clase="entera" />
