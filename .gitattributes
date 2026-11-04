@@ -1,0 +1,34 @@
+# Archivos binarios: git no los toca (no convierte finales de línea) ni intenta mostrar sus diferencias como texto.
+# Git suele adivinarlo solo, pero no siempre: un .hdr sin bytes nulos puede pasar por texto, y si alguien activa la
+# conversión de finales de línea (core.autocrlf, común en Windows) lo rompería. "binary" es "-diff -merge -text".
+# Los SVG no van acá: son texto (XML) y conviene ver sus diferencias.
+
+# Imágenes
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.gif binary
+*.ico binary
+
+# 3D: modelos, escenas de Blender, luz de estudio y texturas
+*.blend binary
+*.glb binary
+*.hdr binary
+*.exr binary
+*.ktx2 binary
+*.bin binary
+
+# El decodificador Draco (WebAssembly)
+*.wasm binary
+
+# Tipografías, documentos y video (por si llegan con un diseño)
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+*.mp4 binary
+*.webm binary
+*.mov binary

@@ -12,6 +12,7 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   Al terminar, tildá lo hecho y anotá en "Bitácora" qué quedó pendiente.
 - Explicá las decisiones cuando introduzcas algo nuevo: el proyecto también es para aprender.
   Preferí soluciones simples antes que librerías nuevas; preguntá antes de sumar dependencias.
+- **Las respuestas, en español** (rioplatense, de vos): explicaciones, planes, resúmenes y mensajes de commit.
 - Textos de la interfaz en español rioplatense (vos), tono irónico y cinéfilo.
 - **Commit y push solo con el OK del dueño.** Antes de commitear: `git add -A` (sin rutas a mano: un `git add`
   con una ruta que ya no existe falla y no agrega nada) y revisar `git status` / `git show --stat` que entre todo.
