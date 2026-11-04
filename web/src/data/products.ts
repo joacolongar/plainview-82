@@ -11,8 +11,11 @@ export type Product = {
   precioDePrueba: boolean
   sizes: Size[]
   colors: string[]
-  /** Textos alternativos de las fotos, en orden (las fotos salen solas de src/assets/productos/<slug>/, ver fotos.ts) */
-  altFotos?: string[]
+  /** Las fotos, en el orden de los archivos (salen solas de src/assets/productos/<slug>/, ver fotos.ts): su texto
+      alternativo, el color de la remera y, si la tiene puesta alguien, quién (arma el pie: "Fig. 1 — El lector…") */
+  fotos?: FotoProducto[]
+  /** La remera en 3D (la última figura de la lámina). Sin modelo, la ficha muestra solo las fotos */
+  modelo3d?: Modelo3D
   /** true mientras las fotos sean bocetos: cada una lleva el sello "Prueba de imprenta" */
   fotoBoceto?: boolean
   /** Miniatura cuadrada del índice: un recorte de la estampa (no la remera entera), WebP de 216 px en
@@ -52,6 +55,29 @@ export type Detalles = {
 
 export type Ambientacion = 'ranas' | 'cafe' | 'pecados'
 
+export type FotoProducto = {
+  alt: string
+  color?: string
+  /** Quién la tiene puesta ("El lector Tomás"), cuánto mide en metros y qué talle usa: información de compra */
+  lector?: { quien: string; altura: number; talle: Size }
+}
+
+/** Un punto en el espacio del modelo, en metros, con Y para arriba (como el glTF) */
+export type Vec3 = [number, number, number]
+
+export type Modelo3D = {
+  /** El .glb de cada color (de la lista `colors`), en public/3d/. Lo exporta aplicar_diseno.py con --web */
+  glb: Record<string, string>
+  /** Adónde mira la cámara con DETALLE: el centro de la estampa principal (lo muestra aplicar_diseno.py, "centro") */
+  detalle: Vec3
+  /** Los puntos de la Fe de erratas, numerados en este orden. posicion y normal, del "PUNTO" de aplicar_diseno.py:
+      la normal es la de la cara (frente [0, 0, 1], espalda [0, 0, -1]): el punto se esconde cuando esa cara no se ve */
+  puntos: PuntoErrata[]
+}
+
+/** Una errata de la estampa: "Donde dice «dice», debió decir «debio»." */
+export type PuntoErrata = { dice: string; debio: string; posicion: Vec3; normal: Vec3 }
+
 // TODO: reemplazar precios, fotos, detalles y textos por los reales. Los textos de aviso son borradores.
 export const products: Product[] = [
   {
@@ -64,11 +90,22 @@ export const products: Product[] = [
     precioDePrueba: true,
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Negro'],
-    altFotos: [
-      'Frente de la remera negra: cuatro carteles de colores en el pecho y una línea de transmisión en vivo debajo',
-      'Espalda de la remera negra, lisa, con una frase chica cerca del ruedo y la etiqueta Watch closer',
-      'Detalle de la estampa: cuatro carteles redondeados en celeste, rojo, rosa y amarillo',
+    fotos: [
+      { alt: 'Frente de la remera negra: cuatro carteles de colores en el pecho y una línea de transmisión en vivo debajo', color: 'Negro' },
+      { alt: 'Espalda de la remera negra, lisa, con una frase chica cerca del ruedo y la etiqueta Watch closer', color: 'Negro' },
+      { alt: 'Detalle de la estampa: cuatro carteles redondeados en celeste, rojo, rosa y amarillo', color: 'Negro' },
     ],
+    // Diseño: modelos/disenos/what-do-kids-know/ (aplicar.sh rehace el .blend y este .glb)
+    modelo3d: {
+      glb: { Negro: '/3d/what-do-kids-know.glb' },
+      detalle: [-0.0022, 0.1082, 0.0185],
+      puntos: [
+        { dice: 'una estampa grande', debio: 'cuatro carteles de 43 cm de ancho, a 14 cm del cuello', posicion: [0.1745, -0.0108, 0.0516], normal: [0, 0, 1] },
+        { dice: 'un cartel', debio: 'el zócalo del noticiero en vivo, en crema, con su punto rojo', posicion: [-0.1773, -0.0475, 0.0385], normal: [0, 0, 1] },
+        { dice: 'sin firma', debio: 'el 8:2, chico, junto al ruedo', posicion: [0.2272, -0.2702, 0.0553], normal: [0, 0, 1] },
+        { dice: 'la espalda lisa', debio: 'una frase chica sobre el ruedo, para quien se queda hasta el final', posicion: [-0.2051, -0.2281, -0.0007], normal: [0, 0, -1] },
+      ],
+    },
     fotoBoceto: true,
     recorte: '/recortes/magnolia.webp',
     reference: 'Una referencia que aparece apenas un instante en un frame. Hay que mirar de cerca.',
@@ -85,7 +122,7 @@ export const products: Product[] = [
     detalles: {
       tela: 'jersey de algodón peinado 24/1, 200 g/m²',
       calce: 'oversize: hombro caído y cuerpo amplio (si dudás, tu talle de siempre)',
-      estampa: { tecnica: 'serigrafía a cuatro tintas', tamano: '28 × 10 cm', ubicacion: 'pecho; frase chica en la espalda, sobre el ruedo' },
+      estampa: { tecnica: 'serigrafía a cuatro tintas', tamano: '43 × 14 cm', ubicacion: 'pecho; frase chica en la espalda, sobre el ruedo' },
       color: 'negro carbón, teñido en pieza',
       cuidado: 'lavar del revés con agua fría, sin secadora ni plancha sobre la estampa',
       edicion: 'tirada de 50 unidades, con etiqueta 8:2 en el ruedo',

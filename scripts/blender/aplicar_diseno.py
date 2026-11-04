@@ -17,20 +17,32 @@ Cómo se hornea: las UV de frente y espalda son la tela aplanada, sin deformar (
 estampa de N cm es un rectángulo de N cm en la textura. Se pinta la textura del color de la tela y cada imagen se
 compone encima respetando su transparencia, en los mismos valores sRGB del archivo (los colores no cambian).
 El material queda con un solo nodo de imagen en Base Color: sin nodos Mix.
+
+La escena queda con la luz de estudio de la web (web/public/3d/estudio.hdr, de estudio.py) como mundo, la vista
+Khronos PBR Neutral (la misma curva que usa el visor de la web) y un piso que solo junta la sombra: un render del
+.blend se ve igual que la remera en la ficha. El comando queda guardado en modelos/disenos/<nombre>/aplicar.sh.
+
+Con --web, además exporta web/public/3d/<nombre>.glb para el visor de la ficha: textura de 2048 en WebP (la de 4096
+ocupa unos 64 MB en la memoria del celular) y la malla comprimida con Draco. Y muestra dónde van los puntos de la Fe de
+erratas: una posición al lado de cada estampa (en metros, con Y arriba, como el glTF) y hacia dónde mira esa cara.
 """
 import argparse
 import os
 import re
+import shlex
 import sys
 from pathlib import Path
 
 import bpy
 import numpy as np
+from mathutils import Vector
 
 RAIZ = Path(__file__).resolve().parents[2]
 BASE = RAIZ / 'modelos' / 'remera-base.blend'
 LIMITE_GLB = 3 * 1024 * 1024
 RESOLUCIONES = (4096, 2048)  # la primera que deje el .glb debajo de 3 MB
+ESTUDIO = RAIZ / 'web' / 'public' / '3d' / 'estudio.hdr'
+SEPARACION = 0.05  # el punto de la Fe de erratas va a 5 cm del borde de su estampa (el círculo no la toca)
 SUBMUESTRAS = 4              # por lado, al achicar la imagen: promedia en vez de saltear píxeles
 
 p = argparse.ArgumentParser(prog='aplicar-diseno.sh', description=__doc__.split('\n')[0])
@@ -40,7 +52,8 @@ p.add_argument('--estampa', nargs=5, action='append', default=[],
                metavar=('LUGAR', 'IMAGEN', 'ANCHO_CM', 'DEBAJO_CM', 'COSTADO_CM'),
                help='frente o espalda, imagen, ancho, cm debajo del escote, cm al costado (repetible)')
 p.add_argument('--rugosidad', type=float, default=0.9)
-p.add_argument('--brillo', type=float, default=0.18, help='color del sheen (gris, 0 a 1)')
+p.add_argument('--brillo', type=float, default=0.10, help='color del sheen (gris, 0 a 1): más alto, más gris el negro')
+p.add_argument('--web', action='store_true', help='exporta también web/public/3d/<nombre>.glb (2048, WebP y Draco)')
 args = p.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else [])
 
 
@@ -191,6 +204,125 @@ for res in RESOLUCIONES:
     bpy.data.materials.remove(mat)
     bpy.data.images.remove(img)
 
+
+
+def estudio():
+    """La luz de la web en el .blend: el HDR de estudio como mundo, la curva Neutral y la sombra de contacto."""
+    if not ESTUDIO.exists():
+        error(f'no está la luz de estudio: {ESTUDIO} (se genera con scripts/blender/estudio.sh)')
+    escena = bpy.context.scene
+    for o in [o for o in bpy.data.objects if o.type == 'LIGHT']:  # las luces de la base: las reemplaza el HDR
+        bpy.data.objects.remove(o)
+    mundo = bpy.data.worlds.new('Estudio web')
+    mundo.use_nodes = True
+    fondo = next(n for n in mundo.node_tree.nodes if n.type == 'BACKGROUND')
+    hdr = mundo.node_tree.nodes.new('ShaderNodeTexEnvironment')
+    hdr.image = bpy.data.images.load(str(ESTUDIO))
+    mundo.node_tree.links.new(hdr.outputs['Color'], fondo.inputs['Color'])
+    fondo.inputs['Strength'].default_value = 1.0
+    escena.world = mundo
+    escena.view_settings.view_transform = 'Khronos PBR Neutral'
+    escena.view_settings.look = 'None'
+    escena.view_settings.exposure = 0
+    escena.render.engine = 'CYCLES'
+    escena.render.film_transparent = True
+    # El piso solo junta la sombra (shadow catcher), justo debajo del ruedo, como la sombra del visor
+    esquinas = [remera.matrix_world @ Vector(c) for c in remera.bound_box]
+    bpy.ops.mesh.primitive_plane_add(size=4, location=(0, 0, min(c.z for c in esquinas) - 0.003))
+    piso = bpy.context.active_object
+    piso.name = 'Piso (sombra)'
+    piso.is_shadow_catcher = True
+
+
+def punto_en_tela(lugar, u, v):
+    """El punto de la tela que cae en (u, v) de la textura, en coordenadas del glTF (Y arriba). La tela tiene grosor
+    (cara de afuera y de adentro con la misma UV): se queda con la de más afuera."""
+    malla = remera.evaluated_get(bpy.context.evaluated_depsgraph_get()).to_mesh()
+    uv = malla.uv_layers.active.data
+    malla.calc_loop_triangles()
+    afuera = -1 if lugar == 'frente' else 1  # el frente mira a -Y en Blender; la espalda, a +Y
+    mejor = None
+    for t in malla.loop_triangles:
+        a, b, c = (uv[i].uv for i in t.loops)
+        den = (b.y - c.y) * (a.x - c.x) + (c.x - b.x) * (a.y - c.y)
+        if abs(den) < 1e-12:
+            continue
+        l1 = ((b.y - c.y) * (u - c.x) + (c.x - b.x) * (v - c.y)) / den
+        l2 = ((c.y - a.y) * (u - c.x) + (a.x - c.x) * (v - c.y)) / den
+        l3 = 1 - l1 - l2
+        if min(l1, l2, l3) < -1e-6:
+            continue
+        va, vb, vc = (malla.vertices[i].co for i in t.vertices)
+        pos = remera.matrix_world @ (va * l1 + vb * l2 + vc * l3)
+        if mejor is None or pos.y * afuera > mejor.y * afuera:
+            mejor = pos
+    if mejor is None:
+        error(f'no encontré la tela en u={u:.3f}, v={v:.3f}')
+    return [mejor.x, mejor.z, -mejor.y]
+
+
+def puntos():
+    """Un punto por estampa, a SEPARACION de su borde: al costado (hacia donde está corrida), si no entra abajo y si no
+    arriba (en la esquina de ese lado). Se queda con el primero que cae en la cara (no en el doblez del costado, donde
+    no se ve de frente) y no pisa otra estampa."""
+    cajas = []  # (lugar, x0, x1, y0, y1) en metros sobre la tela: x al costado, y debajo del escote
+    for lugar, ruta, ancho, debajo, costado in ESTAMPAS:
+        alto_px, ancho_px = leer(ruta).shape[:2]
+        cajas.append((lugar, costado - ancho / 2, costado + ancho / 2, debajo, debajo + ancho * alto_px / ancho_px))
+    for (lugar, ruta, ancho, debajo, costado), (_, *caja) in zip(ESTAMPAS, cajas):
+        mapa = MAPA[lugar]
+        s = mapa['uv_por_metro']
+        alto = caja[3] - caja[2]
+        lado = 1 if costado >= 0 else -1
+        esquina = costado + lado * (ancho / 2 - 0.03)
+        opciones = [(costado + lado * (ancho / 2 + SEPARACION), debajo + alto / 2),  # al costado
+                    (esquina, debajo + alto + SEPARACION),                            # abajo
+                    (esquina, debajo - SEPARACION)]                                    # arriba
+
+        def libre(x, y):
+            en_la_cara = abs(x) <= mapa['medio_ancho'] - 0.05 and 0.03 <= y <= mapa['escote_a_ruedo'] - 0.03
+            pisa = any(l == lugar and x0 - 0.02 < x < x1 + 0.02 and y0 - 0.02 < y < y1 + 0.02 for l, x0, x1, y0, y1 in cajas)
+            return en_la_cara and not pisa
+
+        x, y = next((o for o in opciones if libre(*o)), opciones[-1])
+        posicion = punto_en_tela(lugar, mapa['u_centro'] + x * s, mapa['v_escote'] - y * s)
+        # La normal es la de la cara (frente o espalda), no la de la tela en ese lugar: en un pliegue apunta para
+        # cualquier lado. El visor esconde el punto cuando esa cara de la remera no mira a la cámara
+        normal = [0, 0, 1] if lugar == 'frente' else [0, 0, -1]
+        centro = punto_en_tela(lugar, mapa['u_centro'] + costado * s, mapa['v_escote'] - (debajo + alto / 2) * s)
+        redondo = lambda xs: [round(n, 4) for n in xs]
+        # el centro de la estampa sirve para apuntar la cámara (el botón DETALLE va al de la principal)
+        print(f'PUNTO {lugar} {ruta.name}: posicion {redondo(posicion)} normal {redondo(normal)} centro {redondo(centro)}')
+
+
+def exportar_web():
+    """El .glb del visor: textura de 2048 en WebP y la malla con Draco. No cambia el .blend (la de 4096 queda)."""
+    salida = RAIZ / 'web' / 'public' / '3d' / f'{args.nombre}.glb'
+    nodo = next(n for n in mat.node_tree.nodes if n.type == 'TEX_IMAGE')
+    grande = nodo.image
+    chica = grande.copy()
+    chica.scale(2048, 2048)
+    nodo.image = chica
+    for o in bpy.context.view_layer.objects:  # solo la remera (el piso de la sombra no va a la web)
+        o.select_set(o is remera)
+    bpy.ops.export_scene.gltf(filepath=str(salida), export_format='GLB', use_selection=True, export_apply=True,
+                              export_cameras=False, export_lights=False, export_materials='EXPORT',
+                              export_image_format='WEBP', export_image_quality=90,
+                              export_draco_mesh_compression_enable=True, export_draco_mesh_compression_level=10,
+                              export_yup=True)
+    nodo.image = grande
+    bpy.data.images.remove(chica)
+    print('WEB', salida.relative_to(RAIZ), f'{salida.stat().st_size / 1024:.0f} KB')
+    puntos()
+
+
+estudio()
+if args.web:
+    exportar_web()
+# El comando que armó este diseño, para poder rehacerlo (con otro brillo, otra luz…) sin adivinar las medidas
+argumentos = sys.argv[sys.argv.index('--') + 1:]
+(carpeta / 'aplicar.sh').write_text('#!/usr/bin/env bash\n# Rehace este diseño (lo escribe aplicar_diseno.py; correr desde la raíz del repo)\n'
+                                    f'scripts/blender/aplicar-diseno.sh {shlex.join(argumentos)}\n', encoding='utf-8', newline='\n')
 bpy.ops.wm.save_as_mainfile(filepath=str(carpeta / f'remera-{args.nombre}.blend'))
 print('DISEÑO', args.nombre, f'textura {res} px', f'glb {peso} bytes ({peso / 1024:.0f} KB)', *informe, sep='\n  ')
 if peso >= LIMITE_GLB:

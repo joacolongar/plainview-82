@@ -296,3 +296,13 @@ html[data-entrada] .animate-logo-flip { animation-play-state: paused; }
   .entrada-faja:has(.entrada-ingresar:hover) .entrada-media .entrada-boton { transform: translateY(-1px); }
   .entrada-faja:has(.entrada-ingresar:active) .entrada-media .entrada-boton { transform: translateY(1px) scale(0.98); }
 }
+
+/* El visor 3D de la ficha (components/Visor3D.tsx): papel con luz al centro detrás de la remera */
+.visor-fondo {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, color-mix(in oklab, var(--color-paper), var(--color-loza) 18%), transparent 75%),
+    var(--color-paper);
+}
+/* Los puntos de la Fe de erratas: model-viewer les pone data-visible cuando su cara mira a la cámara */
+.punto-3d { transition: opacity 0.2s; }
+.punto-3d:not([data-visible]) { opacity: 0; pointer-events: none; }

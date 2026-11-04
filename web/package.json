@@ -12,9 +12,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@google/model-viewer": "4.4.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.4"
+    "react-router-dom": "^7.18.4",
+    "three": "0.183.2"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

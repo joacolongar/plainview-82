@@ -1,4 +1,4 @@
-import type { Product } from './products'
+import type { FotoProducto, Product } from './products'
 
 /**
  * Las fotos de cada remera se encuentran solas: alcanza con dejar los archivos en
@@ -9,7 +9,7 @@ import type { Product } from './products'
  */
 const ARCHIVOS = import.meta.glob<string>('../assets/productos/*/*.webp', { eager: true, query: '?url', import: 'default' })
 
-export type Foto = { src: string; alt: string }
+export type Foto = { src: string } & FotoProducto
 
 export function fotosDe(p: Product): Foto[] {
   const patron = new RegExp(`/productos/${p.slug}/${p.slug}-(\\d+)\\.webp$`)
@@ -19,6 +19,8 @@ export function fotosDe(p: Product): Foto[] {
     .sort((a, b) => a.n - b.n)
   return encontradas.map((f, i) => ({
     src: f.src,
-    alt: p.altFotos?.[i] ?? `${p.name}, foto ${i + 1} de ${encontradas.length}`,
+    alt: p.fotos?.[i]?.alt ?? `${p.name}, foto ${i + 1} de ${encontradas.length}`,
+    color: p.fotos?.[i]?.color,
+    lector: p.fotos?.[i]?.lector,
   }))
 }

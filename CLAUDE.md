@@ -61,9 +61,17 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
     teléfono no termina en el año
   - `src/data/banco.ts` el banco de la portada: noticias y avisos propios + las tandas `src/data/banco/banco-noticias-N.json`
     (se guardan tal cual llegan; las correcciones de largo van en `CORRECCIONES`)
-  - `src/components/FeDeErratas.tsx` la Fe de erratas del aviso (se arma con `detalles` del producto) y el bloque
-    "Watch closer"; `src/components/Galeria.tsx` las fotos del aviso; `src/data/fotos.ts` las encuentra solas
-    (`import.meta.glob` sobre `src/assets/productos/<slug>/<slug>-N.webp`, la 1 es la principal)
+  - `src/components/FeDeErratas.tsx` la Fe de erratas del aviso (primero los puntos numerados de la estampa,
+    `modelo3d.puntos`; después las líneas de `detalles`) y el bloque "Watch closer"; `src/data/fotos.ts` encuentra las
+    fotos solas (`import.meta.glob` sobre `src/assets/productos/<slug>/<slug>-N.webp`, la 1 es la principal)
+  - **La lámina** (`docs/ficha-3d/FICHA-3D.md`): `src/components/Lamina.tsx` las figuras del aviso (fotos con su pie y,
+    al final, la remera en 3D; sello GIRALA) y `src/components/Visor3D.tsx` el visor (`<model-viewer>`, en un archivo
+    JS aparte que se baja recién al abrir la figura 3D). Los modelos van en `public/3d/` (`<diseño>.glb`, de
+    `aplicar_diseno.py --web`), con la luz `public/3d/estudio.hdr` y el decodificador Draco en `public/3d/draco/`
+    (copiado de `three/examples/jsm/libs/draco/gltf/`: **al actualizar three, copiarlo de nuevo**). Datos por producto
+    en `products.ts`: `fotos` (alt, color y `lector`: quién, altura y talle) y `modelo3d` (un .glb por color, `detalle`
+    y `puntos`). Ojo con model-viewer: el decodificador se configura en el objeto global `self.ModelViewerElement`
+    (no en la clase); React 19 le pasa como **propiedad** lo que no lleva guiones (`exposure={1.1}`, número, no texto)
   - `src/pages/AtencionAlLector.tsx` Atención al lector (`/atencion-al-lector`; `/como-comprar` redirige): cómo se compra,
     envíos y pagos, cambios y devoluciones y el Botón de arrepentimiento (`#arrepentimiento`, sale por WhatsApp)
   - `src/components/SiteNav.tsx` la barra de secciones (CATÁLOGO · PASATIEMPOS · ATENCIÓN AL LECTOR · BOLETA (n)),
@@ -84,9 +92,15 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   (forma, simulación colgada de la percha y UV; solo se vuelve a correr si cambia la forma, tarda ~3 min).
   `scripts/blender/aplicar-diseno.sh` (llama a `aplicar_diseno.py`) abre la base, le pone color de tela y estampas
   (horneadas en una textura, sin nodos Mix) y guarda `modelos/disenos/<nombre>/remera-<nombre>.blend` y `.glb`.
-  Las imágenes de cada diseño van en `modelos/disenos/<nombre>/estampas/`.
-  Primer diseño: `what-do-kids-know`, **en borrador** (medidas sacadas a escala del mockup). Faltan ajustes finos de
-  posición, y la etiqueta del cuello y la de la cintura están por desarrollar.
+  Las imágenes de cada diseño van en `modelos/disenos/<nombre>/estampas/`. El comando queda en
+  `modelos/disenos/<nombre>/aplicar.sh` (para rehacerlo: `bash modelos/disenos/<nombre>/aplicar.sh`). Con `--web`
+  exporta además `web/public/3d/<nombre>.glb` (textura de 2048 en WebP y malla con Draco, ~66 KB) y muestra los
+  `PUNTO` de la Fe de erratas (posición 3D al lado de cada estampa y centro) para copiar a `products.ts`.
+  **La luz** (`scripts/blender/estudio.sh` → `web/public/3d/estudio.hdr`, la opción "pareja") es la misma en la web y en
+  el `.blend`: entorno HDR neutro y vista **Khronos PBR Neutral** (el visor usa `tone-mapping="neutral"` y
+  `exposure` 1,1, medido para que coincidan). Brillo de la tela (sheen) 0,10.
+  Primer diseño: `what-do-kids-know`, **en borrador**: estampa de 43 cm a 14 del escote, zócalo 17 cm, 8:2 de 5 cm y
+  frase de la espalda de 13 cm. La etiqueta del cuello y la de la cintura están por desarrollar.
 
 ## Comandos
 ```bash
@@ -131,7 +145,7 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   Recortes del índice: `recorte` en `products.ts` apunta a `public/recortes/<slug>.webp`, un cuadrado de 216 px con
   un recorte de la **estampa** (no la remera entera); sin recorte, el índice muestra la trama de grabado.
   Fotos de producto: para sumar una, alcanza con dejar el archivo en `src/assets/productos/<slug>/` (y su texto en
-  `altFotos`); al menos 1500 px de ancho (se ven a ~500 px en la compu) y una foto por archivo. Sin `cwebp` ni Pillow:
+  `fotos`); al menos 1500 px de ancho (se ven a ~500 px en la compu) y una foto por archivo. Sin `cwebp` ni Pillow:
   se convierten con el canvas de Edge headless. Mientras sean bocetos, `fotoBoceto: true` (sello "Prueba de imprenta").
 - **Regla de contenido** (noticias, juegos, pasatiempos, avisos): textos e ilustraciones **propios**, nunca fotogramas
   ni afiches. Evita problemas de copyright y promociona las remeras.
@@ -192,6 +206,13 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   se prueba con un `window.turnstile` falso puesto antes de abrir la boleta (se entra por un aviso y se navega con el
   router, con `document.startViewTransition = undefined`). El widget real lo prueba el dueño en el navegador. La página
   de prueba también recibe la CSP: para usar un iframe propio, sumar `'self'` al `frame-src` de la copia `dist/_headers`.
+- **El visor 3D** no se prueba bien con `--dump-dom` (el reloj virtual no espera al decodificador). Se usa
+  `puppeteer-core` instalado en una carpeta temporal (fuera del proyecto) con el `node.exe` de Windows, que maneja el
+  Edge de verdad **con GPU** (cuadros por segundo, CPU más lenta con `Emulation.setCPUThrottlingRate`), o con el Chrome
+  headless de Linux (WebGL por software: sirve para capturas y CSP, no para medir fluidez). Para comparar con Blender:
+  `toDataURL()` del visor y la misma cámara (`getCameraOrbit`, `getCameraTarget`, `getFieldOfView`) en el `.blend`.
+- **wrangler** no relee `_headers` después de un `npm run build`: reiniciarlo. Para matarlo, `pkill -f` con un patrón que
+  no aparezca en el propio comando (`"[p]ages dev dist"`), si no, el shell se mata a sí mismo.
 - Lo que el headless no puede probar (teclado del celular, gestos reales, menú de compartir, animaciones)
   lo prueba el dueño en su teléfono; queda anotado como pendiente en la Bitácora.
 
@@ -211,10 +232,16 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   `Permissions-Policy` y `frame-ancestors 'none'`. La CSP permite solo lo que usamos (nuestro JS y CSS, Google Fonts,
   imágenes propias y `data:`). **Si se suma algo externo** (analytics, otra fuente, un script), hay que agregarlo
   a la CSP o el navegador lo bloquea. Nada de scripts ni estilos en línea en `index.html`.
+  Para el visor 3D, y probado de a uno (sin cualquiera de ellos se rompe): `'wasm-unsafe-eval'` en `script-src`
+  (compilar el WebAssembly de Draco; no habilita `eval`), `worker-src 'self' blob:` (Draco corre en un worker armado
+  con un blob), `blob:` en `connect-src` (three lee la textura del .glb con fetch) y el **hash** del único `<style>` en
+  línea permitido, el de adentro de `<model-viewer>` (`csp.test.ts` falla si una versión nueva lo cambia).
 - **Dependencias:** `npm audit` sin vulnerabilidades antes de lanzar; Dependabot (`.github/dependabot.yml`) abre PRs
   semanales para `web/`, y en GitHub están activadas las alertas y las actualizaciones de seguridad.
   **`@types/node` sigue a `web/.nvmrc`** (hoy Node 22 → `@types/node` `^22`): Dependabot no ofrece sus saltos mayores
-  (`ignore` en `dependabot.yml`); se suben a mano y junto con `.nvmrc`. Los PR viejos de Dependabot se ponen al día
+  (`ignore` en `dependabot.yml`); se suben a mano y junto con `.nvmrc`. **`three` sigue a `@google/model-viewer`**
+  (su peerDependency, hoy 0.183.x): Dependabot solo ofrece arreglos de three; los dos se suben juntos a mano (y se
+  copia de nuevo el decodificador Draco a `public/3d/draco/`). Los PR viejos de Dependabot se ponen al día
   con un comentario `@dependabot rebase` antes de mergear. Antes de mergear uno: que el build de Cloudflare pase y probar el sitio.
   Dependabot también actualiza las actions del CI (ecosistema `github-actions`).
 - **CI** (`.github/workflows/ci.yml`): `npm ci`, lint, pruebas y build en cada push a `main` y en cada PR (los de

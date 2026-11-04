@@ -20,6 +20,11 @@ updates:
     ignore:
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # three va en la versión que pide @google/model-viewer (su peerDependency: hoy ^0.183, es decir 0.183.x). En
+      # three cada 0.x nuevo puede romper, y Dependabot lo vería como "minor": solo se ofrecen los arreglos (0.183.x).
+      # Cuando model-viewer pida otro three, se suben los dos juntos a mano (ver "Dependencias" en CLAUDE.md)
+      - dependency-name: "three"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
   # Las actions del CI (.github/workflows/): actions/checkout, actions/setup-node. El directorio "/" es la raíz del
   # repo; Dependabot busca solo los workflows en .github/workflows/.
   - package-ecosystem: github-actions

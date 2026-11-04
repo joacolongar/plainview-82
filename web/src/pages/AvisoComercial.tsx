@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import Aviso from '../components/Aviso'
 import Ambientacion from '../components/ambientacion/Ambientacion'
 import FeDeErratas, { WatchCloser } from '../components/FeDeErratas'
-import Galeria from '../components/Galeria'
+import Lamina from '../components/Lamina'
 import { useCart } from '../context/CartContext'
 import { avisoDeProducto } from '../data/anuncios'
 import { fotosDe } from '../data/fotos'
@@ -50,13 +50,13 @@ export default function AvisoComercial() {
       </div>
 
       <div className="mt-5 grid gap-5 md:grid-cols-2 md:gap-8">
-        <figure>
-          {/* Las fotos si hay (galería), si no el grabado con trama; siempre con doble filete y epígrafe */}
-          {fotos.length > 0 ? (
-            <Galeria fotos={fotos} boceto={p.fotoBoceto} marco="border-4 border-double border-print p-1">
-              <Ambientacion key={p.slug} tipo={p.ambientacion} zona="grabado" />
-            </Galeria>
-          ) : (
+        {/* La lámina con las fotos y la remera en 3D si hay; si no, el grabado con trama y su epígrafe */}
+        {fotos.length > 0 || p.modelo3d ? (
+          <Lamina p={p} fotos={fotos} color={color} epigrafe={p.epigrafe}>
+            <Ambientacion key={p.slug} tipo={p.ambientacion} zona="grabado" />
+          </Lamina>
+        ) : (
+          <figure>
             <div className="relative border-4 border-double border-print p-1">
               <div className="engraving flex aspect-[4/5] items-center justify-center">
                 <span className="bg-paper px-2 font-display text-xs uppercase tracking-widest text-print-muted">Grabado en preparación</span>
@@ -64,16 +64,16 @@ export default function AvisoComercial() {
               {/* Lo que puede pasar por encima de la foto (nunca de una palabra) */}
               <Ambientacion key={p.slug} tipo={p.ambientacion} zona="grabado" />
             </div>
-          )}
-          <figcaption className="mt-1 font-display text-sm italic leading-snug text-print-muted">{p.epigrafe}</figcaption>
-        </figure>
+            <figcaption className="mt-1 font-display text-sm italic leading-snug text-print-muted">{p.epigrafe}</figcaption>
+          </figure>
+        )}
 
         <div className="space-y-5">
           {/* Texto del aviso con capitular, como en los catálogos de época */}
           <p className="font-display text-[15px] leading-snug text-pretty first-letter:float-left first-letter:mr-1.5 first-letter:font-headline first-letter:text-5xl first-letter:leading-[0.8]">
             {p.aviso}
           </p>
-          <FeDeErratas p={p} />
+          <FeDeErratas p={p} figura3d={p.modelo3d ? fotos.length + 1 : undefined} />
           <WatchCloser referencia={p.reference} />
           <TablaMedidas talles={p.sizes} elegido={size} />
 
