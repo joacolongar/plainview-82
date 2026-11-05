@@ -23,6 +23,16 @@
   --color-loza: #ffffff; /* el pocillo: blanco puro, sin sombreado */
   --font-fell-sc: "IM Fell English SC", Georgia, serif; /* números romanos */
   --font-fell: "IM Fell English", Georgia, serif; /* nombres, en itálica */
+  /* La portada (docs/portada/PORTADA.md). foto: el fondo de la foto de tapa, el mismo que lleva cada cuadro del video
+     (web/src/data/tapa.json, lo chequea tapa.test.ts). El resto, el tendedero: cartón de la etiqueta, madera de los
+     broches, papel de diario y bramante de los paquetes */
+  --color-foto: #e2d8c2;
+  --color-carton: #d9c49a;
+  --color-madera: #c9a46b;
+  --color-madera-oscura: #8a6d45;
+  --color-papel-diario: #ddd3bd;
+  --color-bramante: #a88a5c;
+  --color-bramante-claro: #d2b680;
 
   /* Logo giratorio (RotatingLogo): 5 s el 8:2 · giro 0,6 s · 5 s PLAINVIEW · giro 0,6 s = 11,2 s.
      44.64% = 5 / 11.2 y 50% = 5.6 / 11.2. El easing va en cada tramo de giro. */
@@ -311,3 +321,20 @@ html[data-entrada] .animate-logo-flip { animation-play-state: paused; }
 /* Los puntos de la Fe de erratas: model-viewer les pone data-visible cuando su cara mira a la cámara */
 .punto-3d { transition: opacity 0.2s; }
 .punto-3d:not([data-visible]) { opacity: 0; pointer-events: none; }
+
+/* ---------------------------------------------------------------- portada: la tapa y el tendedero del kiosco */
+.foto-tapa { background: var(--color-foto); }
+.foto-tapa > * { object-fit: cover; }
+/* La fila del tendedero: en el celular se desliza con el dedo y frena en cada remera; la barra no se ve */
+.tendedero-fila { scrollbar-width: none; overscroll-behavior-x: contain; }
+.tendedero-fila::-webkit-scrollbar { display: none; }
+/* Lo que cuelga se balancea desde la cuerda, cada uno a su ritmo (--desfase); solo transform. Las copias quietas de la
+   entrada y quien pidió menos movimiento lo ven quieto */
+@media (prefers-reduced-motion: no-preference) {
+  .colgada { animation: vaiven 5.5s ease-in-out var(--desfase, 0s) infinite alternate; }
+  .entrada-copia .colgada { animation: none; }
+}
+@keyframes vaiven {
+  from { transform: rotate(-1.4deg); }
+  to { transform: rotate(1.4deg); }
+}

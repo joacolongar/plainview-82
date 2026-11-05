@@ -224,7 +224,7 @@ export default function Entrada({ hoja, alTerminar }: Props) {
 function Copia({ geo, desde }: { geo: Geo; desde: number }) {
   return (
     <div inert className={`entrada-copia ${CLASES_HOJA}`} style={{ width: geo.W, height: geo.altoReal, top: -desde }}>
-      <Home />
+      <Home quieta />
     </div>
   )
 }

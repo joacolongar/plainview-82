@@ -4,10 +4,11 @@
 import type { Aviso } from '../data/anuncios'
 import type { Banco } from '../data/banco'
 import type { Noticia } from '../data/noticias'
+import { diaEnArgentina, numeroEdicion } from './numero-edicion'
 
-/** Edición N° 1: el día que salió el diario (16 de octubre de 2026) */
-export const INICIO = '2026-10-16'
-export const ZONA = 'America/Argentina/Cordoba'
+// El número y el día de la edición están en numero-edicion.ts (los usa también el servidor); se exportan también desde acá
+export { diaEnArgentina, INICIO, numeroEdicion, ZONA } from './numero-edicion'
+
 /** Una noticia (o aviso) no vuelve hasta que pasen al menos 7 ediciones, si el banco alcanza (ver elegir) */
 export const SEPARACION = 7
 
@@ -20,20 +21,6 @@ export type Edicion = {
   lineas: Aviso[] // 2, de una línea
 }
 
-const formatoDia = new Intl.DateTimeFormat('en-CA', { timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit' })
-
-/** El día en Córdoba para un instante: las 23:30 de Argentina del 19 ya son el 20 en UTC, pero acá siguen siendo el 19 */
-export const diaEnArgentina = (fecha: Date) => formatoDia.format(fecha)
-
-const diaUTC = (dia: string) => {
-  const [a, m, d] = dia.split('-').map(Number)
-  return Date.UTC(a, m - 1, d)
-}
-
-/** Días desde INICIO + 1 (el 16/10/2026 es la N° 1). Antes de esa fecha, la N° 1 */
-export function numeroEdicion(fecha: Date): number {
-  return Math.max(1, Math.round((diaUTC(diaEnArgentina(fecha)) - diaUTC(INICIO)) / 86_400_000) + 1)
-}
 
 /**
  * Mulberry32: un generador de números "al azar" chiquito y determinista. Con la misma semilla da siempre la misma

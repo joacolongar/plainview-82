@@ -58,8 +58,21 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
     de la barra de secciones) y el pie, con el mismo orden; a 375 px, si los dos nombres suman más de 46 caracteres,
     solo los números
   - `src/lib/edicion.ts` **la edición del día**: `elegirEdicion(fecha, banco)` (función pura, probada en
-    `edicion.test.ts`) arma la portada; `numeroEdicion(fecha)` da el N° que muestran la cabecera, la franja y el pie.
+    `edicion.test.ts`) arma la portada; `numeroEdicion(fecha)` da el N° que muestran la cabecera, la franja y el pie
+    (vive en `lib/numero-edicion.ts`, sin el banco, porque lo usa también el servidor).
     `src/lib/useFechaEdicion.ts` da la fecha (en desarrollo, `?fecha=AAAA-MM-DD` muestra otro día)
+  - **La portada** (`docs/portada/PORTADA.md`): arriba **la tapa** (`components/portada/Tapa.tsx`): la remera dando una
+    vuelta (MP4 de Blender, no 3D en vivo, con la imagen fija adelante; el video se suma con la página cargada y, si
+    está la entrada, recién al entrar; nada con menos movimiento, ahorro de datos ni en las copias de la entrada,
+    `<Home quieta />`), su titular de tapa y dos notas al lado; después **el tendedero del kiosco**
+    (`components/portada/Tendedero.tsx`, deslizable con `data-no-swipe`; las remeras sin render cuelgan como
+    `Paquete.tsx`) y abajo la principal con su grabado y las columnas. La remera de tapa sale de `remeraDeTapa`
+    (`lib/tapa.ts`, rota con la edición entre las que tienen `vuelta` y `tituloTapa`; la usa también el middleware, que
+    anuncia su imagen con el `<link rel="preload" data-tapa>` de `index.html`); el reparto de notas, de `repartirConTapa`
+    (`lib/portada.ts`: si la principal es de la película de la tapa, baja a nota). Los renders van en `public/portada/`
+    y en `products.ts` (`modelo3d.colores[color].colgada` y `.vuelta`); `src/data/tapa.json` (tamaño, muestras y el
+    fondo de la foto, igual a `--color-foto`) y `src/data/tendedero.json` (dónde caen los broches, lo escribe
+    `aplicar_diseno.py`). `tapa.test.ts` falla si falta un render o el `tituloTapa` de una remera con vuelta
   - `src/data/peliculas.ts` las películas del diario (id, título, año, director y **grabado** de su principal): cada
     película nueva del banco se suma acá; las pruebas fallan si falta una, si una principal no tiene grabado o si un
     teléfono no termina en el año
@@ -105,7 +118,12 @@ Online en https://plainview-82.pages.dev (Cloudflare Pages, deploy automático e
   `modelos/disenos/<nombre>/aplicar.sh` (para rehacerlo: `bash modelos/disenos/<nombre>/aplicar.sh`). Con `--web`
   exporta además `web/public/3d/<nombre>.glb` (textura de 2048 en WebP y malla con Draco, ~66 KB), la imagen fija
   `<nombre>-frente.webp` (Cycles con la cámara de `camara3d.json`, fondo transparente, ~50 KB) y muestra los
-  `PUNTO` de la Fe de erratas (posición 3D al lado de cada estampa y centro) para copiar a `products.ts`.
+  `PUNTO` de la Fe de erratas (posición 3D al lado de cada estampa y centro) para copiar a `products.ts`, y la remera
+  del tendedero (`web/public/portada/<nombre>-colgada.webp`, ~10 KB): la misma tela con la forma de
+  `modelos/remera-tendedero.blend` (de `scripts/blender/remera-tendedero.sh`: la malla de la base colgada de dos broches,
+  sin tocar la base; ~3 min). Con `--vuelta`, la vuelta de la tapa (`<nombre>-vuelta.mp4` H.264 calidad 28, ~240 KB, y
+  `<nombre>-vuelta.webp`): 144 cuadros en Cycles con **4 muestras y el denoiser** (medido: con más no se nota y tarda el
+  triple), ~30 min. Al sumar `colgada` o `vuelta` a una remera, anotarlas en `products.ts` (y su `tituloTapa`).
   **La luz** (`scripts/blender/estudio.sh` → `web/public/3d/estudio.hdr`, la opción "pareja") es la misma en la web y en
   el `.blend`: entorno HDR neutro y vista **Khronos PBR Neutral** (el visor usa `tone-mapping="neutral"` y
   `exposure` 1,1, medido para que coincidan). Brillo de la tela (sheen) 0,10.
@@ -130,7 +148,8 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
 - Acciones importantes (agregar al pedido, enviar por WhatsApp) **al alcance del pulgar**: abajo, fijas si hace falta.
 - **Nada que dependa solo de hover**: todo lo que se revela al pasar el mouse tiene que poder abrirse con un toque.
 - **Imágenes livianas**: tamaño justo, WebP/AVIF, `loading="lazy"` fuera de la primera pantalla.
-- **Primera pantalla:** en la portada, titular, bajada e ilustración con epígrafe entran en **375×667**.
+- **Primera pantalla:** en la portada, el titular de tapa, la foto y el epígrafe con su botón entran en **375×667**
+  (sin remera de tapa: titular, bajada e ilustración con epígrafe). Hoy sobran 9 px: medir si se alarga algo arriba.
 - Acciones pegadas abajo con `sticky` (no `fixed`): se quedan al alcance del pulgar y no tapan el pie de página.
 - Revisar cada cambio a 375px antes de darlo por terminado.
 
@@ -242,6 +261,9 @@ La mayoría de las visitas llegan desde el celular (links de Instagram).
   `Permissions-Policy` y `frame-ancestors 'none'`. La CSP permite solo lo que usamos (nuestro JS y CSS, Google Fonts,
   imágenes propias y `data:`). **Si se suma algo externo** (analytics, otra fuente, un script), hay que agregarlo
   a la CSP o el navegador lo bloquea. Nada de scripts ni estilos en línea en `index.html`.
+  `index.html` anuncia (`preload`) los 5 archivos de tipografía de la primera pantalla: sin eso, el texto se rearma al
+  llegar las fuentes (CLS 0,23 en la portada). Si se cambia una tipografía del link de Google o cambia su versión,
+  copiar las URL nuevas del CSS de Google.
   Para el visor 3D, y probado de a uno (sin cualquiera de ellos se rompe): `'wasm-unsafe-eval'` en `script-src`
   (compilar el WebAssembly de Draco; no habilita `eval`), `worker-src 'self' blob:` (Draco corre en un worker armado
   con un blob), `blob:` en `connect-src` (three lee la textura del .glb con fetch) y el **hash** del único `<style>` en

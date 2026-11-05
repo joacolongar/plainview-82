@@ -38,6 +38,9 @@ export type Product = {
   seccion?: string
   /** Detalle visual de la película que vive en la página (docs/AMBIENTACIONES.md) */
   ambientacion?: Ambientacion
+  /** El titular de la portada cuando esta remera sale en tapa (docs/portada/PORTADA.md): una noticia del universo de
+      la película, con la regla de contenido de siempre. Sale en tapa si además tiene la vuelta renderizada */
+  tituloTapa?: string
   /** Detalles de la prenda: arman la Fe de erratas del aviso. Lo que falte no aparece.
       Mientras precioDePrueba sea true, también son de prueba (lo avisa la Fe de erratas) */
   detalles?: Detalles
@@ -67,12 +70,16 @@ export type Vec3 = [number, number, number]
 
 export type Modelo3D = {
   /** Por color (de la lista `colors`): el .glb y la imagen fija del frente, en public/3d/. Los dos salen de
-      aplicar_diseno.py --web; la imagen se ve mientras carga el 3D y queda si el navegador no puede mostrarlo */
-  colores: Record<string, { glb: string; frente: string }>
+      aplicar_diseno.py --web; la imagen se ve mientras carga el 3D y queda si el navegador no puede mostrarlo.
+      Para la portada (public/portada/): `colgada`, la remera colgada de broches del tendedero (también de --web), y
+      `vuelta`, el video de la tapa con su imagen fija (de --vuelta). Sin `colgada`, el tendedero muestra un paquete */
+  colores: Record<string, RendersColor>
   /** Los puntos de la Fe de erratas, numerados en este orden. posicion y normal, del "PUNTO" de aplicar_diseno.py:
       la normal es la de la cara (frente [0, 0, 1], espalda [0, 0, -1]): el punto se esconde cuando esa cara no se ve */
   puntos: PuntoErrata[]
 }
+
+export type RendersColor = { glb: string; frente: string; colgada?: string; vuelta?: { video: string; poster: string } }
 
 /** Una errata de la estampa: "Donde dice «dice», debió decir «debio»." centro: el de su estampa, adonde va la cámara al
     tocar el número (DETALLE va al del primero, la estampa principal) */
@@ -97,7 +104,14 @@ export const products: Product[] = [
     ],
     // Diseño: modelos/disenos/what-do-kids-know/ (aplicar.sh rehace el .blend y este .glb)
     modelo3d: {
-      colores: { Negro: { glb: '/3d/what-do-kids-know.glb', frente: '/3d/what-do-kids-know-frente.webp' } },
+      colores: {
+        Negro: {
+          glb: '/3d/what-do-kids-know.glb',
+          frente: '/3d/what-do-kids-know-frente.webp',
+          colgada: '/portada/what-do-kids-know-colgada.webp',
+          vuelta: { video: '/portada/what-do-kids-know-vuelta.mp4', poster: '/portada/what-do-kids-know-vuelta.webp' },
+        },
+      },
       puntos: [
         { dice: 'una estampa grande', debio: 'cuatro carteles de 43 cm de ancho, a 14 cm del cuello', posicion: [0.1745, -0.0108, 0.0516], normal: [0, 0, 1], centro: [-0.0022, 0.1082, 0.0185] },
         { dice: 'un cartel', debio: 'el zócalo del noticiero en vivo, en crema, con su punto rojo', posicion: [-0.1773, -0.0475, 0.0385], normal: [0, 0, 1], centro: [-0.1309, 0.0154, 0.012] },
@@ -118,6 +132,7 @@ export const products: Product[] = [
     epigrafe: 'Estampa basada en un detalle de fondo. Mírela de cerca.',
     lugar: 'Valle de San Fernando',
     ambientacion: 'ranas',
+    tituloTapa: 'Llueven ranas sobre el Valle',
     detalles: {
       tela: 'jersey de algodón peinado 24/1, 200 g/m²',
       calce: 'oversize: hombro caído y cuerpo amplio (si dudás, tu talle de siempre)',
@@ -205,3 +220,6 @@ export const ESTADOS: Record<Product['status'], string> = {
 
 /** 1 → "001", como en los catálogos por correo */
 export const numeroArticulo = (p: Product) => String(p.articulo).padStart(3, '0')
+
+/** Los renders del primer color que tenga modelo 3D (los de la portada: la remera colgada y la vuelta) */
+export const rendersDe = (p: Product): RendersColor | undefined => p.colors.map((c) => p.modelo3d?.colores[c]).find(Boolean)

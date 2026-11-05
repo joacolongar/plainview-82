@@ -1,0 +1,15 @@
+{
+  "nota": "Lo escribe aplicar_diseno.py --web (no editar a mano): el tamaño de las imágenes del tendedero (web/public/portada/<diseño>-colgada.webp) y dónde caen los broches, en % del ancho y del alto",
+  "ancho": 450,
+  "alto": 397,
+  "broches": [
+    [
+      21.4,
+      3.0
+    ],
+    [
+      78.7,
+      3.0
+    ]
+  ]
+}

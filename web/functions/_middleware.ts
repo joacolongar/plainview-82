@@ -5,10 +5,13 @@
 //
 // Cómo: index.html trae las etiquetas con los valores de la portada; acá, HTMLRewriter (de Cloudflare) les cambia el
 // `content` con setAttribute mientras el HTML pasa. No se arma HTML con texto: setAttribute escapa solo.
+import { products } from '../src/data/products'
+import { numeroEdicion } from '../src/lib/numero-edicion'
 import { metaDe } from '../src/lib/meta'
+import { remeraDeTapa } from '../src/lib/tapa'
 
 // Lo poco que usamos de HTMLRewriter (así no sumamos @cloudflare/workers-types)
-type Elemento = { setAttribute(nombre: string, valor: string): void; setInnerContent(texto: string): void }
+type Elemento = { setAttribute(nombre: string, valor: string): void; setInnerContent(texto: string): void; remove(): void }
 declare class HTMLRewriter {
   on(selector: string, manejador: { element(e: Elemento): void }): HTMLRewriter
   transform(respuesta: Response): Response
@@ -26,6 +29,10 @@ export async function onRequest({ request, next }: Contexto): Promise<Response> 
   const m = metaDe(url.pathname)
   const absoluta = (ruta: string) => new URL(ruta, url.origin).href
   const contenido = (valor: string) => ({ element: (e: Elemento) => e.setAttribute('content', valor) })
+  // La imagen de tapa se anuncia solo en la portada, y es la de la remera de tapa del día (la misma cuenta que hace la
+  // página con la fecha de Córdoba). Sin remera de tapa, o en otra página, el aviso se saca
+  const tapa = url.pathname === '/' ? remeraDeTapa(numeroEdicion(new Date()), products) : undefined
+  const precarga = { element: (e: Elemento) => (tapa ? e.setAttribute('href', tapa.poster) : e.remove()) }
 
   // La respuesta transformada conserva las cabeceras de la original (CSP, noindex y demás de _headers)
   return new HTMLRewriter()
@@ -37,5 +44,6 @@ export async function onRequest({ request, next }: Contexto): Promise<Response> 
     .on('meta[property="og:description"]', contenido(m.descripcion))
     .on('meta[property="og:image"]', contenido(absoluta(m.imagen)))
     .on('meta[property="og:image:alt"]', contenido(m.imagenAlt))
+    .on('link[data-tapa]', precarga)
     .transform(respuesta)
 }

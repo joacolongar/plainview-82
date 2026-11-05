@@ -23,9 +23,22 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Cabecera del diario THE PLAINVIEW con los bloques rojos de Watch closer y 8:2" />
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- La foto de la remera de tapa (lo más grande de la primera pantalla de la portada): anunciada acá, el navegador la
+         pide junto con el JS en vez de esperar a que React la pinte. functions/_middleware.ts pone la del día y la saca
+         en las demás páginas -->
+    <link rel="preload" as="image" href="/portada/what-do-kids-know-vuelta.webp" fetchpriority="high" data-tapa />
     <!-- Tipografías de época: cabecera gótica, titulares condensados y texto del siglo XIX; IM Fell para los pecados
          (ambientación de Policiales). Solo los pesos que se usan: el navegador baja cada fuente recién cuando la página la usa -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <!-- Las tipografías de la primera pantalla (cabecera, titulares y texto: normal, negrita e itálica), anunciadas para
+         que lleguen antes del primer dibujo: si llegan después, el texto se rearma y la página salta (CLS de 0,23 a 0).
+         Son los archivos que da el CSS de Google de abajo: si se cambia una tipografía o Google cambia la versión (v22…),
+         copiar las URL nuevas del CSS (si no coinciden, se bajan dos veces) -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/unifrakturmaguntia/v22/WWXPlieVYwiGNomYU-ciRLRvEmK7oaVemGZMFABK1Q.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/anton/v27/1Ptgg87LROyAm3Kz-C8CSKlv.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/oldstandardtt/v22/MwQubh3o1vLImiwAVvYawgcf2eVeqlq4ZnRSZw.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/oldstandardtt/v22/MwQrbh3o1vLImiwAVvYawgcf2eVWEX-tS1ZfTc4PlA.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/oldstandardtt/v22/MwQsbh3o1vLImiwAVvYawgcf2eVer2q6bHNwZcQH.woff2" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"

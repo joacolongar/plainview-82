@@ -2,7 +2,9 @@
 
 Guarda modelos/remera-base.blend, la base de todos los diseños (los aplica aplicar_diseno.py, sin volver a simular).
 Solo hace falta volver a correrlo si cambia la forma. Se corre con el Blender de Windows, sin abrir la interfaz:
-    blender.exe --background --factory-startup --python remera_base.py -- <carpeta de salida> <carpeta de capturas> [norender]
+    blender.exe --background --factory-startup --python remera_base.py -- <carpeta de salida> <carpeta de capturas> [norender] [tendedero]
+Con "tendedero" arma la misma malla colgada de dos broches (la portada) y guarda modelos/remera-tendedero.blend, sin
+tocar la base: aplicar_diseno.py --web le pone el diseño y la renderiza para el tendedero del kiosco.
 
 Cómo está armada:
 - Se modela la mitad derecha (x >= 0) y un Mirror en X arma la otra (con las UV espejadas en U, alrededor de 0,5).
@@ -26,6 +28,7 @@ from mathutils import Matrix, Vector
 argv = sys.argv[sys.argv.index('--') + 1:]
 OUT_DIR, SHOT_DIR = argv[0], argv[1]
 RENDER = 'norender' not in argv[2:]
+TENDEDERO = 'tendedero' in argv[2:]
 
 bpy.context.preferences.filepaths.save_version = 0  # sin remera.blend1
 
@@ -435,6 +438,18 @@ PERCHA = dict(medio_ancho=0.21, caida=0.040, franja=0.015, cuadros_bajada=24)
 CIZALLA_MANGA = 500.0
 FLEXION_MANGA = 0.8         # las mangas y la punta del hombro, algo más duras: si no, caen pegadas al cuerpo
 
+# Modo tendedero (la portada): la misma remera, colgada de dos broches en vez de la percha. Los broches aprietan
+# frente y espalda en una franja de 2,4 cm del doblez del hombro, a BROCHE['x'] del centro; el resto cae libre. Sin la
+# percha que sostiene el hombro, la manga necesita girar: cizalla y flexión más blandas (con las de la percha queda
+# horizontal) y más cuadros para asentarse. La gravedad, derecha: así los dos broches quedan a la misma altura.
+# Guarda modelos/remera-tendedero.blend (la misma malla, otra forma) y no toca remera-base.blend.
+BROCHE = dict(x=0.24, medio_ancho=0.012, alto=0.025, apretado=0.002)
+if TENDEDERO:
+    CUADROS = 400
+    GRAVEDAD = Vector((0.0, 0.0, -9.81))
+    CIZALLA_MANGA = 80.0
+    FLEXION_MANGA = 0.5
+
 malla = obj.data
 islas_cara = [d_.value for d_ in malla.attributes['isla'].data]
 islas_vert = [set() for _ in malla.vertices]
@@ -513,6 +528,13 @@ for i, c in enumerate(co0):
     # la franja que apoya en la percha: cerca del doblez del hombro, del cuello a la punta de la percha
     x, z = abs(c.x), c.z + cz
     abajo_del_doblez = linea_hombro(x) - z
+    if TENDEDERO:  # el broche aprieta frente y espalda donde está; no se mueve
+        broche = (not de_manga[i] and 3 not in islas_vert[i] and abs(x - BROCHE['x']) <= BROCHE['medio_ancho']
+                  and -0.002 <= abajo_del_doblez <= BROCHE['alto'])
+        pin.add([i], 1.0 if broche else 0.0, 'REPLACE')
+        if broche:
+            destino[i] = Vector((c.x, math.copysign(min(abs(c.y), BROCHE['apretado']), c.y), c.z))
+        continue
     apoya = (HPS.x <= x <= PERCHA['medio_ancho'] and not de_manga[i] and 3 not in islas_vert[i]
              and -0.002 <= abajo_del_doblez <= PERCHA['franja'])
     pin.add([i], 1.0 if apoya else 0.0, 'REPLACE')
@@ -746,6 +768,6 @@ apuntar(35)
 # remera-base.blend es la base de todos los diseños: aplicar_diseno.py la abre (sin volver a simular) y le pone la tela
 # y las estampas. Las medidas de las UV de frente y espalda viajan como propiedad del objeto.
 obj['mapa_uv'] = MAPA_UV
-bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT_DIR, 'remera-base.blend'))
+bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT_DIR, 'remera-tendedero.blend' if TENDEDERO else 'remera-base.blend'))
 print('MAPA_UV', {k: {c: round(v, 4) for c, v in d.items()} for k, d in MAPA_UV.items()})
 print('LISTO')

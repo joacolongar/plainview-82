@@ -1,0 +1,11 @@
+{
+  "nota": "La vuelta de la remera en la tapa de la portada. La usan aplicar_diseno.py --vuelta (el video y su imagen fija) y la portada (el tamaño). fondo es el color del fondo de la foto: tiene que ser igual a --color-foto de index.css (lo chequea tapa.test.ts). Si cambia algo, regenerar la vuelta de cada diseño",
+  "cuadros": 144,
+  "fps": 24,
+  "ancho": 900,
+  "alto": 600,
+  "muestras": 4,
+  "calidad": 28,
+  "fondo": "#e2d8c2",
+  "camara": { "radio": 1.6, "phi": 80, "fov": 31, "objetivo_y": -0.02 }
+}

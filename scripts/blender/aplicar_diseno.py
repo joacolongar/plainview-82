@@ -27,6 +27,15 @@ ocupa unos 64 MB en la memoria del celular) y la malla comprimida con Draco. Y l
 web/public/3d/<nombre>-frente.webp: el render de Cycles con la cámara del visor (web/src/data/camara3d.json), la misma
 luz y fondo transparente; se ve mientras carga el 3D y queda si el navegador no puede mostrarlo. Y muestra dónde van los puntos de la Fe de
 erratas: una posición al lado de cada estampa (en metros, con Y arriba, como el glTF) y hacia dónde mira esa cara.
+También la remera del tendedero de la portada, web/public/portada/<nombre>-colgada.webp: la misma remera con la forma
+colgada de dos broches (modelos/remera-tendedero.blend, de scripts/blender/remera-tendedero.sh), de frente, con cámara
+ortográfica (todas a la misma escala), la misma luz y fondo transparente. Dónde caen los broches en la imagen lo escribe
+en web/src/data/tendedero.json: la portada dibuja ahí los broches de madera.
+
+Con --vuelta, la remera de tapa de la portada (web/src/data/tapa.json): una vuelta entera en Cycles (4 muestras con el
+denoiser: con más no se nota la diferencia y tarda el triple), cada cuadro sobre el fondo liso de la foto, codificada en
+H.264 con el FFmpeg de Blender (web/public/portada/<nombre>-vuelta.mp4) y su primer cuadro como imagen fija
+(<nombre>-vuelta.webp). Tarda unos 25 minutos.
 """
 import argparse
 import json
@@ -47,6 +56,11 @@ LIMITE_GLB = 3 * 1024 * 1024
 RESOLUCIONES = (4096, 2048)  # la primera que deje el .glb debajo de 3 MB
 ESTUDIO = RAIZ / 'web' / 'public' / '3d' / 'estudio.hdr'
 CAMARA = json.loads((RAIZ / 'web' / 'src' / 'data' / 'camara3d.json').read_text(encoding='utf-8'))  # la del visor
+TAPA = json.loads((RAIZ / 'web' / 'src' / 'data' / 'tapa.json').read_text(encoding='utf-8'))
+TENDEDERO = RAIZ / 'modelos' / 'remera-tendedero.blend'
+PORTADA = RAIZ / 'web' / 'public' / 'portada'
+ANCHO_COLGADA = 450  # px: 3x de los 150 px que ocupa en el tendedero
+MARGEN_COLGADA = 0.02  # m de aire alrededor de la remera colgada
 LADO_FRENTE = 900  # la imagen fija del frente: cuadrada (el visor la recorta a los costados, como al 3D)
 SEPARACION = 0.05  # el punto de la Fe de erratas va a 5 cm del borde de su estampa (el círculo no la toca)
 SUBMUESTRAS = 4              # por lado, al achicar la imagen: promedia en vez de saltear píxeles
@@ -60,6 +74,7 @@ p.add_argument('--estampa', nargs=5, action='append', default=[],
 p.add_argument('--rugosidad', type=float, default=0.9)
 p.add_argument('--brillo', type=float, default=0.10, help='color del sheen (gris, 0 a 1): más alto, más gris el negro')
 p.add_argument('--web', action='store_true', help='exporta también web/public/3d/<nombre>.glb (2048, WebP y Draco)')
+p.add_argument('--vuelta', action='store_true', help='renderiza la vuelta de la tapa de la portada (unos 25 minutos)')
 args = p.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else [])
 
 
@@ -321,6 +336,7 @@ def exportar_web():
     print('WEB', salida.relative_to(RAIZ), f'{salida.stat().st_size / 1024:.0f} KB')
     frente()
     puntos()
+    colgada()
 
 
 def frente():
@@ -351,9 +367,173 @@ def frente():
     print('FRENTE', salida.relative_to(RAIZ), f'{salida.stat().st_size / 1024:.0f} KB')
 
 
+def colgada():
+    """La remera del tendedero: una copia con la forma colgada de broches, de frente, ortográfica y transparente.
+    El encuadre sale de la malla colgada (es la misma para todos los diseños): todas las remeras quedan a la misma
+    escala y con los broches en el mismo lugar, que se anota en tendedero.json para la portada."""
+    if not TENDEDERO.exists():
+        error(f'no está la remera colgada: {TENDEDERO} (se genera con scripts/blender/remera-tendedero.sh)')
+    with bpy.data.libraries.load(str(TENDEDERO)) as (_, destino):
+        destino.meshes = ['Remera']
+    forma = destino.meshes[0]
+    if len(forma.vertices) != len(remera.data.vertices):
+        error('la remera colgada no tiene la misma malla que la base: regenerar las dos')
+    copia = remera.copy()
+    copia.data = remera.data.copy()
+    escena = bpy.context.scene
+    escena.collection.objects.link(copia)
+    coords = np.empty(len(forma.vertices) * 3)
+    forma.vertices.foreach_get('co', coords)
+    copia.data.vertices.foreach_set('co', coords)
+    copia.data.update()
+    ocultas = [o for o in escena.objects if o is not copia and o.type == 'MESH']  # la remera en la percha y el piso
+    for o in ocultas:
+        o.hide_render = True
+    ev = copia.evaluated_get(bpy.context.evaluated_depsgraph_get())
+    pts = [copia.matrix_world @ v.co for v in ev.to_mesh().vertices]
+    x0, x1 = min(p.x for p in pts) - MARGEN_COLGADA, max(p.x for p in pts) + MARGEN_COLGADA
+    z0, z1 = min(p.z for p in pts) - MARGEN_COLGADA, max(p.z for p in pts) + MARGEN_COLGADA
+    camara = bpy.data.objects.new('Cámara tendedero', bpy.data.cameras.new('Cámara tendedero'))
+    escena.collection.objects.link(camara)
+    camara.data.type = 'ORTHO'
+    camara.data.sensor_fit = 'HORIZONTAL'
+    camara.data.ortho_scale = x1 - x0
+    camara.location = ((x0 + x1) / 2, -3, (z0 + z1) / 2)  # de frente: el frente mira a -Y
+    camara.rotation_euler = (math.radians(90), 0, 0)
+    escena.camera = camara
+    escena.render.resolution_x = ANCHO_COLGADA
+    escena.render.resolution_y = round(ANCHO_COLGADA * (z1 - z0) / (x1 - x0))
+    escena.render.resolution_percentage = 100
+    escena.render.film_transparent = True
+    escena.cycles.samples = 128
+    escena.cycles.use_denoising = True
+    ajustes = escena.render.image_settings
+    ajustes.media_type = 'IMAGE'
+    ajustes.file_format = 'WEBP'
+    ajustes.color_mode = 'RGBA'
+    ajustes.quality = 82
+    PORTADA.mkdir(parents=True, exist_ok=True)
+    salida = PORTADA / f'{args.nombre}-colgada.webp'
+    escena.render.filepath = str(salida)
+    bpy.ops.render.render(write_still=True)
+    # los broches: el punto más alto de la tela en cada franja de broche (x = ±0,24 m), en % de la imagen
+    broches = []
+    for lado in (-1, 1):
+        franja = [p for p in pts if abs(p.x - lado * 0.24) < 0.012]
+        tope = max(franja, key=lambda p: p.z)
+        broches.append([round((tope.x - x0) / (x1 - x0) * 100, 1), round((z1 - tope.z) / (z1 - z0) * 100, 1)])
+    datos = {
+        'nota': 'Lo escribe aplicar_diseno.py --web (no editar a mano): el tamaño de las imágenes del tendedero '
+                '(web/public/portada/<diseño>-colgada.webp) y dónde caen los broches, en % del ancho y del alto',
+        'ancho': escena.render.resolution_x, 'alto': escena.render.resolution_y, 'broches': broches,
+    }
+    (RAIZ / 'web' / 'src' / 'data' / 'tendedero.json').write_text(json.dumps(datos, ensure_ascii=False, indent=2) + '\n',
+                                                                  encoding='utf-8', newline='\n')
+    for o in ocultas:
+        o.hide_render = False
+    bpy.data.objects.remove(camara)
+    bpy.data.objects.remove(copia)
+    bpy.data.meshes.remove(forma)
+    print('COLGADA', salida.relative_to(RAIZ), f'{salida.stat().st_size / 1024:.0f} KB', 'broches', broches)
+
+
+def vuelta():
+    """La vuelta de la tapa: la remera (en la percha) gira una vez delante de la cámara, con la luz quieta (como el
+    giro del visor). Cada cuadro sale transparente, se compone sobre el fondo liso de la foto en los valores sRGB del
+    archivo (como lo pintaría el navegador) y el FFmpeg de Blender los junta en un MP4 H.264 sin sonido."""
+    import shutil
+    import tempfile
+    escena = bpy.context.scene
+    camara = bpy.data.objects.new('Cámara tapa', bpy.data.cameras.new('Cámara tapa'))
+    escena.collection.objects.link(camara)
+    c = TAPA['camara']
+    ph = math.radians(c['phi'])
+    objetivo = Vector((0, 0, c['objetivo_y']))
+    camara.location = objetivo + Vector((0, -c['radio'] * math.sin(ph), c['radio'] * math.cos(ph)))
+    camara.rotation_euler = (objetivo - camara.location).to_track_quat('-Z', 'Y').to_euler()
+    camara.data.sensor_fit = 'VERTICAL'
+    camara.data.angle_y = math.radians(c['fov'])
+    escena.camera = camara
+    escena.render.resolution_x, escena.render.resolution_y = TAPA['ancho'], TAPA['alto']
+    escena.render.resolution_percentage = 100
+    escena.render.film_transparent = True
+    escena.cycles.samples = TAPA['muestras']
+    escena.cycles.use_denoising = True
+    ajustes = escena.render.image_settings
+    ajustes.media_type = 'IMAGE'
+    ajustes.file_format = 'PNG'
+    ajustes.color_mode = 'RGBA'
+    m = re.fullmatch(r'#([0-9a-f]{6})', TAPA['fondo'])
+    fondo = np.array([int(m.group(1)[i:i + 2], 16) / 255 for i in (0, 2, 4)], dtype=np.float32)
+    temporal = Path(tempfile.mkdtemp(prefix='vuelta-'))
+    giro = remera.rotation_euler.z
+    n = TAPA['cuadros']
+    try:
+        for f in range(n):
+            remera.rotation_euler.z = giro + 2 * math.pi * f / n
+            escena.render.filepath = str(temporal / f'c-{f:03d}.png')
+            bpy.ops.render.render(write_still=True)
+            img = bpy.data.images.load(escena.render.filepath)
+            img.colorspace_settings.name = 'Non-Color'  # los valores del archivo, sin convertir
+            img.alpha_mode = 'STRAIGHT'
+            px = np.empty(img.size[0] * img.size[1] * 4, dtype=np.float32)
+            img.pixels.foreach_get(px)
+            px = px.reshape(-1, 4)
+            px[:, :3] = px[:, :3] * px[:, 3:4] + fondo * (1 - px[:, 3:4])
+            px[:, 3] = 1
+            img.pixels.foreach_set(px.ravel())
+            img.file_format = 'PNG'
+            img.save()
+            if f == 0:  # la imagen fija: el primer cuadro, en WebP
+                ajustes.file_format = 'WEBP'
+                ajustes.color_mode = 'RGB'
+                ajustes.quality = 82
+                poster = PORTADA / f'{args.nombre}-vuelta.webp'
+                PORTADA.mkdir(parents=True, exist_ok=True)
+                img.save_render(str(poster), scene=escena)
+                ajustes.file_format = 'PNG'
+                ajustes.color_mode = 'RGBA'
+            bpy.data.images.remove(img)
+            print(f'VUELTA cuadro {f + 1}/{n}', flush=True)
+        remera.rotation_euler.z = giro
+        # el video: una escena aparte con los cuadros en el editor de video, sin curva de color (ya la tienen)
+        video = bpy.data.scenes.new('Vuelta')
+        video.view_settings.view_transform = 'Standard'
+        video.render.resolution_x, video.render.resolution_y = TAPA['ancho'], TAPA['alto']
+        video.render.resolution_percentage = 100
+        video.render.fps = TAPA['fps']
+        video.frame_start, video.frame_end = 1, n
+        tira = video.sequence_editor_create().strips.new_image('vuelta', str(temporal / 'c-000.png'), 1, 1)
+        for f in range(1, n):
+            tira.elements.append(f'c-{f:03d}.png')
+        tira.colorspace_settings.name = 'sRGB'
+        r = video.render
+        r.image_settings.media_type = 'VIDEO'
+        r.image_settings.file_format = 'FFMPEG'
+        r.ffmpeg.format = 'MPEG4'
+        r.ffmpeg.codec = 'H264'
+        r.ffmpeg.constant_rate_factor = 'CUSTOM'
+        r.ffmpeg.custom_constant_rate_factor = TAPA['calidad']
+        r.ffmpeg.ffmpeg_preset = 'BEST'
+        r.ffmpeg.gopsize = n
+        r.ffmpeg.audio_codec = 'NONE'
+        mp4 = PORTADA / f'{args.nombre}-vuelta.mp4'
+        r.filepath = str(mp4)
+        r.use_file_extension = False
+        bpy.ops.render.render(animation=True, scene=video.name)
+        bpy.data.scenes.remove(video)
+    finally:
+        shutil.rmtree(temporal, ignore_errors=True)
+    bpy.data.objects.remove(camara)
+    print('VUELTA', mp4.relative_to(RAIZ), f'{mp4.stat().st_size / 1024:.0f} KB,', poster.relative_to(RAIZ),
+          f'{poster.stat().st_size / 1024:.0f} KB')
+
+
 estudio()
 if args.web:
     exportar_web()
+if args.vuelta:
+    vuelta()
 # El comando que armó este diseño, para poder rehacerlo (con otro brillo, otra luz…) sin adivinar las medidas
 argumentos = sys.argv[sys.argv.index('--') + 1:]
 (carpeta / 'aplicar.sh').write_text('#!/usr/bin/env bash\n# Rehace este diseño (lo escribe aplicar_diseno.py; correr desde la raíz del repo)\n'
